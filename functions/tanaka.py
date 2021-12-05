@@ -7,10 +7,19 @@ Created on Wed Dec  1 16:04:17 2021
 """
 
 
+# Libraries
+import numpy as np
+import scipy.sparse as sp
+import scipy.sparse.linalg  as la
+import matplotlib.pyplot as plt
+
                   
 
-def tanaka(s,T,L,M,N,theta,mod,model): 
-    
+def tanaka(s,model,model_para,num_para,graph_para): 
+    T,L,M,N,theta = num_para
+    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion = graph_para
+
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
@@ -73,7 +82,7 @@ def tanaka(s,T,L,M,N,theta,mod,model):
         speed = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave     
     else :
         speed = None
-        print(f"Can't determine the speed of the wave for r = {r} and s = {s}.")                                                 
+        print(f"Can't determine the speed of the wave for s = {s}.")                                                 
             
     return(P, speed, vitesse_en_fct_du_tps)
 

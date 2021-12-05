@@ -6,13 +6,25 @@ Created on Wed Dec  1 16:03:42 2021
 @author: lena
 """
 
+# Libraries
+import numpy as np
+import scipy.sparse as sp
+import scipy.sparse.linalg  as la
 
-################## Growth-Death-Mating Functions ##############################
+# External functions 
+from graph import graph
+
+
 
 # equ is the allele concerned by the equation.
 # oth1 and oth2 are the two other alleles, indifferently.
-    
-def growth(equ, oth1, oth2, r, a, max_capacity, growth_dynamic, linear_growth):
+
+# Growth function
+def growth(equ, oth1, oth2, bio_para, model_para):
+    # Parameters
+    r,s,h,a,difW,difH,difD,c,homing = bio_para
+    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    # Function
     n = (equ+oth1+oth2)/max_capacity
     if growth_dynamic == "exponential":
         return(r+1)
@@ -22,8 +34,14 @@ def growth(equ, oth1, oth2, r, a, max_capacity, growth_dynamic, linear_growth):
         return(r*(1-n)+1)
     if growth_dynamic == "logistical" and linear_growth == True and max_capacity == 1 :  
         return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)         
-    
-def death(equ, oth1, oth2, r, a, max_capacity, death_dynamic):
+
+
+# Death function    
+def death(equ, oth1, oth2, bio_para, model_para):
+    # Parameters
+    r,s,h,a,difW,difH,difD,c,homing = bio_para
+    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    # Function
     n = (equ+oth1+oth2)/max_capacity
     if death_dynamic == "exponential" :
         return(1)
@@ -31,10 +49,15 @@ def death(equ, oth1, oth2, r, a, max_capacity, death_dynamic):
         return(1+r*n)
     if death_dynamic == "allee_effect" :
         return(r+1+r*(1-n)*(n-a))
-     
-        
-def mating(W, H, D, homing, c, max_capacity, linear_growth, linear_mating):
     
+    
+# Mating function
+def mating(W, H, D, bio_para, model_para):  
+    # Parameters
+    r,s,h,a,difW,difH,difD,c,homing = bio_para
+    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    
+    # Function
     if linear_mating == False : 
         
         WW = (W**2)/(W+H+D)
@@ -63,11 +86,14 @@ def mating(W, H, D, homing, c, max_capacity, linear_growth, linear_mating):
         
     
     
-########################## Evolution Function #################################
-                     
-        
-def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod,homing): 
+# Main evolution function      
+def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :  
     
+    r,s,h,a,difW,difH,difD,c,homing = bio_para
+    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    T,L,M,N,theta = num_para
+    wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion = graph_para
+
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
@@ -88,7 +114,7 @@ def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod,homing):
         D = np.zeros(N+1); D[0:N//10] = 0.95*max_capacity                # Drive individuals at t=0
     
     if graph_type != None :
-        graph(X,W,H,D,0,graph_type,None,None)
+        graph(X,W,H,D,0,None,graph_para,r,s,L)
     nb_graph = 1
         
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
@@ -112,16 +138,16 @@ def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod,homing):
         
         t = round(t,2)
         
-        f1 = growth(W,H,D,r,a)*mating(W,H,D)[0] - death(W,H,D,r,a)*W
-        f2 = (1-s*h)*growth(H,W,D,r,a)*mating(W,H,D)[1] - death(W,H,D,r,a)*H
-        f3 = (1-s)*growth(D,H,W,r,a)*mating(W,H,D)[2] - death(W,H,D,r,a)*D
+        f1 = growth(W,H,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[0] - death(W,H,D,bio_para,model_para)*W
+        f2 = (1-s*h)*growth(H,W,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[1] - death(W,H,D,bio_para,model_para)*H
+        f3 = (1-s)*growth(D,H,W,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[2] - death(W,H,D,bio_para,model_para)*D
       
         W = la.spsolve(Bw_, Bw.dot(W) + dt*f1)
         H = la.spsolve(Bh_, Bh.dot(H) + dt*f2)
         D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
         
         if t>=mod*nb_graph and graph_type != None :  
-            graph(X,W,H,D,t,graph_type,None,None)
+            graph(X,W,H,D,t,None,graph_para,r,s,L)
             nb_graph += 1
         
         if speed_proportion == False :
@@ -145,7 +171,7 @@ def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod,homing):
         print(f"Can't determine the speed of the wave : For r = {r} and s = {s}, the environment is empty or not mixed enought (at least one place where W<0.5 and one where W>0.1), or T is too short.")                                                 
 
     if speed != None and graph_type != None and theorical_wave == True :  
-            graph(X,W,H,D,t,graph_type,speed,origin)   
+            graph(X,W,H,D,t,speed,graph_para,r,s,L)   
 
     if what_to_do == "vitesse en fonction du temps" : 
         return(speed,W,H,D,vitesse_en_fct_du_tps)

@@ -15,37 +15,26 @@ Created on Wed Feb 10 18:13:08 2021
 
 
 
-############################ What to do ? #######################################
+############################### Load Stuff #######################################
 
-what_to_do = "evolution"     
-
-# Bring the principal parameters together to make it easier.
-# "evolution" : simplest task, draw the propagation regarding the parameters above.
-# "system+evolution" : draw the propagation for the linear system and add the theoritical values at the end.
-# "calcul de la vitesse en fonction du temps" : idem + draw the speed as a function of time.
-# "heatmap" : draw an heatmap
-
-
-############################## Libraries ########################################
-
+# Load libraries
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors 
-import scipy.sparse as sp
-import scipy.sparse.linalg  as la
-import time
 
+
+# Load functions
+from evolution import evolution
+
+# Change font to serif
 plt.rcParams.update({'font.family':'serif'})
-print(plt.rcParams['font.family'])
-
 
 
 ############################### Parameters ######################################
 
 # Biological
     
-r = 0     # growth rate
-s = 0.45  # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+r = 0.7   # growth rate
+s = 0.49  # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
 h = 1     # and sh for heterozygous individuals
 a = 0     # coefficient for allee effect (growth or death)
 
@@ -53,7 +42,7 @@ difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 1               # homing rate
+c = 0.7             # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
@@ -77,7 +66,7 @@ linear_mating = False
 
 T = 100         # final time
 L = 400         # length of the spatial domain
-M = T*40        # number of time steps
+M = T*6        # number of time steps
 N = L           # number of spatial steps
 
 
@@ -86,7 +75,7 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-wild =True; heterozygous = True; drive = True; N_alpha = False        # What to draw on the graph
+wild =True; heterozygous = True; drive = True              # What to draw on the graph
 theorical_wave = False                                     # Draw the theorical wave or not
 
 origin = 190                                               # where to center the theorical wave(made to be changed manually)   
@@ -94,73 +83,64 @@ grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 ylim = False                                               # y scale on the graph (ylim = False, means it's not specify)
 xlim = False                                               # x scale on the graph (ylim = False, means it's not specify)
-mod = 20                                                   # Draw graph every ..mod.. time
-graph_type = "Proportions"                                 # "Individuals" or "Proportions" (or None if we don't want any graph)
+mod = T                                                    # Draw graph every ..mod.. time
+graph_type = "Individuals"                                 # "Individuals" or "Proportions" (or None if we don't want any graph)
+save_figure = True                                         # Save the figures (.pdf) 
 
 # Speed calculus
 speed_proportion = False            # True : use the wild-type number to compute the speed, False : use the wild-type proportion. 
 
-############################### Results #########################################
+
+
+# Group parameters for lisibility
+bio_para = [r,s,h,a,difW,difH,difD,c,homing]
+model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+num_para = [T,L,M,N,theta]
+graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
 
 
 
+############################ What to do ? #######################################
+
+what_to_do = "evolution" 
+
+# Bring the principal parameters together to make it easier.
+# "evolution" : simplest task, draw the propagation regarding the parameters above.
+# "system+evolution" : draw the propagation for the linear system and add the theoritical values at the end.
+# "calcul de la vitesse en fonction du temps" : idem + draw the speed as a function of time.
+# "heatmap" : draw an heatmap
+
+
+
+############################### Main program #########################################
+
+if what_to_do == "evolution" :        
+    speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
     
     
-    
-if what_to_do == "evolution" :
-    
-    from functions.evolution import evolution 
-        
-    speed, W, H, D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)
-           
     
 if what_to_do == "system+evolution" :
+    from which_system import which_system 
+    from graph import graph
     
-    from functions.evolution import evolution 
-    from functions.which_system import which_system 
-
-    # Penser à changer la configuration graphique !!! (inline vs automatic)
-    T = 2000; L = 1000; M = T*6; N = L; mod=250            #T = 150; L = 900; M = 2000; N = 3000  
     CI = "center"
     graph_type = "Individuals"
     linear_growth = False ; linear_mating = False              
-    homing = "germline"        # "zygote" or "germline" or "minimum"
-    c = 0.7; h = 0.7
-    s = 0.7; r = 7
-    theta = 0.5        
-            
-
-    # Penser à changer la configuration graphique !!! (inline vs automatic)
-    #T = 40; L =120; M = T*6; N = L; mod=20             #T = 150; L = 900; M = 2000; N = 3000  
-    #CI = "center"
-    #graph_type = "Individuals"
-    #grid=False
-    #linear_growth = False ; linear_mating = False             
-    #homing = "zygote"        # "zygote" or "germline" or "minimum"
-    #r = 2; s = 0.4
-    #theta = 1                
-            
-    speed,position,W,H,D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)
-    #print('\nVitesse numérique :', speed)
-    #print('Vitesse théorique :', np.sqrt((8*(r-0.5)**2)/(3*(1+r))), '\n')
+  
+    # update parameters
+    bio_para = [r,s,h,a,difW,difH,difD,c,homing]
+    model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+    num_para = [T,L,M,N,theta]
+    graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
     
-    #speed_vector = np.zeros(6)
-    #for s_index in range(6) :
-    #    s = np.linspace(0.47,0.52,6)[s_index]
-    #    speed, position, W, H, D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)
-    #    speed_vector[s_index] = speed   
-        
+    # run evolution
+    speed,position,W,H,D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+          
     # Determine the position of the border and print the number of the system involve
     epsilon = 0.0001              # numerical error accepted
     window = 'minimum'            # where to look : 'zoom border' or 'everywhere'  or 'minimum'   
-    border, system, system_bis = which_system(W,H,D,epsilon,window)     
-    
-    #derivative = True
-    #X = np.linspace(0,N,N+1)*(L/N) 
-    #graph(X,W,H,D,T,"Individuals",speed,border)  
-    #derivative = False
-    
-    
+    border, system, system_bis = which_system(W,H,D,epsilon,window,num_para)     
+  
    
     # Draw the wave at the end (normal and log scale), and the theoritical values.
     if speed != None and border!=None:  
@@ -168,11 +148,11 @@ if what_to_do == "system+evolution" :
         semilogy = False
         xlim = (border-75,border+75)
         ylim = (-0.3,1.3)
-        graph(X,W,H,D,T,"Individuals",speed,border)  
+        graph(X,W,H,D,T,speed,graph_para,r,s,L)
         semilogy = True 
         xlim = (0,L)                
         ylim = (10**(-60),10)
-        graph(X,W,H,D,T,"Individuals",speed,border)  
+        graph(X,W,H,D,T,speed,graph_para,r,s,L) 
         
         
      
@@ -181,23 +161,24 @@ if what_to_do == "system+evolution" :
         
 # Calcul de la vitesse en fonction du temps 
 if what_to_do == "vitesse en fonction du temps" :
+    from tanaka import tanaka
     
-    # Penser à changer la configuration graphique !!! (inline vs automatic)
-    T = 1000; L = 4000; M = T*6; N = L; mod=100         #T = 150; L = 900; M = 2000; N = 3000  
     CI = "center"
     graph_type = None
-    linear_growth = False ; linear_mating = False              
-    homing = "zygote"        # "zygote" or "germline" or "minimum"
-    c = 1; h = 1
-    r = 0
+    linear_growth = False ; linear_mating = False   
+    
+    # update parameters
+    model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+    graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
+    
     
     speed_proportion = True   # To compare speed, we have to use the WT proportion front (because Tanaka doesn't deal with number)
     
     for s in [0.3,0.8] : 
 
-        speed, W, H, D, speed_fct_of_time_girardin = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)  
-        p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,T,L,M,N,theta,mod,"cubic")
-        p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,T,L,M,N,theta,mod,"fraction")
+        speed, W, H, D, speed_fct_of_time_girardin = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
+        p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
     
         print('s=',s)
         fig, ax = plt.subplots()  
@@ -233,18 +214,20 @@ if what_to_do == "vitesse en fonction du temps" :
             
    
 if what_to_do == "vitesse en fonction de s" :  
+    from tanaka import tanaka
     
-    # Penser à changer la configuration graphique !!! (inline vs automatic)
     T = 1000; L = 4000; M = T*6; N = L; mod=20            
     CI = "left"
     graph_type = None
-    linear_growth = False ; linear_mating = False                
-    homing = "zygote"       # "zygote" or "germline" or "minimum"
-    r = 0
-    theta = 0.5    
+    linear_growth = False ; linear_mating = False   
     model = 'comparaison'    
     
+    # update parameters
+    model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+    num_para = [T,L,M,N,theta]
+    graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
     
+   
     s_min = 0.3 ; s_max = 0.8
     s_values = np.linspace(s_min,s_max,31)
     fct_of_s = np.zeros((7,len(s_values))) 
@@ -254,7 +237,7 @@ if what_to_do == "vitesse en fonction de s" :
         for s_index in range(len(s_values)) :
             s = np.round(s_values[s_index],3); print(s)
             
-            speed, W, H, D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)
+            speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
             # Speed
             fct_of_s[1,s_index] = speed
             # Alpha
@@ -296,10 +279,10 @@ if what_to_do == "vitesse en fonction de s" :
         for s_index in range(len(s_values)) :
             s = np.round(s_values[s_index],3); print(s) 
             
-            fct_of_s[1,s_index] = (2-3*s)/np.sqrt(2*s)     # theorical speed for one solution of Tanaka cubic
-            fct_of_s[2,s_index] = tanaka(s,T,L,M,N,theta,mod,"cubic")[1]   # numerical speed for Tanaka cubic
-            fct_of_s[3,s_index] = tanaka(s,T,L,M,N,theta,mod,"fraction")[1]    # numerical speed for Tanaka fraction
-            fct_of_s[4,s_index], W, H, D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)  # speed for Leo and Florence's model
+            fct_of_s[1,s_index] = (2-3*s)/np.sqrt(2*s)     # theorical speed for one solution of Tanaka cubic  
+            fct_of_s[2,s_index] = tanaka(s,"cubic",model_para,num_para,graph_para)[1]   # numerical speed for Tanaka cubic
+            fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[1]    # numerical speed for Tanaka fraction
+            fct_of_s[4,s_index], W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)  # speed for Leo and Florence's model
             if s < 0.5 : 
                 fct_of_s[5,s_index] = 2*np.sqrt(1-2*s)          # speed of KKP model (with r=1-2*s)
     
@@ -320,43 +303,52 @@ if what_to_do == "vitesse en fonction de s" :
             
 
 if what_to_do == "heatmap" :
+        from heatmap import heatmap
+        from heatmap import print_heatmap
     
         heatmap_type = "classic"    #   "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"                                          
 
         CI = "center"
         graph_type = None
-        theta = 0.5                
         precision = 30  # number of value on s and r scale (including 0 and 1) for the heatmap
-              
-        tic = time.clock()
+        
+        # update parameters
+        graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
+   
         
         if heatmap_type == "classic" :
             for h in [0.9] :
                 T = 500; L = 2000; M = T*6; N = L 
-                smin = 0.3; smax = 0.9; rmin = 0 ; rmax = 12  
-                linear_growth = False ; linear_mating = False              
-                homing = "zygote"        # "zygote" or "germline" 
-                c = 0.9 #; h = 0.7
-                s_range, r_range, heatmap_values, zero_line = heatmap(precision,smin,smax,rmin,rmax, "classic")
-                print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, "simple")  
-                print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, "eradication")  
-                print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, "collapse") 
-                np.savetxt(f'zero_line_{homing}_c_{c}_h_{h}.txt', zero_line) 
-                np.savetxt(f'heatmap_{homing}_c_{c}_h_{h}.txt', heatmap_values)               # heatmap_values = np.loadtxt('heatmap_{homing}_c_{c}_h_{h}.txt') to get it back
+                smin = 0.3; smax = 0.9; rmin = 0 ; rmax = 12 
+                linear_growth = False ; linear_mating = False  
+                
+                # update parameters
+                heatmap_para = [precision, smin, smax, rmin, rmax]  
+                model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+                num_para = [T,L,M,N,theta]
+                             
+                s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)
+                print_heatmap(heatmap_values, zero_line, "simple", heatmap_type, heatmap_para, bio_para, save_figure)
+                print_heatmap(heatmap_values, zero_line, "eradication", heatmap_type, heatmap_para, bio_para, save_figure)
+                print_heatmap(heatmap_values, zero_line, "collapse", heatmap_type, heatmap_para, bio_para, save_figure)
         else :   
             T = 1000; L = 4000; M = T*40; N = L 
             smin = 0.3; smax = 0.9; rmin = 50 ; rmax = 60 
             linear_growth = False ; linear_mating = False              
-            homing = "zygote"        # "zygote" or "germline" 
+            homing = "zygote"       
             c = 1; h = 1
-            s_range, r_range, heatmap_values, zero_line = heatmap(precision,smin,smax,rmin,rmax,heatmap_type)                                  
-            print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, None)  
-            np.savetxt(f'heatmap_{heatmap}.txt', heatmap_values)  
+            
+            # update parameters
+            heatmap_para = [precision, smin, smax, rmin, rmax] 
+            bio_para = [r,s,h,a,difW,difH,difD,c,homing]
+            model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+            num_para = [T,L,M,N,theta]
+            
+            s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)                          
+            print_heatmap(heatmap_values, zero_line, None, heatmap_type, heatmap_para, bio_para, save_figure)
+            
 
-        toc = time.clock()
-        print("Temps de calcul :", toc - tic)
         
-    
                
         
 if what_to_do == "limite r infini" :  
@@ -368,7 +360,13 @@ if what_to_do == "limite r infini" :
     homing = "zygote"        # "zygote" or "germline" or "minimum"
     c = 1; h = 1
     s = 0.5
-    theta = 0.5    
+
+    # update parameters
+    heatmap_para = [precision, smin, smax, rmin, rmax]  
+    model_para = [CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating]
+    num_para = [T,L,M,N,theta]
+    graph_para = [wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion]
+   
     #nb_points = 15          # ATTENTION MODIF SALE POUR r=0
     #rmin = 50
     #rmax = 60
@@ -397,7 +395,7 @@ if what_to_do == "limite r infini" :
         print(i)
         
         r = np.round(cv_r1moinsn_fct_of_r[0,i],6)
-        speed_girardin, W, H, D = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,mod)
+        speed_girardin, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         p = D/(D+H+W); n = D+H+W
         
         # When r tends to infinity : does r(1-n) cv to 0 ? to  s*p*(2-p)/(1-s+s*(1-p)**2) ? 
@@ -405,8 +403,8 @@ if what_to_do == "limite r infini" :
         cv_r1moinsn_fct_of_r[2,i] = np.max(abs(r*(1-n)))
         
         # When r tends to infinity : does the speed of the system Girardin 2021 tends to the speed Tanaka cubic ? Tanaka fraction ?
-        cv_speed_fct_of_r[2,i] = tanaka(s,T,L,M,N,theta,mod,"cubic")[1]
-        cv_speed_fct_of_r[3,i] = tanaka(s,T,L,M,N,theta,mod,"fraction")[1]
+        cv_speed_fct_of_r[2,i] = tanaka(s,"cubic",model_para,num_para,graph_para)[1]   
+        cv_speed_fct_of_r[3,i] = tanaka(s,"fraction",model_para,num_para,graph_para)[1]
         cv_speed_fct_of_r[4,i] = speed_girardin
              
     np.savetxt(f'cv_r_un_moins_n_s_{s}.txt', cv_r1moinsn_fct_of_r) 
@@ -426,35 +424,6 @@ if what_to_do == "limite r infini" :
     ax.set(xlabel='r (growth rate)', ylabel='speed')   
     ax.grid();plt.legend();plt.show()
     fig.savefig(f'cv_speed_s_{s}.pdf')
-    
-
-#s=0.8    # Attention à modifier s en haut aussi !!!!
-#cv_r1moinsn_fct_of_r = np.loadtxt(f'cv_r_un_moins_n_s_{s}.txt')
-#cv_speed_fct_of_r = np.loadtxt(f'cv_speed_s_{s}.txt')
-
-      
-# Brouillon          
-#      
-
-#r = 0.7; s = 0.51
-#alpha = (-(1-2*s)*(1-r) + np.sqrt((1-2*s)**2 * (1-r)**2 + 8 * r**2 * (1-s)))/(4 * r * (1-s))
-#A_scr = (2*(1-s)*r)/(2*(1-s)*(1-r+2*alpha*r)-(1-r))              
-
-# dt = T/M    # time
-# dx = L/N    # spatial
-# X = np.linspace(0,N,N+1)*dx  
-        
- 
-#linear_speed_range = speed_range       
-#precision = 20  
-#smin = 0.3; smax = 0.9; rmin = 0.1 ; rmax = 5   
-#s_range = np.linspace(smin,smax,precision)      
-#r_range = np.linspace(rmin,rmax,precision) 
-#linear_speed_range = np.loadtxt('heatmap_zygote_c_1_h_1.txt')
-#i=18;j=18
-#print('r_range =', r_range[i]); print('s_range =', s_range[j])
-#print('vitesse', linear_speed_range[i,j])
-
 
 
 
