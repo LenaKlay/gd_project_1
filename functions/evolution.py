@@ -14,8 +14,6 @@ import scipy.sparse.linalg  as la
 # External functions 
 from graph import graph
 
-
-
 # equ is the allele concerned by the equation.
 # oth1 and oth2 are the two other alleles, indifferently.
 
@@ -91,8 +89,12 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para
-    wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion = graph_para
+    T,L,M,N,mod,theta = num_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
+    
+    # Saving and figures parameters
+    directory = f"evolution/r_{r}_s_{s}_log_{semilogy}"
+    file = "evo"
 
     # Steps
     dt = T/M    # time
@@ -114,11 +116,11 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         D = np.zeros(N+1); D[0:N//10] = 0.95*max_capacity                # Drive individuals at t=0
     
     if graph_type != None :
-        graph(X,W,H,D,0,None,graph_para,r,s,L)
+        graph(X,W,H,D,0,graph_para,directory,file,"t = 0")
     nb_graph = 1
         
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
-    vitesse_en_fct_du_tps = np.zeros((2,T//mod))   # first line : time, second line : speed of the wave at the corresponding time
+    speed_fct_of_time = np.zeros((2,T//mod))   # first line : time, second line : speed of the wave at the corresponding time
     
     # Matrix
     C0 = -2*np.ones(N+1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
@@ -146,8 +148,8 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         H = la.spsolve(Bh_, Bh.dot(H) + dt*f2)
         D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
         
-        if t>=mod*nb_graph and graph_type != None :  
-            graph(X,W,H,D,t,None,graph_para,r,s,L)
+        if t>=mod*nb_graph and graph_type != None : 
+            graph(X,W,H,D,t,graph_para,directory,file,f"t = {np.round(t,2)}")
             nb_graph += 1
         
         if speed_proportion == False :
@@ -158,9 +160,9 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
             if np.isin(True, W/(W+H+D)>0.5) and np.isin(True, W/(W+H+D)<0.99) : 
                 position = np.append(position,np.where(W/(W+H+D)>0.5)[0][0])
    
-        if t%mod == 0 and what_to_do == "vitesse en fonction du temps" : 
-            #print("\nTemps :", t) ; print("Vitesse :", np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt, "\n")
-            vitesse_en_fct_du_tps[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
+        if t%mod == 0 and what_to_do == "speed function of time" : 
+            #print("\nTemps :", t) ; print("Speed :", np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt, "\n")
+            speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
             # first line : time, second line : speed of the wave at the corresponding time
 
     if np.shape(position)[0] != 0 :
@@ -170,14 +172,14 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         speed = None
         print(f"Can't determine the speed of the wave : For r = {r} and s = {s}, the environment is empty or not mixed enought (at least one place where W<0.5 and one where W>0.1), or T is too short.")                                                 
 
-    if speed != None and graph_type != None and theorical_wave == True :  
-            graph(X,W,H,D,t,speed,graph_para,r,s,L)   
-
-    if what_to_do == "vitesse en fonction du temps" : 
-        return(speed,W,H,D,vitesse_en_fct_du_tps)
+    if what_to_do == "speed function of time" : 
+        return(speed,W,H,D,speed_fct_of_time)
     if what_to_do == "system+evolution" : 
         return(speed,position,W,H,D)
     else :
         return(speed,W,H,D)
 
 
+
+
+        

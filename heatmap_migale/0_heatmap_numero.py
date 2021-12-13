@@ -13,7 +13,6 @@ Created on Wed Feb 10 18:13:08 2021
 # homing
 
 num = numero
-heatmap_type = "classic"   #  "classic"   "speed_cubic"   "speed_fraction"   "r_one_minus_n_cubic"   "r_one_minus_n_fraction"                              
 
 ############################## Libraries ########################################
 
@@ -223,8 +222,8 @@ def heatmap(precision,smin,smax,rmin,rmax, what):
 
 # Biological
     
-c = 3/4     # homing rate
-h = 3/4     # and sh for heterozygous individuals
+c = 1/4     # homing rate
+h = 1/4     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 homing = "zygote"   # "zygote" or "germline"
@@ -254,6 +253,9 @@ linear_mating = False
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
 
+# Heatmap
+
+heatmap_type = "classic"   #  "classic"   "speed_cubic"   "speed_fraction"   "r_one_minus_n_cubic"   "r_one_minus_n_fraction"                              
 precision = quelle_precision
                    
 

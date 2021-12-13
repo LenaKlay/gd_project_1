@@ -23,10 +23,10 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     precision, smin, smax, rmin, rmax = heatmap_para 
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para
-    wild, heterozygous, drive, theorical_wave, origin, grid, semilogy, ylim, xlim, mod, graph_type, save_figure, speed_proportion = graph_para
+    T,L,M,N,mod,theta = num_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, ylim, xlim, save_figure, speed_proportion = graph_para
 
-    
+
     # Arrange scales
     s_range = np.linspace(smin,smax,precision)             # range of values for s
     r_range = np.linspace(rmin,rmax,precision)             # range of values for r

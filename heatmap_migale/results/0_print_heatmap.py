@@ -20,12 +20,12 @@ import matplotlib.colors as mcolors
 ################################ Paramètres ###################################
 precision = 30
 heatmap_type = "classic"       # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"                                           
-style = "simple"               # if heatmap_type != "classic : simple", "eradication" or "collapse"
+style = "simple"               # if heatmap_type == "classic : simple", "eradication" or "collapse"
                                # else : None
 
 homing = "zygote"
-c = 3/4
-h = 3/4
+c = 1/4
+h = 1/4
 smin = 0.3; smax=0.9
 
 if heatmap_type == "classic" : 

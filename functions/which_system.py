@@ -13,8 +13,8 @@ import numpy as np
 
 def which_system(W,H,D,epsilon,window,num_para) :
     # Parameters
-    T,L,M,N,theta = num_para
- 
+    T,L,M,N,mod,theta = num_para
+
     system = [[] for _ in range(len(W))]
     for i in range(0,len(W)) :
         if (1-W-D)[i] >= W[i] :
