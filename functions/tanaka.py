@@ -24,7 +24,7 @@ line_size = 4
 
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
 
     # Steps
@@ -36,9 +36,9 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     # Initialization       
     if CI == "center" : 
-        P = np.zeros(N+1); P[0:N//2] = 0.95*max_capacity                # Proportion of drive individuals at t=0
+        P = np.zeros(N+1); P[0:N//2] = 1               # Proportion of drive individuals at t=0
     if CI == "left" :      
-        P = np.zeros(N+1); P[0:N//10] = 0.95*max_capacity               # Proportion of drive individuals at t=0
+        P = np.zeros(N+1); P[0:N//10] = 1              # Proportion of drive individuals at t=0
     
     if graph_type != None :
         graph_tanaka(X,P,0,model,graph_para)

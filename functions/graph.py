@@ -36,7 +36,7 @@ def graph(X,W,H,D,t,graph_para,directory,file,title_fig):
         # what to plot
         plot = [wild, heterozygous, drive]
         # color for each
-        col = ['green','gold','deeppink']
+        col = ['green','orange','deeppink']
         # label for each
         lab = ['Wild-type','Heterozygous','Drive']    
         # plot considering a log y-scale or not

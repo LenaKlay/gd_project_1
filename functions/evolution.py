@@ -21,16 +21,16 @@ from graph import graph
 def growth(equ, oth1, oth2, bio_para, model_para):
     # Parameters
     r,s,h,a,difW,difH,difD,c,homing = bio_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     # Function
-    n = (equ+oth1+oth2)/max_capacity
+    n = (equ+oth1+oth2)
     if growth_dynamic == "exponential":
         return(r+1)
     if growth_dynamic == "allee_effect" :
         return(np.max(r*(1-n)*(n-a)+1,0))
     if growth_dynamic == "logistical" and linear_growth == False :
         return(r*(1-n)+1)
-    if growth_dynamic == "logistical" and linear_growth == True and max_capacity == 1 :  
+    if growth_dynamic == "logistical" and linear_growth == True :  
         return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)         
 
 
@@ -38,9 +38,9 @@ def growth(equ, oth1, oth2, bio_para, model_para):
 def death(equ, oth1, oth2, bio_para, model_para):
     # Parameters
     r,s,h,a,difW,difH,difD,c,homing = bio_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     # Function
-    n = (equ+oth1+oth2)/max_capacity
+    n = (equ+oth1+oth2)
     if death_dynamic == "exponential" :
         return(1)
     if death_dynamic == "logistical" :
@@ -53,7 +53,7 @@ def death(equ, oth1, oth2, bio_para, model_para):
 def mating(W, H, D, bio_para, model_para):  
     # Parameters
     r,s,h,a,difW,difH,difD,c,homing = bio_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     
     # Function
     if linear_mating == False : 
@@ -75,7 +75,7 @@ def mating(W, H, D, bio_para, model_para):
             mat2 = (1+c)*WH + 2*WD + 0.5*(1-c**2)*HH + (1-c)*HD
             mat3 = 0.25*(c+1)**2*HH + (1+c)*HD + DD
             
-    if linear_mating == True and homing == "zygote" and max_capacity == 1 : 
+    if linear_mating == True and homing == "zygote" : 
         mat1 = (W>D)
         mat2 = 0
         mat3 = ((W>D)+1)  
@@ -88,7 +88,7 @@ def mating(W, H, D, bio_para, model_para):
 def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :  
     
     r,s,h,a,difW,difH,difD,c,homing = bio_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
     graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
     
@@ -107,13 +107,13 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     # Initialization 
             
     if CI == "center" : 
-        W = np.ones(N+1)*max_capacity; W[0:N//2] = 0.05*max_capacity    # Wild individuals at t=0  
+        W = np.ones(N+1); W[0:N//2] = 0    # Wild individuals at t=0  
         H = np.zeros(N+1)                                               # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//2] = 0.95*max_capacity                # Drive individuals at t=0
+        D = np.zeros(N+1); D[0:N//2] = 1                # Drive individuals at t=0
     if CI == "left" : 
-        W = np.ones(N+1)*max_capacity; W[0:N//10] = 0.05*max_capacity    # Wild individuals at t=0  
+        W = np.ones(N+1); W[0:N//10] = 0    # Wild individuals at t=0  
         H = np.zeros(N+1)                                                # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//10] = 0.95*max_capacity                # Drive individuals at t=0
+        D = np.zeros(N+1); D[0:N//10] = 1                # Drive individuals at t=0
     
     if graph_type != None :
         graph(X,W,H,D,0,graph_para,directory,file,"t = 0")

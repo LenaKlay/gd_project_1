@@ -26,18 +26,18 @@ import scipy.sparse.linalg as la
 # oth1 and oth2 are the two other alleles, indifferently.
     
 def growth(equ,oth1,oth2,r,a):
-    n = (equ+oth1+oth2)/max_capacity
+    n = (equ+oth1+oth2)
     if growth_dynamic == "exponential":
         return(r+1)
     if growth_dynamic == "allee_effect" :
         return(np.max(r*(1-n)*(n-a)+1,0))
     if growth_dynamic == "logistical" and linear_growth == False :
         return(r*(1-n)+1)
-    if growth_dynamic == "logistical" and linear_growth == True and max_capacity == 1 :  
+    if growth_dynamic == "logistical" and linear_growth == True :  
         return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)         
     
 def death(equ,oth1,oth2,r,a):
-    n = (equ+oth1+oth2)/max_capacity
+    n = (equ+oth1+oth2)
     if death_dynamic == "exponential" :
         return(1)
     if death_dynamic == "logistical" :
@@ -68,7 +68,7 @@ def mating(W,H,D):
             mat2 = (1+c)*WH + 2*WD + 0.5*(1-c**2)*HH + (1-c)*HD
             mat3 = 0.25*(c+1)**2*HH + (1+c)*HD + DD
             
-    if linear_mating == True and homing == "zygote" and max_capacity == 1 : 
+    if linear_mating == True and homing == "zygote" : 
         mat1 = (W>D)
         mat2 = 0
         mat3 = ((W>D)+1)  
@@ -87,13 +87,13 @@ def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta):
     # Initialization 
             
     if CI == "center" : 
-        W = np.ones(N+1)*max_capacity; W[0:N//2] = 0.05*max_capacity    # Wild individuals at t=0  
-        H = np.zeros(N+1)                                               # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//2] = 0.95*max_capacity                # Drive individuals at t=0
+        W = np.ones(N+1); W[0:N//2] = 0          # Wild individuals at t=0  
+        H = np.zeros(N+1)                        # Heterozygous individuals at t=0
+        D = np.zeros(N+1); D[0:N//2] = 1         # Drive individuals at t=0
     if CI == "left" : 
-        W = np.ones(N+1)*max_capacity; W[0:N//10] = 0.05*max_capacity    # Wild individuals at t=0  
-        H = np.zeros(N+1)                                                # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//10] = 0.95*max_capacity                # Drive individuals at t=0
+        W = np.ones(N+1); W[0:N//10] = 0         # Wild individuals at t=0  
+        H = np.zeros(N+1)                        # Heterozygous individuals at t=0
+        D = np.zeros(N+1); D[0:N//10] = 1        # Drive individuals at t=0
         
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
 
@@ -143,9 +143,9 @@ def tanaka(s,T,L,M,N,theta,model):
     
     # Initialization       
     if CI == "center" : 
-        P = np.zeros(N+1); P[0:N//2] = 0.95*max_capacity                # Proportion of drive individuals at t=0
+        P = np.zeros(N+1); P[0:N//2] = 1            # Proportion of drive individuals at t=0
     if CI == "left" :      
-        P = np.zeros(N+1); P[0:N//10] = 0.95*max_capacity               # Proportion of drive individuals at t=0
+        P = np.zeros(N+1); P[0:N//10] = 1           # Proportion of drive individuals at t=0
 
     # Matrix
     C0 = -2*np.ones(N+1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
@@ -242,12 +242,10 @@ CI = "center"       # "center" for having the border in the center, "left" for h
 growth_dynamic = "logistical"     # exponential or logistical or allee_effect
 death_dynamic = "exponential"      # exponential or logistical or allee_effect
 
-max_capacity = 1                   # for logistical growth or death
-
 
 # Linearization
   
-linear_growth = False    # With linear_growth = True, max_capacity = 1 is mandatory for a good linear approx. 
+linear_growth = False   
 linear_mating = False          
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson

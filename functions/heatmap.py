@@ -22,7 +22,7 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     # Parameters
     precision, smin, smax, rmin, rmax = heatmap_para 
     r,s,h,a,difW,difH,difD,c,homing = bio_para
-    CI,growth_dynamic,death_dynamic,max_capacity,linear_growth,linear_mating = model_para
+    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
     graph_type, wild, heterozygous, drive, grid, semilogy, ylim, xlim, save_figure, speed_proportion = graph_para
 
