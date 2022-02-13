@@ -123,14 +123,17 @@ def evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta):
         H = la.spsolve(Bh_, Bh.dot(H) + dt*f2)
         D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
         
-        if np.isin(True, W/(W+H+D)>0.5) and np.isin(True, W/(W+H+D)<0.99) :  # wild pop is still present somewhere in the environment
-            position = np.append(position,np.where(W/(W+H+D)>0.5)[0][0])        # List containing the first position where the 
+        if np.isin(True, W>0.5) and np.isin(True, W<0.99) :  # wild pop is still present somewhere in the environment
+            position = np.append(position,np.where(W>0.5)[0][0])        # List containing the first position where the 
                                                                                     # proportion of wild alleles is lower than 0.5.   
                                                                                     
     if np.shape(position)[0] != 0 :
         position = position[position!=0]                          
         speed = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave                                                   
 
+    print('r =',r)
+    print('s =',s)
+    print(speed)
     return(speed,W,H,D)
 
 

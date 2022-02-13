@@ -11,11 +11,11 @@ Created on Wed Dec  1 15:32:47 2021
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors 
-import os
 
 # External functions 
 from evolution import evolution
 from tanaka import tanaka
+from graph import save_figure
 
 
 def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do):
@@ -24,9 +24,8 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, ylim, xlim, save_figure, speed_proportion = graph_para
-
-
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
+    
     # Arrange scales
     s_range = np.linspace(smin,smax,precision)             # range of values for s
     r_range = np.linspace(rmin,rmax,precision)             # range of values for r
@@ -38,14 +37,14 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
         print("\n------- NEW r=", r_range[r_index])
         zero_done = False
         for s_index in range(0, precision) :
-            r = r_range[r_index]
-            s = s_range[s_index]
+            r = r_range[r_index] ; bio_para[0] = r
+            s = s_range[s_index] ; bio_para[1] = s
             
             print(f"\n s={np.round(s,2)},r={np.round(r,4)},c={np.round(c,2)},h={np.round(h,2)}")
             
             if heatmap_type == "classic" :
                 heatmap_values[r_index,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0]
-                if s_index != 0 and heatmap_values[r_index,s_index-1]*heatmap_values[r_index,s_index]<=0 and heatmap_values[r_index,s_index-1] != 0 and zero_done == False :
+                if s_index != 0 and heatmap_values[r_index,s_index-1]*heatmap_values[r_index,s_index]<=0 and heatmap_values[r_index,s_index] != 0 and zero_done == False :
                     zero_line = np.append(zero_line,np.matrix([[s_index-0.5],[r_index]]), axis=1)
                     zero_done = True 
             if heatmap_type == "speed_cubic" : 
@@ -60,15 +59,12 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
                 speed_girardin, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
                 p = D/(D+H+W); n = D+H+W
                 heatmap_values[r_index,s_index] = np.max(abs(r*(1-n) - s*p*(2-p)/(1-s+s*(1-p)**2)))
-            np.savetxt(f'heatmap_{homing}_c_{c}_h_{h}.txt', heatmap_values)  
             print(f"heatmap value ={heatmap_values[r_index,s_index]} \n")
-                   
-    np.savetxt(f'heatmap_{homing}_c_{c}_h_{h}_inside.txt', heatmap_values)               # heatmap_values = np.loadtxt('heatmap.txt') to get it back 
-    if heatmap_type == "classic" : np.savetxt(f'zero_line_{homing}_c_{c}_h_{h}_inside.txt', zero_line) 
+    
     return(s_range, r_range, heatmap_values, zero_line) 
     
     
-def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, save_figure) : 
+def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, save_fig) : 
     # Parameters
     precision, smin, smax, rmin, rmax = heatmap_para 
     r,s,h,a,difW,difH,difD,c,homing = bio_para
@@ -137,22 +133,6 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     plt.gca().invert_yaxis()
     plt.xlim([0,precision-1]);plt.ylim([0,precision-1])
     #plt.title("\n", f"Heatmap : {heatmap_type}")
-    
-    # Saving figures
-    if save_figure :            
-        actual_dir = os.getcwd()
-        print ("The current working directory is %s" % actual_dir)
-        new_dir = f"../outputs/heatmap_{homing}_c_{c}_h_{h}"
-        try:
-            os.mkdir(new_dir)
-        except OSError:
-            print ("Creation of the directory %s failed" % new_dir)
-        else:
-            print ("Successfully created the directory %s " % new_dir)
-                    
-        fig.savefig(f"../outputs/heatmap_{homing}_c_{c}_h_{h}/heatmap_{homing}_c_{c}_h_{h}_prec_{precision}.pdf")                   
-        np.savetxt(f'../outputs/heatmap_{homing}_c_{c}_h_{h}/zero_line_{homing}_c_{c}_h_{h}_prec_{precision}.txt', zero_line) 
-        np.savetxt(f'../outputs/heatmap_{homing}_c_{c}_h_{h}/heatmap_{homing}_c_{c}_h_{h}_prec_{precision}.txt', heatmap_values)     
         
     #ax.xaxis.label.set_size(14)
     #ax.yaxis.label.set_size(14)
@@ -160,29 +140,31 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     ax.yaxis.set_tick_params(labelsize=11)
     plt.show()
     
+    # Saving figures        
+    if save_fig : 
+        dir_title = f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}"
+        save_figure(None, fig, f"{dir_title}", f"heatmap_{precision}") 
+        np.savetxt(f'../outputs/{dir_title}/heatmap.txt', heatmap_values) 
+        if heatmap_type == "classic" : 
+            np.savetxt(f'../outputs/{dir_title}/zero_line.txt', heatmap_values) 
+    
 
-
-
-
-        
+      
 # Pour retracer les heatmaps :
 # if needed : heatmap_values = heatmap_values*(-1)        
-def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, save_figure) : 
-    # Parameters
-    precision, smin, smax, rmin, rmax = heatmap_para 
-    s_range = np.linspace(smin,smax,precision)             
-    r_range = np.linspace(rmin,rmax,precision)
+def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, bio_para, heatmap_para, save_fig) : 
     # upload heatmap 
-    heatmap_values = np.loadtxt(f'heatmap_{homing}_c_{c}_h_{c}.txt') 
+    heatmap_values = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/heatmap.txt') 
     # upload zero_line
-    zero_line = np.loadtxt(f'zero_line_{homing}_c_{c}_h_{c}.txt')   
+    if heatmap_type == "classic" :
+        zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/zero_line.txt')   
     # print heatmap
-    print_heatmap(homing, c, h, s_range, r_range, heatmap_type, heatmap_values, zero_line, style)
-
+    print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, save_fig) 
 
 # Example :    
-# c=0.5; h=0.5; homing='germline'; style = 'simple'; save_figure = True
-# heatmap_type = 'classic'; precision = 30; smin = 0.3; smax = 0.9; rmin = 0.1 ; rmax = 12  
+# c=1; h=1; homing='zygote'; style = 'simple'; save_fig = True
+# heatmap_type = 'classic'; precision = 30; smin = 0.1; smax = 0.9; rmin = 0.1 ; rmax = 12  
 # heatmap_para = [heatmap_type, precision, smin, smax, rmin, rmax]
-# upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para)
+# upload_and_plot_heatmap(c, h, homing, style, heatmap_type, bio_para, heatmap_para, save_fig) 
+
      

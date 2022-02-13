@@ -31,7 +31,7 @@ def graph(X,W,H,D,t,graph_para,directory,file,title_fig):
         fig, ax = plt.subplots()
         
         # Plot evolution for wild, heterozygous, drive (nb of individuals or proportions)
-        if graph_type == "Individuals" : Y = [W,H,D]
+        if graph_type == "Population density" : Y = [W,H,D]
         if graph_type == "Proportions" : Y = [W/(W+H+D),H/(W+H+D),D/(W+H+D)]
         # what to plot
         plot = [wild, heterozygous, drive]
@@ -123,10 +123,5 @@ def save_figure(t, fig, directories, pdf_title) :
         fig.savefig(f"../outputs{path}/{pdf_title}.pdf") 
         
     
-             
-
-
-                
-                
-                
+              
                 

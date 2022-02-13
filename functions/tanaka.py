@@ -20,12 +20,14 @@ number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
 line_size = 4
-                  
+
+# External functions
+from graph import save_figure
 
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion = graph_para
 
     # Steps
     dt = T/M    # time
@@ -41,7 +43,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
         P = np.zeros(N+1); P[0:N//10] = 1              # Proportion of drive individuals at t=0
     
     if graph_type != None :
-        graph_tanaka(X,P,0,model,graph_para)
+        graph_tanaka(s,X,P,0,model,graph_para)
     nb_graph = 1
 
     # Matrix
@@ -67,7 +69,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
         P = la.spsolve(B_, B.dot(P) + dt*f)
 
         if t>=mod*nb_graph and graph_type != None :  
-            graph_tanaka(X,P,t,model,graph_para)
+            graph_tanaka(s,X,P,t,model,graph_para)
             nb_graph += 1
             
         if np.isin(True, (1-P)>0.5) and np.isin(True, (1-P)<0.99) :             # wild pop is still present somewhere in the environment
@@ -93,9 +95,9 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     
     
-def graph_tanaka(X,P,t,model,graph_para):
+def graph_tanaka(s,X,P,t,model,graph_para):
     
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion = graph_para
 
         fig, ax = plt.subplots()        
         ax.plot(X, P, label=f'Drive', color = "deeppink", linewidth=line_size)
@@ -114,3 +116,19 @@ def graph_tanaka(X,P,t,model,graph_para):
         plt.rc('legend', fontsize=legend_size)        
         ax.legend()
         plt.show() 
+        
+        # Saving figures and data
+        if save_fig : 
+            dir_title = f"tanaka/s_{s}"
+            save_figure(t, fig, dir_title, "t_{t}") 
+            column = [P]; np.savetxt(f"../outputs/{dir_title}/p_for_t_{t}.txt", np.column_stack(column), fmt='%.3e', delimiter="  ") 
+        
+    
+        
+        
+        
+        
+        
+        
+        
+        

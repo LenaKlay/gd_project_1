@@ -119,7 +119,7 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, sty
     
 heatmap_values = np.zeros((precision,precision))
 zero_line = np.matrix([[],[]]) 
-for num in range(1,precision+1) :
+for num in range(1,precision+1):
     heatmap_values[num-1,:] = np.loadtxt(f'{heatmap_type}_heatmap_{num}.txt')
     if heatmap_type == "classic" : 
         zero_line = np.append(zero_line,np.matrix([[int(np.loadtxt(f'{heatmap_type}_zero_line_{num}.txt'))],[num-1]]), axis=1)
@@ -130,10 +130,6 @@ if heatmap_type == "classic" : np.savetxt(f'{heatmap_type}_zero_line.txt', heatm
 # heatmap_values = np.loadtxt(f'{heatmap_type}_zero_line.txt')
 
 print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, style)
-
-
-
-
 
 
 

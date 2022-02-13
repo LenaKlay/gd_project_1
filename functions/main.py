@@ -7,10 +7,10 @@ Created on Wed Feb 10 18:13:08 2021
 """
 
 # This is annoying : 
-#for i in np.linspace(0.1,1,10) : 
-#  print(i)    
+# for i in np.linspace(0.1,1,10) : 
+# print(i)    
 # different from :
-#np.linspace(0.1,1,10)
+# np.linspace(0.1,1,10)
 
 
 ############################### Load Stuff #######################################
@@ -34,14 +34,14 @@ plt.rcParams.update({'font.family':'serif'})
     
 r = 0     # growth rate
 s = 0.4   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 1     # and sh for heterozygous individuals
+h = 1/4   # and sh for heterozygous individuals
 a = 0     # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 1              # homing rate
+c = 1/4              # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
@@ -60,8 +60,8 @@ linear_mating = False
 
 # Numerical
 
-T = 100         # final time
-L = 400         # length of the spatial domain
+T = 1000         # final time
+L = 4000         # length of the spatial domain
 M = T*6         # number of time steps
 N = L           # number of spatial steps
 
@@ -71,12 +71,12 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = "Individuals"                                 # "Individuals" or "Proportions" (or None if we don't want any evolution graph fct of time)
-wild = True; heterozygous = True; drive = True             # What to draw on the graph
+graph_type = "Population density"                                 # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
+wild = True; heterozygous = False; drive = True             # What to draw on the graph
 grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T/3)                                             # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = int(T/5)                                             # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                            # Save the figures (.pdf) 
 
 # Speed calculus
@@ -94,7 +94,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "speed function of s"
+what_to_do = "evolution"
 
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction"   : simplest task, draw the propagation regarding the parameters above.
@@ -306,47 +306,41 @@ if what_to_do == "heatmap" :
         from heatmap import heatmap
         from heatmap import print_heatmap
     
-        heatmap_type = "classic"    #  "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"                                          
+        heatmap_type = "classic" ; print("heatmap_type =", heatmap_type, "\n")   # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"   
+        bio_para[8] =  "zygote"     # Homing : "zygote" or "germline"                                   
 
-        CI = "center"
-        graph_type = None
-        precision = 30  # number of value on s and r scale (including 0 and 1) for the heatmap
-        
-        # update parameters
-        graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion]
-   
-        
+        graph_para[0] = None        # No evolution graph : graph_type = None.
+        precision = 30              # Number of value on s and r scale (including 0 and 1) for the heatmap
+
         if heatmap_type == "classic" :
-            for h in [0.9] :
-                T = 400; L = 100; M = T*6; N = L 
-                smin = 0.3; smax = 0.9; rmin = 0 ; rmax = 12 
-                linear_growth = False ; linear_mating = False  
+                T = 100; L = 400; M = T*6; N = L 
+                smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
                 
                 # update parameters
                 heatmap_para = [precision, smin, smax, rmin, rmax]  
-                model_para = [CI,growth_dynamic,death_dynamic,linear_growth,linear_mating]
                 num_para = [T,L,M,N,mod,theta]
                              
                 s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)
                 print_heatmap(heatmap_values, zero_line, "simple", heatmap_type, heatmap_para, bio_para, save_fig)
                 #print_heatmap(heatmap_values, zero_line, "eradication", heatmap_type, heatmap_para, bio_para, save_fig)
                 #print_heatmap(heatmap_values, zero_line, "collapse", heatmap_type, heatmap_para, bio_para, save_fig)
+
         else :   
             T = 1000; L = 4000; M = T*40; N = L 
-            smin = 0.3; smax = 0.9; rmin = 50 ; rmax = 60 
-            linear_growth = False ; linear_mating = False              
-            homing = "zygote"       
-            c = 1; h = 1
+            smin = 0.1; smax = 0.9; rmin = 50 ; rmax = 60 
             
             # update parameters
             heatmap_para = [precision, smin, smax, rmin, rmax] 
-            bio_para = [r,s,h,a,difW,difH,difD,c,homing]
-            model_para = [CI,growth_dynamic,death_dynamic,linear_growth,linear_mating]
             num_para = [T,L,M,N,mod,theta]
             
             s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)                          
             print_heatmap(heatmap_values, zero_line, None, heatmap_type, heatmap_para, bio_para, save_fig)
             
+            if save_fig : 
+                dir_title = f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}"
+                save_figure(None, fig, f"{dir_title}", "heatmap_{precision}") 
+                np.savetxt(f'../outputs/{dir_title}/heatmap.txt', heatmap_values) 
+                np.savetxt(f'../outputs/{dir_title}/zero_line.txt', heatmap_values) 
 
 
 ################# Not tested ######################"
@@ -406,7 +400,7 @@ if what_to_do == "limite r infini" :
     
     T = 1000; L = 4000; M = T*40; N = L; mod=int(T/10)         #T = 150; L = 900; M = 2000; N = 3000  
     CI = "center"
-    graph_type = "Individuals"
+    graph_type = "Population density" 
     linear_growth = False ; linear_mating = False              
     homing = "zygote"        # "zygote" or "germline" or "minimum"
     c = 1; h = 1
