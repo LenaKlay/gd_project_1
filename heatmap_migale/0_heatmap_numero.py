@@ -222,11 +222,11 @@ def heatmap(precision,smin,smax,rmin,rmax, what):
 
 # Biological
     
-c = 1/4     # homing rate
-h = 1/4     # and sh for heterozygous individuals
+c = 1/2     # homing rate
+h = 1/2     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
-homing = "zygote"   # "zygote" or "germline"
+homing = "germline"   # "zygote" or "germline"
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals

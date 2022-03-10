@@ -86,14 +86,14 @@ def mating(W, H, D, bio_para, model_para):
     
 # Main evolution function      
 def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :  
-    
+
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion, show_graph_ini = graph_para
     
     # Saving and figures parameters
-    directory = f"evolution/r_{r}_s_{s}_log_{semilogy}"
+    directory = f"evolution/{homing}/r_{np.round(r,3)}/s_{np.round(s,3)}/h_{np.round(h,2)}_c_{np.round(c,2)}"
     file = "evo"
 
     # Steps
@@ -115,8 +115,8 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         H = np.zeros(N+1)                                                # Heterozygous individuals at t=0
         D = np.zeros(N+1); D[0:N//10] = 1                # Drive individuals at t=0
     
-    if graph_type != None :
-        graph(X,W,H,D,0,graph_para,directory,file,"t = 0")
+    if graph_type != None and show_graph_ini :
+        graph(X,W,H,D,0,graph_para,bio_para,num_para,directory,file,"t = 0")
     nb_graph = 1
         
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
@@ -149,7 +149,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
         
         if t>=mod*nb_graph and graph_type != None : 
-            graph(X,W,H,D,t,graph_para,directory,file,f"t = {np.round(t,2)}")
+            graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,f"t = {np.round(t,2)}")
             nb_graph += 1
         
         if speed_proportion == False :

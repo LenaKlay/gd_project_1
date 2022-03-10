@@ -27,7 +27,7 @@ from graph import save_figure
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
 
     # Steps
     dt = T/M    # time
@@ -42,8 +42,8 @@ def tanaka(s,model,model_para,num_para,graph_para):
     if CI == "left" :      
         P = np.zeros(N+1); P[0:N//10] = 1              # Proportion of drive individuals at t=0
     
-    if graph_type != None :
-        graph_tanaka(s,X,P,0,model,graph_para)
+    if graph_type != None and show_graph_ini :
+        graph_tanaka(s,X,P,0,model,graph_para,num_para)
     nb_graph = 1
 
     # Matrix
@@ -64,12 +64,14 @@ def tanaka(s,model,model_para,num_para,graph_para):
         if model == "cubic" : 
             f = s*P*(1-P)*(P-(2*s-1)/s)
         if model == "fraction" : 
-            f = (s*P*(1-P)*(P-(2*s-1)/s))/(1-s+s*(1-P)**2)       
+            f = (s*P*(1-P)*(P-(2*s-1)/s))/(1-s+s*(1-P)**2)  
+        if model == "KPP" : 
+            f = P*(1-P)*(1-2*s)
       
         P = la.spsolve(B_, B.dot(P) + dt*f)
 
-        if t>=mod*nb_graph and graph_type != None :  
-            graph_tanaka(s,X,P,t,model,graph_para)
+        if t>=mod*nb_graph and graph_type != None :
+            graph_tanaka(s,X,P,t,model,graph_para,num_para)
             nb_graph += 1
             
         if np.isin(True, (1-P)>0.5) and np.isin(True, (1-P)<0.99) :             # wild pop is still present somewhere in the environment
@@ -95,13 +97,13 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     
     
-def graph_tanaka(s,X,P,t,model,graph_para):
+def graph_tanaka(s,X,P,t,model,graph_para,num_para):
     
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
 
         fig, ax = plt.subplots()        
         ax.plot(X, P, label=f'Drive', color = "deeppink", linewidth=line_size)
-        ax.set(xlabel='Space', ylabel='Proportion', ylim= (-0.03,1.03))
+        ax.set(xlabel='Space', ylabel='Proportion', ylim= (-0.03,1.03), title=f"Tanaka {model}, t={t}, s={s}")
         if grid == True : 
             ax.grid()
         ax.xaxis.label.set_size(label_size)
@@ -120,7 +122,7 @@ def graph_tanaka(s,X,P,t,model,graph_para):
         # Saving figures and data
         if save_fig : 
             dir_title = f"tanaka/s_{s}"
-            save_figure(t, fig, dir_title, "t_{t}") 
+            save_figure(t, fig, dir_title, "t_{t}", None, num_para) 
             column = [P]; np.savetxt(f"../outputs/{dir_title}/p_for_t_{t}.txt", np.column_stack(column), fmt='%.3e', delimiter="  ") 
         
     
