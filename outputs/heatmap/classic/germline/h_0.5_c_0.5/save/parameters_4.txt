@@ -1,0 +1,11 @@
+Parameters : 
+r = heatmap 
+s = heatmap 
+h = 0.5 
+c = 0.5 
+homing = germline 
+T = 500 
+L = 2000 
+M = 3000 
+N = 2000 
+theta = 0.5

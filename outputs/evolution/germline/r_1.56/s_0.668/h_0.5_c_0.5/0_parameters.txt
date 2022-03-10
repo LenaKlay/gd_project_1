@@ -1,0 +1,12 @@
+Parameters : 
+r = 1.56 
+s = 0.668 
+h = 0.5 
+c = 0.5 
+homing = germline 
+T = 1000 
+L = 4000 
+M = 6000 
+N = 4000 
+theta = 0.5 
+mod = 100
