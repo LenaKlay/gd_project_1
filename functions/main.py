@@ -40,7 +40,7 @@ plt.rcParams.update({'font.family':'serif'})
 #        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
 #       10.92, 11.16, 11.4 , 11.64, 11.88])
     
-r = 1.56       # growth rate
+r = 1.8       # growth rate
 s = 0.668   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
 h = 0.5    # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
@@ -49,7 +49,7 @@ difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.5              # homing rate
+c = 0.5               # homing rate
 homing = "germline"   # "zygote" or "germline"
 
 # Initialization
@@ -79,12 +79,12 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
 # Graph
 
 graph_type = "Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
-show_graph_ini = True                                      # Show graph at time 0
-wild = True; heterozygous = True; drive = True            # What to draw on the graph
+show_graph_ini = False                                     # Show graph at time 0
+wild = True; heterozygous = True; drive = True             # What to draw on the graph
 grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T/10)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = int(T)                                               # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                            # Save the figures (.pdf) 
 
 # Speed calculus
@@ -102,7 +102,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do ="evolution" 
+what_to_do = "heatmap" 
 
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
@@ -120,7 +120,8 @@ print("what_to_do =", what_to_do,"\n")
 ############################### Main program #########################################
 
 if what_to_do == "evolution" : 
-        #bio_para[0] = r; print(f"r={r}")
+    for r in [0.12,  0.36,  0.6 , 0.84,  1.08,  1.32,  1.56,  1.8 ,  2.04,  2.28,  2.52] : 
+        bio_para[0] = r; print(f"r={r}")
         #bio_para[1] = s; print(f"s={s}")
         speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         print(speed)
@@ -351,7 +352,7 @@ if what_to_do == "heatmap" :
         precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :
-                T = 500; L = 2000; M = T*6; N = L 
+                T = 1000; L = 4000; M = T*6; N = L 
                 smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
                 
                 # update parameters

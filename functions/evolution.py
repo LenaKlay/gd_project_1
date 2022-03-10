@@ -101,11 +101,9 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     dx = L/N    # spatial
     
     # Spatial domain (1D)
-    
     X = np.linspace(0,N,N+1)*dx   
     
-    # Initialization 
-            
+    # Initialization             
     if CI == "center" : 
         W = np.ones(N+1); W[0:N//2] = 0    # Wild individuals at t=0  
         H = np.zeros(N+1)                                               # Heterozygous individuals at t=0
@@ -119,6 +117,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         graph(X,W,H,D,0,graph_para,bio_para,num_para,directory,file,"t = 0")
     nb_graph = 1
         
+    increasing_WT_wave = True # indicate if the wave is monotone increasing 
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
     speed_fct_of_time = np.zeros((2,T//mod))   # first line : time, second line : speed of the wave at the corresponding time
     
@@ -148,25 +147,40 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         H = la.spsolve(Bh_, Bh.dot(H) + dt*f2)
         D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
         
+        # Graph
         if t>=mod*nb_graph and graph_type != None : 
             graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,f"t = {np.round(t,2)}")
             nb_graph += 1
-        
-        if speed_proportion == False :
-            if np.isin(True, W>0.5) and np.isin(True, W<0.99) :  # wild pop is still present somewhere in the environment
-                position = np.append(position,np.where(W>0.5)[0][0])     # List containing the first position where the 
-                                                                         # proportion of wild alleles is lower than 0.5.   
-        if speed_proportion == True :                          # Idem on proportion of wild-type individuals
-            if np.isin(True, W/(W+H+D)>0.5) and np.isin(True, W/(W+H+D)<0.99) : 
-                position = np.append(position,np.where(W/(W+H+D)>0.5)[0][0])
-   
+                            
+        # Compute the speed on WT proportion or density
+        if speed_proportion == True : WT = W/(W+H+D)
+        else : WT = W
+        # Check if the WT wave is partially decreasing
+        epsilon = -0.000000001
+        index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
+        # if the wave is increasing OR if the first increasing section come above 0.2 : the position will be correct. 
+        if len(index_neg) == 0 or WT[index_neg[0]] > 0.2 :
+            # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again.
+            if len(index_neg) != 0 and increasing_WT_wave :
+                position = np.array([])   
+                speed_fct_of_time = np.zeros((2,T//mod))   
+                increasing_WT_wave = False
+            # we recorde the position only if the WT wave is still in the environment
+            if np.isin(True, WT>0.2) and np.isin(True, WT<0.99) :       
+                # List containing the first position of WT where the proportion of wild alleles is higher than 0.2.  
+                position = np.append(position,np.where(WT>0.2)[0][0])   
+             
         if t%mod == 0 and what_to_do == "speed function of time" : 
             #print("\nTemps :", t) ; print("Speed :", np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt, "\n")
             speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
             # first line : time, second line : speed of the wave at the corresponding time
 
+
+    # Compute the wave speed with the position vector
     if np.shape(position)[0] != 0 :
+        # Do not count positions when the wave was partially outside the window.
         position = position[position!=0]   
+        # Speed compute on the last fifth of the position vector.
         speed = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave   
     else :
         speed = None
