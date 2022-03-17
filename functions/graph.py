@@ -24,8 +24,10 @@ line_size = 4
 save_column = True
 
 
-def graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,title_fig):
-    
+def graph(X,W,H,D,t,graph_para,bio_para,num_para):
+       
+        r,s,h,a,difW,difH,difD,c,homing = bio_para
+        T,L,M,N,mod,theta = num_para
         graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
 
         fig, ax = plt.subplots()
@@ -49,9 +51,9 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,title_fig):
         if semilogy : defaultylim = (0.00001,1.1)
         else : defaultylim = (-0.03,1.03)  
         if xlim == None : 
-            ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim, title=title_fig)   
+            ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim, title=f"t = {t}")   
         else : 
-            ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim, title=title_fig)
+            ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim, title="t = {t}")
             
         # Grid
         if grid == True : 
@@ -73,20 +75,16 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,title_fig):
         # Show the graph      
         plt.show()
         
-        # Saving figures and data
+        # Saving figures and datas
         if save_fig : 
-            save_figure(t, fig, directory, file, bio_para, num_para) 
-            if save_column : 
-                columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/columns_t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
+            directory = f"evolution/{homing}/r_{np.round(r,3)}/s_{np.round(s,3)}/h_{np.round(h,2)}_c_{np.round(c,2)}"
+            save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
+            columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
-        
- 
+    
 
 
-
-
-
-# Create a new directory "path" in outputs         
+# Create a new directory at the localisation f"../outputs{path}"
 def create_directory(path, bio_para, num_para, parameters_txt) :
     # Directory to create
     new_dir = f"../outputs{path}"
@@ -103,23 +101,22 @@ def create_directory(path, bio_para, num_para, parameters_txt) :
             if parameters_txt : 
                 T,L,M,N,mod,theta = num_para
                 file = open(f"../outputs{path}/0_parameters.txt", "w") 
-                if bio_para != None :   
-                    r,s,h,a,difW,difH,difD,c,homing = bio_para
-                    file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nhoming = {homing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}") 
-                else :   #  no bio_para for tanaka
+                
+                if bio_para == None :  #  no bio_para for tanaka
                     file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}")  
-                file.close()
+                else : 
+                    r,s,h,a,difW,difH,difD,c,homing = bio_para
+                    file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nhoming = {homing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}")                     
+                file.close() 
     #else : 
     #    print("Already exists : %s" % new_dir)
-
-                 
     
-# Create the tree of directories in outputs and save pdf figures
-def save_figure(t, fig, directories, pdf_title, bio_para, num_para) : 
-   
+    
+
+# Create the tree of directories at the localisation f"../outputs{path}" with parameters.txt
+def create_path(directories, bio_para, num_para):
     #actual_dir = os.getcwd()
     #print ("\nWorking directory : %s" % actual_dir) 
-    
     lst_slash_index = [-1]
     path = ""          
     for pos,char in enumerate(directories):
@@ -129,15 +126,18 @@ def save_figure(t, fig, directories, pdf_title, bio_para, num_para) :
             create_directory(path, bio_para, num_para, False)
     path = path+"/"+directories[lst_slash_index[-1]+1:len(directories)]    
     create_directory(path, bio_para, num_para, True)
-      
-    # Save figures .pdf in the new directory
-    if t != None : 
-        fig.savefig(f"../outputs{path}/t_{t}_{pdf_title}.pdf")  
-        fig.savefig(f"../outputs{path}/t_{t}_{pdf_title}.png") 
-    else : 
-        fig.savefig(f"../outputs{path}/{pdf_title}.pdf") 
-        fig.savefig(f"../outputs{path}/{pdf_title}.png")
-        
+                 
     
-              
+# Save figures and datas regarding what we are doing. 
+# fig is the figure to save (title.png and title.pdf)
+# data is the data to save (title.txt)
+def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
+    # Create the tree of directories in outputs (if it does not exist) with parameters.txt
+    create_path(directories, bio_para, num_para)
+    # Save figure
+    if fig != [] :
+        fig.savefig(f"../outputs/{directories}/{title}.pdf"); fig.savefig(f"../outputs/{directories}/{title}.png") 
+    # Save datas
+    if data != [] :
+        np.savetxt(f"../outputs/{directories}/{title}.txt", data)             
                 

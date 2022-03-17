@@ -15,7 +15,7 @@ import matplotlib.colors as mcolors
 # External functions 
 from evolution import evolution
 from tanaka import tanaka
-from graph import save_figure
+from graph import save_fig_or_data
 
 
 def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do):
@@ -24,19 +24,23 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion, show_graph_ini = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
     
-    # Range values (r and s)
-    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    delta_s = (smax-smin)/precision   
-    # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)            
-     # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-    delta_r = (rmax-rmin)/precision 
-    # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
-    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)         
-   
+    # Range for r and s
+    delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
+    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)     
+    delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
+    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
     
+    # Create a directory and save parameters.txt with r_range and s_range
+    if save_fig :
+        bio_para[0] = r_range; bio_para[1] = s_range
+        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", [], [], None, bio_para, num_para)
+     
+    # Print principal parameters
+    print("\nwhat_to_do =", what_to_do); print("homing =", bio_para[8]);  print("\nr =", r_range); print("s =", s_range); print("h =", h); print("c =", c)
+      
+      
     # Initiate
     # matrix containing all the wave speeds for the different values of s and r 
     heatmap_values = np.zeros((precision,precision))      
@@ -82,7 +86,11 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
             # Print each value of the heatmap once it is computed.    
             print(f"heatmap value ={heatmap_values[r_index,s_index]} \n") 
             
-    return(s_range, r_range, heatmap_values, zero_line) 
+        # for each r, save the corresponding line
+        if save_fig : 
+            save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", [], heatmap_values[r_index,:], f"line_r_{np.round(r,2)}", bio_para, num_para)
+           
+    return(r_range, s_range, heatmap_values, zero_line) 
     
     
     
@@ -90,19 +98,8 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
 def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, num_para, save_fig) : 
     # Parameters
     precision, smin, smax, rmin, rmax = heatmap_para 
-    r,s,h,a,difW,difH,difD,c,homing = bio_para
+    r_range,s_range,h,a,difW,difH,difD,c,homing = bio_para
     T,L,M,N,mod,theta = num_para
-    
-    # Range values (r and s)
-    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    delta_s = (smax-smin)/precision   
-    # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)            
-     # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-    delta_r = (rmax-rmin)/precision 
-    # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
-    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)         
-   
         
     # Figure
     fig, ax = plt.subplots()     
@@ -186,15 +183,11 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     plt.show()
     
     # Save figures and datas 
-    if save_fig : 
-        dir_title = f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}"
-        save_figure(None, fig, f"{dir_title}", f"heatmap_{precision}") 
-        np.savetxt(f'../outputs/{dir_title}/heatmap_{precision}.txt', heatmap_values) 
+    if save_fig :
+        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", fig, heatmap_values, f"{precision}_heatmap", bio_para, num_para)
         if heatmap_type == "classic" : 
-            np.savetxt(f'../outputs/{dir_title}/zero_line_{precision}.txt', zero_line) 
-        file = open(f"../outputs/{dir_title}/parameters_{precision}.txt", "w") 
-        file.write(f"Parameters : \nr = heatmap \ns = heatmap \nh = {h} \nc = {c} \nhoming = {homing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}") 
-        file.close()
+            save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", [], zero_line, f"{precision}_zero_line", bio_para, num_para)
+
 
       
 # To print loaded heatmaps :      
@@ -219,17 +212,15 @@ if load :
     # update new values in parameters vectors
     heatmap_para = [precision, smin, smax, rmin, rmax]; bio_para[8]=homing
     # calculate s and r ranges
-    delta_s = (smax-smin)/precision; s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)            
-    delta_r = (rmax-rmin)/precision; r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)    
+    delta_s = (smax-smin)/precision; s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s); bio_para[0] = r_range         
+    delta_r = (rmax-rmin)/precision; r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r); bio_para[1] = s_range  
     # load and plot the heatmap     
     heatmap_values, zero_line = upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio_para, num_para, save_fig)
 
 # The heatmap_values[r_index,s_index] correspond to the values s : s_range[s_index] and r : r_range[r_index]
-
-
-
-
-
+#indice_r = np.where((5.3 < r_range) & (r_range < 5.5))[0] ; print("\nindice r :", indice_r)
+#indice_s = np.where((0.87 < s_range) & (s_range < 0.89))[0] ; print("\nindice s :", indice_s)
+#print(heatmap_values[indice_r,indice_s])
 
 
 

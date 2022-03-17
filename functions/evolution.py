@@ -92,10 +92,6 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     T,L,M,N,mod,theta = num_para
     graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, speed_proportion, show_graph_ini = graph_para
     
-    # Saving and figures parameters
-    directory = f"evolution/{homing}/r_{np.round(r,3)}/s_{np.round(s,3)}/h_{np.round(h,2)}_c_{np.round(c,2)}"
-    file = "evo"
-
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
@@ -114,7 +110,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         D = np.zeros(N+1); D[0:N//10] = 1                # Drive individuals at t=0
     
     if graph_type != None and show_graph_ini :
-        graph(X,W,H,D,0,graph_para,bio_para,num_para,directory,file,"t = 0")
+        graph(X,W,H,D,0,graph_para,bio_para,num_para)
     nb_graph = 1
         
     increasing_WT_wave = True # indicate if the wave is monotone increasing 
@@ -149,42 +145,45 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         
         # Graph
         if t>=mod*nb_graph and graph_type != None : 
-            graph(X,W,H,D,t,graph_para,bio_para,num_para,directory,file,f"t = {np.round(t,2)}")
+            graph(X,W,H,D,t,graph_para,bio_para,num_para)
             nb_graph += 1
-                            
+                          
         # Compute the speed on WT proportion or density
         if speed_proportion == True : WT = W/(W+H+D)
         else : WT = W
         # Check if the WT wave is partially decreasing
-        epsilon = -0.000000001
+        epsilon = -0.0001
         index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
         # if the wave is increasing OR if the first increasing section come above 0.2 : the position will be correct. 
+        
         if len(index_neg) == 0 or WT[index_neg[0]] > 0.2 :
-            # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again.
-            if len(index_neg) != 0 and increasing_WT_wave :
+            # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again. index_neg[0]>3 is there to assure 
+            # that the decreasing is not a numerical error due to borders. 
+            if len(index_neg) != 0 and increasing_WT_wave and index_neg[0]>3 :
                 position = np.array([])   
                 speed_fct_of_time = np.zeros((2,T//mod))   
                 increasing_WT_wave = False
-            # we recorde the position only if the WT wave is still in the environment
-            if np.isin(True, WT>0.2) and np.isin(True, WT<0.99) :       
+            # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the 0.2 value of the wave might be outside the window.
+            if np.isin(True, WT>0.2) and np.isin(True, WT<0.99) and np.where(WT>0.2)[0][0] != 0:  
                 # List containing the first position of WT where the proportion of wild alleles is higher than 0.2.  
                 position = np.append(position,np.where(WT>0.2)[0][0])   
-             
+           
+        # Speed fonction of time    
         if t%mod == 0 and what_to_do == "speed function of time" : 
-            #print("\nTemps :", t) ; print("Speed :", np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt, "\n")
-            speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
             # first line : time, second line : speed of the wave at the corresponding time
-
-
+            speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
+            
+        # if the 0.2 value of the wave is outside the window, stop the simulation    
+        if not(np.any(WT>0.2) and np.any(WT<0.2)) : 
+            break
+        
     # Compute the wave speed with the position vector
     if np.shape(position)[0] != 0 :
-        # Do not count positions when the wave was partially outside the window.
-        position = position[position!=0]   
         # Speed compute on the last fifth of the position vector.
         speed = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave   
     else :
         speed = None
-        print(f"Can't determine the speed of the wave : For r = {r} and s = {s}, the environment is empty or not mixed enought (at least one place where W<0.5 and one where W>0.1), or T is too short.")                                                 
+        print(f"Can't determine the speed of the wave for r = {r} and s = {s} : the position vector is empty.")                                                 
 
     if what_to_do == "speed function of time" : 
         return(speed,W,H,D,speed_fct_of_time)

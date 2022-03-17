@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 # Load functions
 from evolution import evolution
 from tanaka import tanaka
+from graph import save_fig_or_data
 
 # Change font to serif
 plt.rcParams.update({'font.family':'serif'})
@@ -39,18 +40,27 @@ plt.rcParams.update({'font.family':'serif'})
 #        6.6 ,  6.84,  7.08,  7.32,  7.56,  7.8 ,  8.04,  8.28,  8.52,
 #        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
 #       10.92, 11.16, 11.4 , 11.64, 11.88])
+
+
+# s = 0.876
+# r_range = array([ 0.12,  0.36,  0.6 ,  0.84,  1.08,  1.32,  1.56,  1.8 ,  2.04,
+#        2.28,  2.52,  2.76,  3.  ,  3.24,  3.48,  3.72,  3.96,  4.2 ,
+#        4.44,  4.68,  4.92,  5.16,  (5.4 ,  5.64,  5.88,  6.12,  6.36),
+#        6.6 ,  6.84,  7.08,  7.32,  7.56,  7.8 ,  8.04,  8.28,  8.52,
+#        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
+#       10.92, 11.16, 11.4 , 11.64, 11.88])
     
-r = 1.8       # growth rate
+r = 5.88    # growth rate
 s = 0.668   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 0.5    # and sh for heterozygous individuals
+h = 0.25     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.5               # homing rate
-homing = "germline"   # "zygote" or "germline"
+c = 0.25               # homing rate
+homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
 
@@ -68,9 +78,9 @@ linear_mating = False
 
 # Numerical
 
-T = 1000         # final time
-L = 4000        # length of the spatial domain
-M = T*6          # number of time steps
+T = 1000       # final time
+L = 4000       # length of the spatial domain
+M = T*6        # number of time steps
 N = L          # number of spatial steps
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
@@ -78,7 +88,7 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = "Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = None #"Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = False                                     # Show graph at time 0
 wild = True; heterozygous = True; drive = True             # What to draw on the graph
 grid = True                                                # A grid or not
@@ -103,84 +113,57 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 ############################ What to do ? #######################################
 
 what_to_do = "heatmap" 
-
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
-# "system+evolution" : draw the propagation for the linear system and add the theoritical values at the end.
 # "speed function of time" : idem + draw the speed as a function of time.
 # "heatmap" : draw an heatmap function of s and r
 
 
-# Print important parameters
-print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
-print("\nhoming =", homing)
-print("graph_type =", graph_type)
-print("what_to_do =", what_to_do,"\n")
-
 ############################### Main program #########################################
 
+# Evolution
 if what_to_do == "evolution" : 
-    for r in [0.12,  0.36,  0.6 , 0.84,  1.08,  1.32,  1.56,  1.8 ,  2.04,  2.28,  2.52] : 
-        bio_para[0] = r; print(f"r={r}")
-        #bio_para[1] = s; print(f"s={s}")
+    
+    #for r in [0.12,  0.36,  0.6 ,  0.84, 1.08,  1.32] : 
+    #for r in [5.88, 6.12, 6.36, 6.6, 6.84] : 
+        bio_para[0] = r; bio_para[1] = s
+        print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
         speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         print(speed)
 
-if what_to_do == "tanaka cubic" :    
+
+# Tanaka cubic
+if what_to_do == "tanaka cubic" : 
+    
+    print("\nwhat_to_do =", what_to_do); print("homing = zygote"); print("\ns =", s)
+    
     p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
-    # NB : this dont save the figures.
     
-if what_to_do == "tanaka fraction" : 
+    
+# Tanaka fraction  
+if what_to_do == "tanaka fraction" :
+    
+    print("\nwhat_to_do =", what_to_do); print("homing = zygote"); print("\ns =", s)
+    
     p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
-    # NB : this dont save the figures.
-
-if what_to_do == "KPP" :    
+    
+    
+# KPP
+if what_to_do == "KPP" :  
+    
+    print("\nwhat_to_do =", what_to_do)
+    
     p_KPP, speed_KPP, speed_fct_of_time_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
-    # NB : this dont save the figures.
 
 
-if what_to_do == "system+evolution" :
-    
-    # External function
-    from which_system import which_system 
-    from graph import graph
-    
-    # No graph at each time
-    graph_para[0] = None          
-  
-    # run evolution
-    speed,position,W,H,D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
-          
-    # Determine the position of the border and print the number of the system involve
-    epsilon = 0.0001              # numerical error accepted
-    window = 'minimum'            # where to look : 'zoom border' or 'everywhere'  or 'minimum'   
-    border, system, system_bis = which_system(W,H,D,epsilon,window,num_para)     
-  
-   
-    # Draw (and save if save_fig==True) the wave at the end (normal and log scale).
-    directory = "system_evolution"
-    file = "wave"
-    title_fig = f"t = {T}"
-    if speed != None and border != None:  
-        X = np.linspace(0,N,N+1)*(L/N)
-        semilogy = False
-        xlim = (border-75,border+75)
-        graph(X,W,H,D,T,graph_para,bio_para,num_para,directory,file,title_fig)
-        semilogy = True 
-        xlim = (0,L)       
-        graph(X,W,H,D,T,graph_para,bio_para,num_para,directory,file,title_fig)
-        
-        
-     
-                
+
         
         
 # Speed function of time 
 if what_to_do == "speed function of time" :
     
-    # External functions
-    from graph import save_figure
-    
+    print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
+   
     # No graph at each time
     graph_para[0] = None    
     
@@ -216,20 +199,17 @@ if what_to_do == "speed function of time" :
         ax.set(xlabel='Time', ylabel='Speed')   
         ax.grid();plt.legend(); plt.show()      
         if save_fig : 
-            dir_title = f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}"
-            save_figure(None, fig, dir_title, f"r_{r}_s_{s}", bio_para, num_para)  
-        file = open(f"../outputs/{dir_title}/parameters.txt", "w") 
-        file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nhoming = {homing} \nCI = {CI} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}") 
-        file.close()
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", fig, [], "speeds_fct_of_time", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_leoflo , "speed_flo_leo", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_cubic, "speed_tanaka_cubic", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_fraction, "speed_tanaka_fraction", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_KPP, "speed_KPP", bio_para, num_para)
         
     
             
 # Speed function of s
 if what_to_do == "speed function of s" :
-    
-    # External functions
-    from graph import save_figure
-    
+        
     # No graph at each time
     graph_para[0] = None    
     
@@ -252,7 +232,10 @@ if what_to_do == "speed function of s" :
     # s values for s < 0.5
     list_s05 = []   
     
-       
+    # Print principal parameters
+    print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r); print("s =", s_values); print("h =", h); print("c =", c)
+      
+    # Loop on s_values
     for s_index in range(len(s_values)) :
         # print and update s value
         s = np.round(s_values[s_index],3); print(s); bio_para[1] = s 
@@ -271,7 +254,7 @@ if what_to_do == "speed function of s" :
             fct_of_s[5,s_index] = 2*np.sqrt(1-2*s)
             
     
-           
+    # Figure
     fig, ax = plt.subplots()    
     if r == 0 : 
         ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="(2-3*s)/np.sqrt(2*s)")
@@ -282,12 +265,9 @@ if what_to_do == "speed function of s" :
     ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="KPP r=1-2s")
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
-        dir_title = f"speed_function_of_s/r_{r}_h_{h}_c_{c}/s_from_{s_min}_to_{s_max}"
-        save_figure(None, fig, f"{dir_title}", "speed_fct_of_time", bio_para, num_para) 
-        np.savetxt(f'../outputs/{dir_title}/speed_fct_of_s.txt', fct_of_s) 
-        file = open(f"../outputs/{dir_title}/parameters.txt", "w") 
-        file.write(f"Parameters : \nr = {r} \ns = fct of s \nh = {h} \nc = {c} \nhoming = {homing} \nCI = {CI} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}") 
-        file.close()
+        bio_para[1] = s_values 
+        save_fig_or_data(f"speed_function_of_s/r_{r}_h_{h}_c_{c}", fig, fct_of_s, f"s_from_{s_min}_to_{s_max}", bio_para, num_para)
+        
         
 
 
@@ -296,9 +276,6 @@ if what_to_do == "speed function of s" :
 
 # Speed function of s
 if what_to_do == "speed function of r" :
-    
-    # External functions
-    from graph import save_figure
     
     # No graph at each time
     graph_para[0] = None    
@@ -317,7 +294,10 @@ if what_to_do == "speed function of r" :
     # first line = r values
     fct_of_r[0,:] = r_values      
     
-       
+    # Print principal parameters
+    print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r_values); print("s =", s); print("h =", h); print("c =", c)
+      
+    # Loop on r_values 
     for r_index in range(len(r_values)) :
         # print and update s value
         r = np.round(r_values[r_index],3); print(r); bio_para[0] = r 
@@ -325,44 +305,40 @@ if what_to_do == "speed function of r" :
         fct_of_r[1,r_index], W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do) 
         print(fct_of_r)
        
-           
+    # Figure
     fig, ax = plt.subplots()    
     ax.plot(fct_of_r[0,:],fct_of_r[1,:], label="Leo/Flo")
     ax.plot(fct_of_r[0,:], 2*np.sqrt(1-2*s)*np.ones(len(r_values)), label="KPP exact")
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
-        dir_title = f"speed_function_of_r/s_{s}_h_{h}_c_{c}/r_from_{r_min}_to_{r_max}"
-        save_figure(None, fig, f"{dir_title}", "speed_fct_of_r",bio_para, num_para) 
-        np.savetxt(f'../outputs/{dir_title}/speed_fct_of_r.txt', fct_of_r) 
-        file = open(f"../outputs/{dir_title}/parameters.txt", "w") 
-        file.write(f"Parameters : \nr = speed fct of r \ns = {s} \nh = {h} \nc = {c} \nhoming = {homing} \nCI = {CI} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}") 
-        file.close()
+        bio_para[0] = r_values         
+        save_fig_or_data(f"speed_function_of_r/s_{s}_h_{h}_c_{c}", fig, fct_of_r, f"r_from_{r_min}_to_{r_max}", bio_para, num_para)
+
         
       
-
 
 if what_to_do == "heatmap" :
         from heatmap import heatmap
         from heatmap import print_heatmap
     
         heatmap_type = "classic" ; print("heatmap_type =", heatmap_type, "\n")   # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"   
-        bio_para[8] =  "germline"   # Homing : "zygote" or "germline"                                   
+        bio_para[8] = "zygote"   # Homing : "zygote" or "germline"                                   
 
         graph_para[0] = None        # No evolution graph : graph_type = None.
         precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :
-                T = 1000; L = 4000; M = T*6; N = L 
-                smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
+            T = 1000; L = 4000; M = T*6; N = L 
+            smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
                 
-                # update parameters
-                heatmap_para = [precision, smin, smax, rmin, rmax]  
-                num_para = [T,L,M,N,mod,theta]
-            
-                s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)
-                print_heatmap(heatmap_values, zero_line, "simple", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
-                #print_heatmap(heatmap_values, zero_line, "eradication", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
-                #print_heatmap(heatmap_values, zero_line, "collapse", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
+            # update parameters
+            heatmap_para = [precision, smin, smax, rmin, rmax]  
+            num_para = [T,L,M,N,mod,theta]
+           
+            bio_para[0], bio_para[1], heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)
+            print_heatmap(heatmap_values, zero_line, "simple", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
+            #print_heatmap(heatmap_values, zero_line, "eradication", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
+            #print_heatmap(heatmap_values, zero_line, "collapse", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
 
         else :   
             T = 1000; L = 4000; M = T*40; N = L 
@@ -372,22 +348,51 @@ if what_to_do == "heatmap" :
             heatmap_para = [precision, smin, smax, rmin, rmax] 
             num_para = [T,L,M,N,mod,theta]
             
-            s_range, r_range, heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)                          
+            bio_para[0], bio_para[1], heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)                          
             print_heatmap(heatmap_values, zero_line, None, heatmap_type, heatmap_para, bio_para, num_para, save_fig)
-            
-            if save_fig : 
-                dir_title = f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}"
-                save_figure(None, fig, f"{dir_title}", "heatmap_{precision}", bio_para, num_para) 
-                np.savetxt(f'../outputs/{dir_title}/heatmap_{precision}.txt', heatmap_values) 
-                np.savetxt(f'../outputs/{dir_title}/zero_line_{precision}.txt', heatmap_values) 
-                file = open(f"../outputs/{dir_title}/parameters_{precision}.txt", "w") 
-                file.write(f"Parameters : \nr = {r_range} \ns = {s_range} \nrmin = {rmin} \nrmax = {rmax} \nsmin = {smin} \nsmax = {smax}  \nprecision = {precision}  \nh = {h} \nc = {c} \nhoming = {homing} \nCI = {CI} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}") 
-                file.close()
+
                 
 
 
-################# Not tested ######################"
 
+
+
+################# Not re-tested ######################"
+
+
+
+if what_to_do == "system+evolution" :
+    
+    # External function
+    from which_system import which_system 
+    from graph import graph
+    
+    # No graph at each time
+    graph_para[0] = None          
+  
+    # run evolution
+    speed,position,W,H,D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+          
+    # Determine the position of the border and print the number of the system involve
+    epsilon = 0.0001              # numerical error accepted
+    window = 'minimum'            # where to look : 'zoom border' or 'everywhere'  or 'minimum'   
+    border, system, system_bis = which_system(W,H,D,epsilon,window,num_para)     
+  
+   
+    # Draw (and save if save_fig==True) the wave at the end (normal and log scale).
+    directory = "system_evolution"
+    file = "wave"
+    title_fig = f"t = {T}"
+    if speed != None and border != None:  
+        X = np.linspace(0,N,N+1)*(L/N)
+        semilogy = False
+        xlim = (border-75,border+75)
+        graph(X,W,H,D,T,graph_para,bio_para,num_para)
+        semilogy = True 
+        xlim = (0,L)       
+        graph(X,W,H,D,T,graph_para,bio_para,num_para)
+        
+        
 
             
 if what_to_do == "roots and speed function of s" : 

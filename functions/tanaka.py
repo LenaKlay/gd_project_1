@@ -22,7 +22,7 @@ number_y_size = 20
 line_size = 4
 
 # External functions
-from graph import save_figure
+from graph import save_fig_or_data
 
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
@@ -35,6 +35,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     # Spatial domain (1D)
     X = np.linspace(0,N,N+1)*dx   
+    save_fig_or_data(f"tanaka/{model}/s_{s}", None, X, "abscisse_X", None, num_para)
     
     # Initialization       
     if CI == "center" : 
@@ -88,9 +89,8 @@ def tanaka(s,model,model_para,num_para,graph_para):
     else :
         speed = None
         print(f"Can't determine the speed of the wave for s = {s}.")                                                 
-            
+        
     return(P, speed, speed_fct_of_time)
-    
     
     
     
@@ -121,11 +121,7 @@ def graph_tanaka(s,X,P,t,model,graph_para,num_para):
         
         # Saving figures and data
         if save_fig : 
-            dir_title = f"tanaka/s_{s}"
-            save_figure(t, fig, dir_title, "t_{t}", None, num_para) 
-            column = [P]; np.savetxt(f"../outputs/{dir_title}/p_for_t_{t}.txt", np.column_stack(column), fmt='%.3e', delimiter="  ") 
-        
-    
+            save_fig_or_data(f"tanaka/{model}/s_{s}", fig, P, "t_{t}_X", None, num_para)
         
         
         
