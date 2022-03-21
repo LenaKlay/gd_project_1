@@ -1,0 +1,12 @@
+Parameters : 
+r = 0.36 
+s = 0.332 
+h = 0.25 
+c = 0.25 
+homing = zygote 
+T = 5000 
+L = 10000 
+M = 30000 
+N = 10000 
+theta = 0.5 
+mod = 500
