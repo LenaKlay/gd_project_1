@@ -88,14 +88,14 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = None #"Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
-show_graph_ini = False                                     # Show graph at time 0
+graph_type = "Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
+show_graph_ini = True                                     # Show graph at time 0
 wild = True; heterozygous = True; drive = True             # What to draw on the graph
 grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T)                                               # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
-save_fig = True                                            # Save the figures (.pdf) 
+mod = int(T/3)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
 speed_proportion = False            # True : use the wild-type number to compute the speed, False : use the wild-type proportion. 
@@ -112,7 +112,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "heatmap" 
+what_to_do = "evolution" 
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
@@ -124,12 +124,23 @@ what_to_do = "heatmap"
 # Evolution
 if what_to_do == "evolution" : 
     
-    #for r in [0.12,  0.36,  0.6 ,  0.84, 1.08,  1.32] : 
-    #for r in [5.88, 6.12, 6.36, 6.6, 6.84] : 
-        bio_para[0] = r; bio_para[1] = s
+    r = 0.12; bio_para[0] = r 
+    for s in [3.24,  3.48,  3.72] : 
+        bio_para[1] = s    
+        if homing == "zygote" : 
+            print("Condition : s <", c/(2*c + h*(1-c)), "->", s < c/(2*c + h*(1-c)))
+            print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
+        if homing == "germline" : 
+            print("Condition: s <",  c/(2*c*h + h*(1-c)), "->", s < c/(2*c*h + h*(1-c)))
+            print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
+
         print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
         speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
-        print(speed)
+        # save the speed value
+        if save_fig :
+            np.savetxt(f"../outputs/evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}/0_speed.txt", np.ones(1)*speed)        
+        print("speed =", speed)
+        
 
 
 # Tanaka cubic
@@ -336,6 +347,7 @@ if what_to_do == "heatmap" :
             num_para = [T,L,M,N,mod,theta]
            
             bio_para[0], bio_para[1], heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)
+            r_range = bio_para[0]; s_range = bio_para[1]
             print_heatmap(heatmap_values, zero_line, "simple", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
             #print_heatmap(heatmap_values, zero_line, "eradication", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
             #print_heatmap(heatmap_values, zero_line, "collapse", heatmap_type, heatmap_para, bio_para, num_para, save_fig)
@@ -349,6 +361,7 @@ if what_to_do == "heatmap" :
             num_para = [T,L,M,N,mod,theta]
             
             bio_para[0], bio_para[1], heatmap_values, zero_line = heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do)                          
+            r_range = bio_para[0]; s_range = bio_para[1]
             print_heatmap(heatmap_values, zero_line, None, heatmap_type, heatmap_para, bio_para, num_para, save_fig)
 
                 

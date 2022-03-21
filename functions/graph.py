@@ -77,7 +77,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         
         # Saving figures and datas
         if save_fig : 
-            directory = f"evolution/{homing}/r_{np.round(r,3)}/s_{np.round(s,3)}/h_{np.round(h,2)}_c_{np.round(c,2)}"
+            directory = f"evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}"
             save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
             columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
@@ -94,8 +94,8 @@ def create_directory(path, bio_para, num_para, parameters_txt) :
             os.mkdir(new_dir)
         except OSError:
             print ("Fail : %s " % new_dir)
-        else:
-            print ("Success : %s " % new_dir)
+        #else:
+            #print ("Success : %s " % new_dir)
                         
             # Write parameters in the new directory
             if parameters_txt : 

@@ -184,9 +184,9 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     
     # Save figures and datas 
     if save_fig :
-        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", fig, heatmap_values, f"{precision}_heatmap", bio_para, num_para)
+        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}", fig, heatmap_values, f"{precision}_heatmap", bio_para, num_para)
         if heatmap_type == "classic" : 
-            save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}", [], zero_line, f"{precision}_zero_line", bio_para, num_para)
+            save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}", [], zero_line, f"{precision}_zero_line", bio_para, num_para)
 
 
       
@@ -219,7 +219,7 @@ if load :
 
 # The heatmap_values[r_index,s_index] correspond to the values s : s_range[s_index] and r : r_range[r_index]
 #indice_r = np.where((5.3 < r_range) & (r_range < 5.5))[0] ; print("\nindice r :", indice_r)
-#indice_s = np.where((0.87 < s_range) & (s_range < 0.89))[0] ; print("\nindice s :", indice_s)
+#indice_s = np.where((0.31 < s_range) & (s_range < 0.32))[0] ; print("\nindice s :", indice_s)
 #print(heatmap_values[indice_r,indice_s])
 
 

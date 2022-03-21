@@ -113,9 +113,22 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         graph(X,W,H,D,0,graph_para,bio_para,num_para)
     nb_graph = 1
         
-    increasing_WT_wave = True # indicate if the wave is monotone increasing 
+    increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
+    p_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
+    treshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
     speed_fct_of_time = np.zeros((2,T//mod))   # first line : time, second line : speed of the wave at the corresponding time
+    
+    
+    # Check for a coexitence stable state 
+    if homing == "zygote" and (1-h)*(1-c) > 0.5 : 
+        p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))                       
+    if homing == "germline" and h < 0.5 : 
+        p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
+    # If an admissible coexistence stable state exists, we change the treshold value.
+    if  p_star > 0 and p_star < 1 : 
+        speed_proportion = True
+        treshold = (1-p_star) + 0.001
     
     # Matrix
     C0 = -2*np.ones(N+1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
@@ -131,7 +144,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     Bd_ = sp.identity(N+1)-(theta*difD*dt/dx**2)*A        
 
     # Evolution
-    for t in np.linspace(dt,T,M) : 
+    for t in np.linspace(dt,T,M) :
         
         t = round(t,2)
         
@@ -147,34 +160,40 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         if t>=mod*nb_graph and graph_type != None : 
             graph(X,W,H,D,t,graph_para,bio_para,num_para)
             nb_graph += 1
-                          
+                                          
         # Compute the speed on WT proportion or density
-        if speed_proportion == True : WT = W/(W+H+D)
+        if speed_proportion : WT = (W+0.5*H)/(W+H+D) 
         else : WT = W
-        # Check if the WT wave is partially decreasing
-        epsilon = -0.0001
-        index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        # if the wave is increasing OR if the first increasing section come above 0.2 : the position will be correct. 
         
-        if len(index_neg) == 0 or WT[index_neg[0]] > 0.2 :
+        # If the WT wave is partially decreasing, index_neg is not empty.
+        epsilon = -0.0001 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
+        
+        # if the wave is increasing OR if the first increasing section come above the treshold : the position will be correct.       
+        if len(index_neg) == 0 or WT[index_neg[0]] > treshold :
             # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again. index_neg[0]>3 is there to assure 
             # that the decreasing is not a numerical error due to borders. 
             if len(index_neg) != 0 and increasing_WT_wave and index_neg[0]>3 :
                 position = np.array([])   
                 speed_fct_of_time = np.zeros((2,T//mod))   
                 increasing_WT_wave = False
-            # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the 0.2 value of the wave might be outside the window.
-            if np.isin(True, WT>0.2) and np.isin(True, WT<0.99) and np.where(WT>0.2)[0][0] != 0:  
-                # List containing the first position of WT where the proportion of wild alleles is higher than 0.2.  
-                position = np.append(position,np.where(WT>0.2)[0][0])   
-           
+            # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the treshold value of the wave might be outside the window.
+            if np.isin(True, WT>treshold) and np.isin(True, WT<0.99) and np.where(WT>treshold)[0][0] != 0:  
+                # List containing the first position of WT where the proportion of wild alleles is higher than the treshold.  
+                position = np.append(position,np.where(WT>treshold)[0][0])   
+
+        # NB : problems encountered when computing the speed : 
+        # - decreasing section   ->     r=1.08 s=0.668 c=h=0.5 homing="germline"  T=1000  L=5000  M=6000  N=5000 
+        # - small perturbation at the border, which can create fake decreasing sections 
+        # - coexistance with WT equilibrium under the 0.2 treshold value   ->    r=0.36 s=0.332 c=h=0.25 homing="zygote"  T=5000  L=10000  M=T*6  N=L 
+
+
         # Speed fonction of time    
         if t%mod == 0 and what_to_do == "speed function of time" : 
             # first line : time, second line : speed of the wave at the corresponding time
             speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
             
-        # if the 0.2 value of the wave is outside the window, stop the simulation    
-        if not(np.any(WT>0.2) and np.any(WT<0.2)) : 
+        # if the treshold value of the wave is outside the window, stop the simulation  
+        if not(np.any(WT>treshold) and np.any(WT<treshold)) : 
             break
         
     # Compute the wave speed with the position vector
