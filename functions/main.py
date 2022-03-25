@@ -33,7 +33,9 @@ plt.rcParams.update({'font.family':'serif'})
 
 # Biological
 
+# homing = "germline"
 # s = 0.668
+# h=0.5 et c=0.5
 # r_range = array([ 0.12,  0.36,  0.6 ,  0.84,  (1.08),  (1.32),  1.56,  1.8 ,  2.04,
 #        2.28,  2.52,  2.76,  3.  ,  3.24,  3.48,  3.72,  3.96,  4.2 ,
 #        4.44,  4.68,  4.92,  5.16,  5.4 ,  5.64,  5.88,  6.12,  6.36,
@@ -59,7 +61,7 @@ difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.25               # homing rate
+c = 0.25              # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
@@ -78,8 +80,8 @@ linear_mating = False
 
 # Numerical
 
-T = 1000       # final time
-L = 4000       # length of the spatial domain
+T = 5000       # final time
+L = 5000       # length of the spatial domain
 M = T*6        # number of time steps
 N = L          # number of spatial steps
 
@@ -88,13 +90,13 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = "Population density"                          # "Individual density" or "Proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = "Population densities"                         # "Population densities" or "Population proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 wild = True; heterozygous = True; drive = True             # What to draw on the graph
 grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T/3)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = int(T/5)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
@@ -112,7 +114,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "evolution" 
+what_to_do = "heatmap" 
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
@@ -124,15 +126,21 @@ what_to_do = "evolution"
 # Evolution
 if what_to_do == "evolution" : 
     
-    r = 0.12; bio_para[0] = r 
-    for s in [3.24,  3.48,  3.72] : 
-        bio_para[1] = s    
-        if homing == "zygote" : 
-            print("Condition : s <", c/(2*c + h*(1-c)), "->", s < c/(2*c + h*(1-c)))
-            print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
+    #r = 0.12; bio_para[0] = r 
+    #for s in [0.3, 0.316, 0.332] : 
+    
+    for r in [0.1, 0.2, 0.3] : 
+        s = 0.316
+        bio_para[0] = r ; bio_para[1] = s 
+        s_1 = c/(1-h*(1-c))   
+        if homing == "zygote" :
+            s_3 = c/(2*c + h*(1-c))
+            print("\nCoexistence", s > s_1 and s < s_3 , ":", np.round(s_1,3), " < s <", np.round(s_3,3))
+            if c*(1-2*s)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
         if homing == "germline" : 
-            print("Condition: s <",  c/(2*c*h + h*(1-c)), "->", s < c/(2*c*h + h*(1-c)))
-            print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
+            s_2 = c/(2*c*h + h*(1-c))
+            print("\nCoexistence", s > s_1 and s < s_2, ":", np.round(s_1,3) , " < s <", np.round(s_2,3))
+            if c*(1-2*s*h)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
 
         print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
         speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
@@ -339,7 +347,7 @@ if what_to_do == "heatmap" :
         precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :
-            T = 1000; L = 4000; M = T*6; N = L 
+            T = 3000; L = 3000; M = T*6; N = L 
             smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
                 
             # update parameters

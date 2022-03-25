@@ -33,8 +33,8 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         fig, ax = plt.subplots()
         
         # Plot evolution for wild, heterozygous, drive (nb of individuals or proportions)
-        if graph_type == "Population density" : Y = [W,H,D]
-        if graph_type == "Proportions" : Y = [W/(W+H+D),H/(W+H+D),D/(W+H+D)]
+        if graph_type == "Population densities" : Y = [W,H,D]
+        if graph_type == "Population proportions" : Y = [W/(W+H+D),H/(W+H+D),D/(W+H+D)]
         # what to plot
         plot = [wild, heterozygous, drive]
         # color for each

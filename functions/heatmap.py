@@ -55,9 +55,6 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
             r = r_range[r_index] ; bio_para[0] = r
             s = s_range[s_index] ; bio_para[1] = s
             
-            # Print main parameters
-            print(f"\n s={np.round(s,2)},r={np.round(r,4)},c={np.round(c,2)},h={np.round(h,2)}")
-            
             # Classical heatmap
             if heatmap_type == "classic" :
                 # Speed value for evolution.py
@@ -136,18 +133,41 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         s_range = np.resize(s_range,len(s_range)-1); r_range = np.resize(r_range,len(r_range)-1)
         
     # Abscisse to plot lines    
-    abscisse = np.arange(precision)       # (s_range-smin)*(precision-1)/(smax-smin)   
+    abscisse = np.arange(precision)-0.5       # (s_range-smin)*(precision-1)/(smax-smin)   
     
     # Lines always there
     if style == "simple" or style == "eradication" or style == "collapse" :
+        
         # Zero line
         if np.shape(zero_line)[1] != 0 : 
            ax.plot(np.array(zero_line[0,:]).ravel(),np.array(zero_line[1,:]).ravel(),color="red",label="zero speed", linewidth = 1.5, linestyle='-.')
-        # Eradication line
-        eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin))
-        ax.plot(abscisse,eradication_drive, color='orangered',label="eradication drive", linewidth = 2)  
-        ax.legend()
         
+        # Eradication drive line
+        eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
+        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)     
+        ax.plot(abscisse,eradication_drive-0.5, color='orangered',label="eradication drive", linewidth = 2)  
+        
+        # Population eradication line
+        if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) : 
+            s_1 = c/(1-h*(1-c))   
+            if homing == "zygote" : 
+                s_2 = c/(2*c + h*(1-c))
+                print(s_2)
+                print(s_1)
+                p_star = (s_range*(1-(1-c)*(1-h)) - c*(1-s_range))/(s_range*(1-2*(1-c)*(1-h)))  
+                mean_fitness = (1-s_range)*p_star**2+2*(c*(1-s_range)+(1-c)*(1-s_range*h))*p_star*(1-p_star)+(1-p_star)**2 
+            if homing == "germline" : 
+                p_star = ((1-s_range*h)*(1+c)-1)/(s_range*(1-2*h))
+                mean_fitness = (1-s_range)*p_star**2+2*(1-s_range*h)*p_star*(1-p_star)+(1-p_star)**2 
+                s_2 = c/(2*c*h + h*(1-c))
+            eradication_pop = ((1-mean_fitness)/mean_fitness-rmin)*((precision-1)/(rmax-rmin)) 
+            # neglect the negative values (which do not interest us)
+            eradication_pop[eradication_pop<0] = 0
+            # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+            ax.plot(abscisse, eradication_pop-0.5, color='purple',label="eradication pop", linewidth = 2)
+            ax.vlines((s_1-smin)*((precision-1)/(smax-smin))-0.5,-0.5,precision-0.5,label="s_1")
+            ax.vlines((s_2-smin)*((precision-1)/(smax-smin))-0.5,-0.5,precision-0.5,label="s_2")
+   
     # Eradication zone
     if style == "eradication":
         abscisse_for_zero_line = np.unique(np.array(zero_line[0,:]).ravel(),return_index=True)
@@ -165,7 +185,8 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
             collapsing_drive = ((1/((c+1)*(1-s_range)+(1-c)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
         if homing == "germline":
             collapsing_drive = ((1/((1-s_range)+(c+1)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
-        ax.plot(abscisse,collapsing_drive, color='deepskyblue',label="collapsing drive", linewidth = 2)
+        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+        ax.plot(abscisse,collapsing_drive-0.5, color='deepskyblue',label="collapsing drive", linewidth = 2)
     # Collapsing zone 
         plt.fill_between(abscisse, collapsing_drive, color='deepskyblue')
                
@@ -180,6 +201,7 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     #fig.suptitle(f"Heatmap : {heatmap_type}", fontsize=14)
     #plt.xlim([0,precision-1]);plt.ylim([0,precision-1])
     #plt.title("\n", f"Heatmap : {heatmap_type}")
+    ax.legend()
     plt.show()
     
     # Save figures and datas 
@@ -192,28 +214,32 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
       
 # To print loaded heatmaps :      
 def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio_para, num_para,save_fig) : 
+    r_range,s_range,h,a,difW,difH,difD,c,homing = bio_para
+    T,L,M,N,mod,theta = num_para
     # upload heatmap 
-    heatmap_values = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/heatmap_{heatmap_para[0]}.txt') 
+    heatmap_values = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}/{heatmap_para[0]}_heatmap.txt') 
     # upload zero_line
     if heatmap_type == "classic" :
-        zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/zero_line_{heatmap_para[0]}.txt')   
+        zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}/{heatmap_para[0]}_zero_line.txt')   
     # print heatmap  
     print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, num_para, save_fig) 
     return(heatmap_values, zero_line)
 
 
 # To load an already existing heatmap : 
-load = False 
+load = True
 if load : 
     # style indicates which lines and zones to draw
-    c=0.5; h=0.5; homing='germline'; style = 'simple'; save_fig = True;     
+    c=0.25; h=0.25; homing='zygote'; style = 'simple'; save_fig = True
+    T = 1000; L = 4000; M = T*6; N = L      
     # heatmap_type indicates if we plot the speed of the wave at r small or r very large.
     heatmap_type = 'classic'; precision = 50; smin = 0.1; smax = 0.9; rmin = 0 ; rmax = 12  
     # update new values in parameters vectors
     heatmap_para = [precision, smin, smax, rmin, rmax]; bio_para[8]=homing
+    num_para = [T,L,M,N,mod,theta]
     # calculate s and r ranges
-    delta_s = (smax-smin)/precision; s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s); bio_para[0] = r_range         
-    delta_r = (rmax-rmin)/precision; r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r); bio_para[1] = s_range  
+    delta_s = (smax-smin)/precision; s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s); bio_para[1] = s_range       
+    delta_r = (rmax-rmin)/precision; r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r); bio_para[0] = r_range   
     # load and plot the heatmap     
     heatmap_values, zero_line = upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio_para, num_para, save_fig)
 
@@ -221,6 +247,11 @@ if load :
 #indice_r = np.where((5.3 < r_range) & (r_range < 5.5))[0] ; print("\nindice r :", indice_r)
 #indice_s = np.where((0.31 < s_range) & (s_range < 0.32))[0] ; print("\nindice s :", indice_s)
 #print(heatmap_values[indice_r,indice_s])
+
+
+
+
+
 
 
 
