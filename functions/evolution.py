@@ -91,20 +91,33 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
     graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_figure, WT_proportion_wave, show_graph_ini = graph_para
-      
+    
+    # Parameters initialization
+    increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
+    p_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
+    treshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    WT_allele_wave = False
+    position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
+    speed = np.array([])      # speed computed... 
+    time = np.array([])       # ...for each value of time in this vector.
+ 
     # Check for a coexitence stable state 
-    if homing == "zygote" and (1-h)*(1-c) > 0.5 : 
-        p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))
-        #mean_fitness = (1-s)*p**2+2*(c*(1-s)+(1-c)*(1-s*h))*p*(1-p)+(1-p)**2                
-    if homing == "germline" and h < 0.5 : 
-        p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
-        #mean_fitness = (1-s)*p**2+2*(1-s*h)*p*(1-p)+(1-p)**2 
-    # If an admissible coexistence stable state exists, we change the treshold value.
-    if  p_star > 0 and p_star < 1 : 
-        #n_star =  1-(1-mean_fitness)/(mean_fitness*r)
-        WT_allele_wave = True
-        treshold = (1-p_star) + 0.001
-        T = 5000; L = 5000; M = T*6; N = L 
+    if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) : 
+            #s_1 = c/(1-h*(1-c))
+            if homing == "zygote" : 
+                #s_2 = c/(2*c + h*(1-c))
+                p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))
+                #mean_fitness = (1-s)*p**2+2*(c*(1-s)+(1-c)*(1-s*h))*p*(1-p)+(1-p)**2 
+            if homing == "germline" : 
+                #s_2 = c/(2*c*h + h*(1-c))
+                p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
+                #mean_fitness = (1-s)*p**2+2*(1-s*h)*p*(1-p)+(1-p)**2    
+            # If an admissible coexistence stable state exists, we change the treshold value.
+            if p_star > 0 and p_star < 1 : 
+                #n_star =  1-(1-mean_fitness)/(mean_fitness*r)
+                WT_allele_wave = True
+                treshold = ((1-p_star)+1)/2              
+    
              
     # Steps
     dt = T/M    # time
@@ -123,19 +136,12 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         H = np.zeros(N+1)                   # Heterozygous individuals at t=0
         D = np.zeros(N+1); D[0:N//10] = 1   # Drive individuals at t=0
     
+    
     if graph_type != None and show_graph_ini :
         graph(X,W,H,D,0,graph_para,bio_para,num_para)
     nb_graph = 1
         
-    increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
-    p_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
-    treshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
-    WT_allele_wave = False
-    position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
-    speed = np.array([])    # speed computed at each step of time : 
-    #speed_fct_of_time = np.zeros((2,T//mod))   # to plot the speed function of time, with mod steps (first line : time, second line : speed of the wave at the corresponding time)
-    
-    
+
     # Matrix
     C0 = -2*np.ones(N+1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
     C1 = np.ones(N+1) 
@@ -185,7 +191,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
             if len(index_neg) != 0 and increasing_WT_wave and index_neg[0]>3 :
                 position = np.array([])   
                 speed = np.array([])   
-                #speed_fct_of_time = np.zeros((2,T//mod))   
+                time = np.array([])   
                 increasing_WT_wave = False
             # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the treshold value of the wave might be outside the window.
             if np.isin(True, WT>treshold) and np.isin(True, WT<0.99) and np.where(WT>treshold)[0][0] != 0:  
@@ -195,43 +201,24 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
                 if np.shape(position)[0] > 5 : 
                     # The speed is computed on the last fifth of the position vector.
                     speed = np.append(speed, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-                    # Stop the simulation if the speed stabilies
-                    #if np.shape(speed)[0] > 500 and np.mean(np.abs((speed[1:]-speed[:-1])[-501:-1]))<0.00001 : 
-                    #    print("ça y est !")
-                    #    print(position)
-                    #    print(speed)
-                    #    print("Time :",t)
-                    #    break
+                    time = np.append(time,t)
+            # if the treshold value of the wave is outside the window, stop the simulation  
+            if not( np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
+                print("t=",t)
+                break
+ 
                     
         # NB : problems encountered when computing the speed : 
         # - decreasing section   ->     r=1.08 s=0.668 c=h=0.5 homing="germline"  T=1000  L=5000  M=6000  N=5000 
         # - small perturbation at the border, which can create fake decreasing sections 
         # - coexistance with WT equilibrium under the 0.2 treshold value   ->    r=0.36 s=0.332 c=h=0.25 homing="zygote"  T=5000  L=10000  M=T*6  N=L 
 
-
-        # Speed fonction of time    
-        #if t%mod == 0 and what_to_do == "speed function of time" : 
-            # first line : time, second line : speed of the wave at the corresponding time
-        #    speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
             
-        # if the treshold value of the wave is outside the window, stop the simulation  
-        if not(np.any(WT>treshold) and np.any(WT<treshold)) : 
-            break
-        
-    # Compute the wave speed with the position vector
     if np.shape(position)[0] == 0 :
-        # Speed compute on the last fifth of the position vector.
-        #speed[-1] = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave   
-    #else :
-        speed[-1] = None
         print(f"Can't determine the speed of the wave for r = {r} and s = {s} : the position vector is empty.")                                                 
 
-    if what_to_do == "speed function of time" : 
-        return(speed[-1],W,H,D,speed)
-    if what_to_do == "system+evolution" : 
-        return(speed[-1],position,W,H,D)
-    else :
-        return(speed[-1],W,H,D)
+    return(speed,time,W,H,D,position)
+
 
 
 

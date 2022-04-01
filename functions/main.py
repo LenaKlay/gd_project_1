@@ -52,8 +52,8 @@ plt.rcParams.update({'font.family':'serif'})
 #        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
 #       10.92, 11.16, 11.4 , 11.64, 11.88])
     
-r = 5.88    # growth rate
-s = 0.668   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+r = 0    # growth rate
+s = 0.25   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
 h = 0.25     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
@@ -61,7 +61,7 @@ difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.25              # homing rate
+c = 1              # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
@@ -80,8 +80,8 @@ linear_mating = False
 
 # Numerical
 
-T = 5000       # final time
-L = 5000       # length of the spatial domain
+T = 1000       # final time
+L = 4000       # length of the spatial domain
 M = T*6        # number of time steps
 N = L          # number of spatial steps
 
@@ -90,14 +90,14 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = "Population densities"                         # "Population densities" or "Population proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = "Population densities"                      # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
-wild = True; heterozygous = True; drive = True             # What to draw on the graph
+wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                                # A grid or not
 semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T/5)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
-save_fig = True                                           # Save the figures (.pdf) 
+mod = int(T/3)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+save_fig = True                                          # Save the figures (.pdf) 
 
 # Speed calculus
 speed_proportion = False            # True : use the wild-type number to compute the speed, False : use the wild-type proportion. 
@@ -125,29 +125,26 @@ what_to_do = "heatmap"
 
 # Evolution
 if what_to_do == "evolution" : 
-    
-    #r = 0.12; bio_para[0] = r 
-    #for s in [0.3, 0.316, 0.332] : 
-    
-    for r in [0.1, 0.2, 0.3] : 
-        s = 0.316
+
+      for s in [0.508] :
+        r = 0.12
         bio_para[0] = r ; bio_para[1] = s 
         s_1 = c/(1-h*(1-c))   
         if homing == "zygote" :
             s_3 = c/(2*c + h*(1-c))
-            print("\nCoexistence", s > s_1 and s < s_3 , ":", np.round(s_1,3), " < s <", np.round(s_3,3))
+            print("\nCoexistence", s > s_1 and s < s_3, ":", np.round(s_1,3), "< s <", np.round(s_3,3))
             if c*(1-2*s)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
         if homing == "germline" : 
             s_2 = c/(2*c*h + h*(1-c))
-            print("\nCoexistence", s > s_1 and s < s_2, ":", np.round(s_1,3) , " < s <", np.round(s_2,3))
+            print("\nCoexistence", s > s_1 and s < s_2, ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
             if c*(1-2*s*h)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
 
         print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
-        speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        speed, time, W, H, D, position = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         # save the speed value
         if save_fig :
-            np.savetxt(f"../outputs/evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}/0_speed.txt", np.ones(1)*speed)        
-        print("speed =", speed)
+            np.savetxt(f"../outputs/evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}/0_speed.txt", speed)        
+        print("speed =", speed[-1])
         
 
 
@@ -200,7 +197,7 @@ if what_to_do == "speed function of time" :
         bio_para[1] = s; print(s)
 
         # compute speed for Leo/Flo and Tanaka's models
-        speed, W, H, D, speed_fct_of_time_leoflo = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        speed_leoflo, time_leoflo, W, H, D, position = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
         p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
         p_KPP, speed_KPP, speed_fct_of_time_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
@@ -213,13 +210,14 @@ if what_to_do == "speed function of time" :
         if s < 0.5 : 
             ax.plot(speed_fct_of_time_KPP[0,:], speed_fct_of_time_KPP[1,:], label="KPP numeric")
             #ax.plot(range(0,T+1,mod), np.ones(int(T/mod+1))*2*np.sqrt(1-2*s), label="KPP exact")         
-        ax.plot(speed_fct_of_time_leoflo[0,:],speed_fct_of_time_leoflo[1,:], label="Leo/Flo")
+        ax.plot(time_leoflo, speed_leoflo, label="Leo/Flo")
         ax.set(title = f"Speed function of time with s={s}")
         ax.set(xlabel='Time', ylabel='Speed')   
         ax.grid();plt.legend(); plt.show()      
         if save_fig : 
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", fig, [], "speeds_fct_of_time", bio_para, num_para)
-            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_leoflo , "speed_flo_leo", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], time_leoflo, "time_flo_leo", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_leoflo, "speed_flo_leo", bio_para, num_para)
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_cubic, "speed_tanaka_cubic", bio_para, num_para)
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_fraction, "speed_tanaka_fraction", bio_para, num_para)
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_KPP, "speed_KPP", bio_para, num_para)
@@ -266,7 +264,7 @@ if what_to_do == "speed function of s" :
         # fourth line = numerical speed of Tanaka fraction
         fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[1]  
         # fifth line = numerical speed Leo and Florence's model
-        fct_of_s[4,s_index], W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)      
+        fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0][-1]
         if s <= 0.5 : 
             list_s05.append(s)
             # sixth line = speed of KPP model (only defined when s < 0.5)
@@ -321,7 +319,7 @@ if what_to_do == "speed function of r" :
         # print and update s value
         r = np.round(r_values[r_index],3); print(r); bio_para[0] = r 
         # first line = numerical speed Leo and Florence's model
-        fct_of_r[1,r_index], W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do) 
+        fct_of_r[1,r_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0][-1]
         print(fct_of_r)
        
     # Figure
@@ -347,7 +345,7 @@ if what_to_do == "heatmap" :
         precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :
-            T = 3000; L = 3000; M = T*6; N = L 
+            T = 1000; L = 4000; M = T*6; N = L 
             smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
                 
             # update parameters

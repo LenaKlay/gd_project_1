@@ -33,20 +33,36 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         fig, ax = plt.subplots()
         
         # Plot evolution for wild, heterozygous, drive (nb of individuals or proportions)
-        if graph_type == "Population densities" : Y = [W,H,D]
-        if graph_type == "Population proportions" : Y = [W/(W+H+D),H/(W+H+D),D/(W+H+D)]
+        if graph_type == "Population densities" : 
+            nb = 3; Y = [W, D, H]
+        if graph_type == "Population proportions" : 
+            nb = 3; Y = [W/(W+H+D), D/(W+H+D), H/(W+H+D)]            
+        if graph_type == "Allele densities" : 
+            nb = 2
+            if homing == "zygote" : 
+                Y = [W+0.5*H, D+0.5*H]
+            if homing == "germline" : 
+                Y = [W+0.5*(1-c)*H, D+0.5*(1+c)*H]
+        if graph_type == "Allele proportions" : 
+            nb = 2
+            if homing == "zygote" : 
+                Y = [(W+0.5*H)/(W+H+D), (D+0.5*H)/(W+H+D) ]
+            if homing == "germline" : 
+                Y = [(W+0.5*(1-c)*H)/(W+H+D), (D+0.5*(1+c)*H)/(W+H+D) ]
+                
         # what to plot
-        plot = [wild, heterozygous, drive]
+        plot = [wild, drive, heterozygous]
         # color for each
-        col = ['green','orange','deeppink']
+        col = ['green','deeppink','orange']
         # label for each
-        lab = ['Wild-type','Heterozygous','Drive']    
+        lab = ['Wild-type','Drive','Heterozygous']    
         # plot considering a log y-scale or not
-        for i in range(3) :
+        for i in range(nb) :
             if plot[i] :
                 if semilogy : ax.semilogy(X, Y[i], color = col[i], label=lab[i], linewidth = line_size)
                 else : ax.plot(X, Y[i], color = col[i], label=lab[i], linewidth = line_size)
-
+        #ax.plot(X, np.ones(len(X))*threshold)        
+         
         # Graphic size, title and labels
         if semilogy : defaultylim = (0.00001,1.1)
         else : defaultylim = (-0.03,1.03)  
@@ -139,5 +155,7 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
         fig.savefig(f"../outputs/{directories}/{title}.pdf"); fig.savefig(f"../outputs/{directories}/{title}.png") 
     # Save datas
     if data != [] :
-        np.savetxt(f"../outputs/{directories}/{title}.txt", data)             
-                
+        print('yep')
+        print(f"../outputs/{directories}/{title}.txt")
+        np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
+              
