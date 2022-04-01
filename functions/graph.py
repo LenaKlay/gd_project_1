@@ -155,7 +155,6 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
         fig.savefig(f"../outputs/{directories}/{title}.pdf"); fig.savefig(f"../outputs/{directories}/{title}.png") 
     # Save datas
     if data != [] :
-        print('yep')
         print(f"../outputs/{directories}/{title}.txt")
         np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
               

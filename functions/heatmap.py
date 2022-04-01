@@ -30,8 +30,9 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
     s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)     
     #delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-    #r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
-    r_range = np.logspace(-2, 1, num=precision)
+    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
+    # (for r logarithmic scale) 
+    #r_range = np.logspace(-2, 1, num=precision)
     
     # Create a directory and save parameters.txt with r_range and s_range
     if save_fig :
@@ -126,15 +127,15 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     
     # Ticks positions : we want the ticks to start from the bordure, not the center
     ax.set_xticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))     
-    ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))  
+    #ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))  
     # (for r logarithmic scale)                  
-    #ax.set_yticks(np.linspace(0,1,10)*(precision-1))                  
+    ax.set_yticks(np.linspace(0,1,10)*(precision-1))                  
         
     # Ticks labels
     ax.set_xticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))                                    
-    ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))   
+    #ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))   
     # (for r logarithmic scale)  
-    #ax.set_yticklabels(np.around(np.logspace(-2, 1, num=10),2))       
+    ax.set_yticklabels(np.around(np.logspace(-2, 1, num=10),2))       
     
     # Colorbar
     ax.figure.colorbar(im, ax=ax)
@@ -145,7 +146,7 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         s_range = np.resize(s_range,len(s_range)-1); r_range = np.resize(r_range,len(r_range)-1)
         
     # Abscisse to plot lines    
-    abscisse = np.arange(precision)-0.5       # (s_range-smin)*(precision-1)/(smax-smin)   
+    abscisse = np.arange(precision)       # (s_range-smin)*(precision-1)/(smax-smin)   
     
     # Lines always there
     if style == "simple" or style == "eradication" or style == "collapse" :
@@ -156,9 +157,10 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         
         # Eradication drive line
         eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
-        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)     
-        ax.plot(abscisse,eradication_drive-0.5, color='orangered',label="eradication drive", linewidth = 2)  
-        
+           
+        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel) 
+        ax.plot(abscisse,eradication_drive-0.5, color='orangered',label="eradication drive", linewidth = 2)
+                   
         # Population eradication line
         if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) : 
             s_1 = c/(1-h*(1-c))
@@ -203,7 +205,7 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     # Set graph parameters
     ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
     ax.set_ylabel("r (growth rate)", fontsize=12)
-    ax.contour(np.arange(precision),np.arange(precision),heatmap_values,40, color="black") 
+    #ax.contour(np.arange(precision),np.arange(precision),heatmap_values,40, color="black") 
     fig.tight_layout()
     plt.gca().invert_yaxis()                 # inverse r axis (increase)
     ax.xaxis.set_tick_params(labelsize=9)
@@ -235,17 +237,18 @@ def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio
     # upload zero_line
     if heatmap_type == "classic" :
         zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}/{heatmap_para[0]}_zero_line.txt')   
-   
+    else : 
+        zero_line = np.matrix([[],[]]) 
     # print heatmap  
     print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, bio_para, num_para, save_fig) 
     return(heatmap_values, zero_line)
 
 
 # To load an already existing heatmap : 
-load = False
+load = True
 if load : 
     # style indicates which lines and zones to draw
-    c=0.5; h=0.5; homing='germline'; style = 'simple'; save_fig = True
+    c=1; h=1; homing='zygote'; style = 'simple'; save_fig = True
     T = 1000; L = 4000; M = T*6; N = L    
     # load heatmap from the multiple r_lines or the 50_heatmap file
     r_line = False
@@ -267,10 +270,22 @@ if load :
 #print(heatmap_values[indice_r,indice_s])
 
 
-
-
-
-
+# To compute the zero line from heatmap values : 
+compute_zero_line = False
+if compute_zero_line :
+    zero_line = np.matrix([[],[]])                        
+    for r_index in range(0, precision) : 
+        print("\n------- r=", r_range[r_index])
+        # Denote that we already meet (or not) the first pixel of the line with negative speed (to draw the zero line)
+        zero_done = False
+        for s_index in range(0, precision) :
+            r = r_range[r_index]; s = s_range[s_index] 
+            if s_index != 0 and heatmap_values[r_index,s_index-1]*heatmap_values[r_index,s_index]<=0 and heatmap_values[r_index,s_index] != 0 and zero_done == False :
+                    zero_line = np.append(zero_line,np.matrix([[s_index-0.5],[r_index]]), axis=1)
+                    zero_done = True
+    # Save the zero line
+    save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}", [], zero_line, f"{precision}_zero_line", bio_para, num_para)                  
+ 
 
 
 
