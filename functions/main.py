@@ -54,15 +54,15 @@ plt.rcParams.update({'font.family':'serif'})
     
 r = 0    # growth rate
 s = 0.25   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 0.25     # and sh for heterozygous individuals
+h = 0.4     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 1              # homing rate
-homing = "zygote"   # "zygote" or "germline"
+c = 0.5              # homing rate
+homing = "germline"   # "zygote" or "germline"
 
 # Initialization
 
@@ -81,7 +81,7 @@ linear_mating = False
 # Numerical
 
 T = 1000       # final time
-L = 4000       # length of the spatial domain
+L = 2000       # length of the spatial domain
 M = T*6        # number of time steps
 N = L          # number of spatial steps
 
@@ -90,14 +90,15 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                    
 # Graph
 
-graph_type = "Population densities"                      # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
-show_graph_ini = True                                     # Show graph at time 0
+graph_type = "Allele proportions"                         # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
+show_graph_ini = True                                    # Show graph at time 0
+show_graph_fin = True                                    # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
-grid = True                                                # A grid or not
-semilogy = False                                           # semilogy = False : classical scale, semilogy = True : log scale for y
-xlim = None                                                # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T/3)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
-save_fig = True                                          # Save the figures (.pdf) 
+grid = True                                               # A grid or not
+semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
+xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
+mod = int(T/4)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
 speed_proportion = False            # True : use the wild-type number to compute the speed, False : use the wild-type proportion. 
@@ -108,43 +109,54 @@ speed_proportion = False            # True : use the wild-type number to compute
 bio_para = [r,s,h,a,difW,difH,difD,c,homing]
 model_para = [CI,growth_dynamic,death_dynamic,linear_growth,linear_mating]
 num_para = [T,L,M,N,mod,theta]
-graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion,show_graph_ini]
-
+graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion,show_graph_ini,show_graph_fin]
 
 
 ############################ What to do ? #######################################
 
-what_to_do = "heatmap" 
+what_to_do = "speed function of s"
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
 # "heatmap" : draw an heatmap function of s and r
-
 
 ############################### Main program #########################################
 
 # Evolution
 if what_to_do == "evolution" : 
 
-      for s in [0.508] :
-        r = 0.12
+      for r in [0,1,2,3] :
+        s = 0.7
         bio_para[0] = r ; bio_para[1] = s 
         s_1 = c/(1-h*(1-c))   
         if homing == "zygote" :
             s_3 = c/(2*c + h*(1-c))
             print("\nCoexistence", s > s_1 and s < s_3, ":", np.round(s_1,3), "< s <", np.round(s_3,3))
-            if c*(1-2*s)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
+            if c*(1-2*s)-(1-c)*s*h > 0 : 
+                print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
+                print("p_star :", (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h))))                
         if homing == "germline" : 
             s_2 = c/(2*c*h + h*(1-c))
             print("\nCoexistence", s > s_1 and s < s_2, ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
-            if c*(1-2*s*h)-(1-c)*s*h > 0 : print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
+            if c*(1-2*s*h)-(1-c)*s*h > 0 : 
+                print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
+                print("p_star :", ((1-s*h)*(1+c)-1)/(s*(1-2*h)))  
 
         print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
-        speed, time, W, H, D, position = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        W, H, D, time, speed = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         # save the speed value
-        if save_fig :
-            np.savetxt(f"../outputs/evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}/0_speed.txt", speed)        
-        print("speed =", speed[-1])
+        #if save_fig :
+        #    np.savetxt(f"../outputs/evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}/0_speed.txt", speed)        
+        print("\nspeed :", speed[-1])
+        
+        # proportion
+        if homing == "zygote" : 
+            print("final prop :", ((D+0.5*H)/(W+H+D))[1000])
+        if homing == "germline" : 
+            print("final prop :", ((D+0.5*(1+c)*H)/(W+H+D))[1000], "\n")
+        
+
+        
         
 
 
@@ -153,7 +165,7 @@ if what_to_do == "tanaka cubic" :
     
     print("\nwhat_to_do =", what_to_do); print("homing = zygote"); print("\ns =", s)
     
-    p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
+    p_cubic, time_cubic, speed_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
     
     
 # Tanaka fraction  
@@ -161,7 +173,7 @@ if what_to_do == "tanaka fraction" :
     
     print("\nwhat_to_do =", what_to_do); print("homing = zygote"); print("\ns =", s)
     
-    p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
+    p_fraction, time_fraction, speed_fraction  = tanaka(s,"fraction",model_para,num_para,graph_para)
     
     
 # KPP
@@ -169,7 +181,7 @@ if what_to_do == "KPP" :
     
     print("\nwhat_to_do =", what_to_do)
     
-    p_KPP, speed_KPP, speed_fct_of_time_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
+    p_KPP, time_KPP, speed_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
 
 
 
@@ -181,7 +193,7 @@ if what_to_do == "speed function of time" :
     print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
    
     # No graph at each time
-    graph_para[0] = None    
+    graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False  
     
     # Parameters
     if r<10 : 
@@ -197,18 +209,18 @@ if what_to_do == "speed function of time" :
         bio_para[1] = s; print(s)
 
         # compute speed for Leo/Flo and Tanaka's models
-        speed_leoflo, time_leoflo, W, H, D, position = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
-        p_cubic, speed_cubic, speed_fct_of_time_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
-        p_fraction, speed_fraction, speed_fct_of_time_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
-        p_KPP, speed_KPP, speed_fct_of_time_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
+        W, H, D, time_leoflo, speed_leoflo = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        p_cubic, time_cubic, speed_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
+        p_fraction, time_fraction, speed_fraction = tanaka(s,"fraction",model_para,num_para,graph_para)
+        p_KPP, time_KPP, speed_KPP = tanaka(s,"KPP",model_para,num_para,graph_para)
     
         print('s=',s)
         fig, ax = plt.subplots()  
-        ax.plot(speed_fct_of_time_cubic[0,:], speed_fct_of_time_cubic[1,:], label="Tanaka cubic")
+        ax.plot(time_cubic, speed_cubic, label="Tanaka cubic")
         ax.plot(range(0,T+1,mod), np.ones(int(T/mod+1))*(2-3*s)/np.sqrt(2*s), label="Tanaka cubic solution part.")
-        ax.plot(speed_fct_of_time_fraction[0,:], speed_fct_of_time_fraction[1,:], label="Tanaka fraction")
+        ax.plot(time_fraction, speed_fraction, label="Tanaka fraction")
         if s < 0.5 : 
-            ax.plot(speed_fct_of_time_KPP[0,:], speed_fct_of_time_KPP[1,:], label="KPP numeric")
+            ax.plot(time_KPP, speed_KPP, label="KPP numeric")
             #ax.plot(range(0,T+1,mod), np.ones(int(T/mod+1))*2*np.sqrt(1-2*s), label="KPP exact")         
         ax.plot(time_leoflo, speed_leoflo, label="Leo/Flo")
         ax.set(title = f"Speed function of time with s={s}")
@@ -216,11 +228,10 @@ if what_to_do == "speed function of time" :
         ax.grid();plt.legend(); plt.show()      
         if save_fig : 
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", fig, [], "speeds_fct_of_time", bio_para, num_para)
-            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], time_leoflo, "time_flo_leo", bio_para, num_para)
             save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_leoflo, "speed_flo_leo", bio_para, num_para)
-            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_cubic, "speed_tanaka_cubic", bio_para, num_para)
-            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_fraction, "speed_tanaka_fraction", bio_para, num_para)
-            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fct_of_time_KPP, "speed_KPP", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_cubic, "speed_tanaka_cubic", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fraction, "speed_tanaka_fraction", bio_para, num_para)
+            save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_KPP, "speed_KPP", bio_para, num_para)
         
     
             
@@ -228,20 +239,23 @@ if what_to_do == "speed function of time" :
 if what_to_do == "speed function of s" :
         
     # No graph at each time
-    graph_para[0] = None    
-    
+    graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False  
+      
     # Parameters
     if r<10 : 
-        T = 100; L = 400; M = T*8; N = L*4; mod = int(T/100) 
+        T = 400; L = 800; M = T*8; N = L*4
     if r>=10 :  # for r -> infinity, we need a big time precision (for the simulation to be stable)
-        T = 100; L = 400; M = T*40; N = L*4; mod = int(T/100) 
+        T = 100; L = 400; M = T*40; N = L*4
+    # Comparison with the perfect conversion in the zygote model    
+    r=0; homing = "zygote"; c=1; h=0
     
     # Update parameters
     num_para = [T,L,M,N,mod,theta]
+    bio_para = [r,s,h,a,difW,difH,difD,c,homing]
      
     # Set the x-axis (values of s)
-    s_min = 0.1 ; s_max = 0.9
-    nb_points = 41
+    s_min = 0.3 ; s_max = 0.4
+    nb_points = 20
     s_values = np.linspace(s_min,s_max,nb_points)
     fct_of_s = np.zeros((7,len(s_values))) 
     # first line = s values
@@ -256,30 +270,33 @@ if what_to_do == "speed function of s" :
     for s_index in range(len(s_values)) :
         # print and update s value
         s = np.round(s_values[s_index],3); print(s); bio_para[1] = s 
-        
-        # second line = theoritical speed of one Tanaka cubic solution 
-        fct_of_s[1,s_index] = (2-3*s)/np.sqrt(2*s)     
-        # third line = numerical speed of Tanaka cubic
-        fct_of_s[2,s_index] = tanaka(s,"cubic",model_para,num_para,graph_para)[1]  
+                
+        # line = numerical speed of Tanaka cubic
+        #fct_of_s[1,s_index] = tanaka(s,"cubic",model_para,num_para,graph_para)[2][-1] 
+        # third line = exact bistable speed for Tanaka cubic 
+        #fct_of_s[2,s_index] = (2-3*s)/np.sqrt(2*s)     
         # fourth line = numerical speed of Tanaka fraction
-        fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[1]  
+        #fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1]  
         # fifth line = numerical speed Leo and Florence's model
-        fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0][-1]
+        fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
         if s <= 0.5 : 
             list_s05.append(s)
-            # sixth line = speed of KPP model (only defined when s < 0.5)
-            fct_of_s[5,s_index] = 2*np.sqrt(1-2*s)
+            # sixth line = numerical speed of KPP model (only defined when s < 0.5)
+            fct_of_s[5,s_index] = tanaka(s,"KPP",model_para,num_para,graph_para)[2][-1]  
+            # seventh line = theorical speed of KPP model (only defined when s < 0.5)
+            fct_of_s[6,s_index] = 2*np.sqrt(1-2*s)
+           
             
     
     # Figure
     fig, ax = plt.subplots()    
-    if r == 0 : 
-        ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="(2-3*s)/np.sqrt(2*s)")
-    ax.plot(fct_of_s[0,:],fct_of_s[2,:], label="Tanaka Cubic")
-    ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Tanaka Fraction")
-    if r != 0 : ax.plot(fct_of_s[0,:],fct_of_s[4,:], label="Leo/Flo")
-    else : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Leo/Flo")
-    ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="KPP r=1-2s")
+    #ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="Tanaka Cubic")
+    #ax.plot(fct_of_s[0,:],fct_of_s[2,:], label="(2-3*s)/np.sqrt(2*s)")    
+    #ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Tanaka Fraction")
+    if r == 0 : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Leo/Flo")
+    else : print("r est different de 0.")
+    ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="KPP numerique")
+    ax.plot(list_s05,fct_of_s[6,0:len(list_s05)], label="KPP theorique")
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
         bio_para[1] = s_values 
@@ -319,7 +336,7 @@ if what_to_do == "speed function of r" :
         # print and update s value
         r = np.round(r_values[r_index],3); print(r); bio_para[0] = r 
         # first line = numerical speed Leo and Florence's model
-        fct_of_r[1,r_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0][-1]
+        fct_of_r[1,r_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
         print(fct_of_r)
        
     # Figure
@@ -376,6 +393,7 @@ if what_to_do == "heatmap" :
 
 
 
+
 ################# Not re-tested ######################"
 
 
@@ -390,7 +408,7 @@ if what_to_do == "system+evolution" :
     graph_para[0] = None          
   
     # run evolution
-    speed,position,W,H,D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+    W,H,D,time,speed = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
           
     # Determine the position of the border and print the number of the system involve
     epsilon = 0.0001              # numerical error accepted
@@ -424,7 +442,7 @@ if what_to_do == "roots and speed function of s" :
     for s_index in range(len(s_values)) :
             s = np.round(s_values[s_index],3); print(s)
             
-            speed, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+            W, H, D, time, speed = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
             # Speed
             fct_of_s[1,s_index] = speed
             # Alpha
@@ -450,6 +468,7 @@ if what_to_do == "roots and speed function of s" :
     ax.grid()
     ax.legend()
     plt.show()
+    
     fig.savefig(f'vitesse_en_fct_de_s_model_{model}.pdf')
     
     fig, ax = plt.subplots()    
@@ -507,7 +526,7 @@ if what_to_do == "limite r infini" :
         print(i)
         
         r = np.round(cv_r1moinsn_fct_of_r[0,i],6)
-        speed_leoflo, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+        W, H, D, time_leoflo, speed_leoflo = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         p = D/(D+H+W); n = D+H+W
         
         # When r tends to infinity : does r(1-n) cv to 0 ? to  s*p*(2-p)/(1-s+s*(1-p)**2) ? 
@@ -515,8 +534,8 @@ if what_to_do == "limite r infini" :
         cv_r1moinsn_fct_of_r[2,i] = np.max(abs(r*(1-n)))
         
         # When r tends to infinity : does the speed of the system Girardin 2021 tends to the speed Tanaka cubic ? Tanaka fraction ?
-        cv_speed_fct_of_r[2,i] = tanaka(s,"cubic",model_para,num_para,graph_para)[1]   
-        cv_speed_fct_of_r[3,i] = tanaka(s,"fraction",model_para,num_para,graph_para)[1]
+        cv_speed_fct_of_r[2,i] = tanaka(s,"cubic",model_para,num_para,graph_para)[2][-1] 
+        cv_speed_fct_of_r[3,i] = tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1]
         cv_speed_fct_of_r[4,i] = speed_leoflo
              
     np.savetxt(f'cv_r_un_moins_n_s_{s}.txt', cv_r1moinsn_fct_of_r) 

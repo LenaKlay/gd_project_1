@@ -17,6 +17,9 @@ from evolution import evolution
 from tanaka import tanaka
 from graph import save_fig_or_data
 
+# Logarithmic scale for r
+rlog = False
+
 
 def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do):
     # Parameters
@@ -24,15 +27,16 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
     
     # Range for r and s
     delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)     
-    #delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
-    # (for r logarithmic scale) 
-    #r_range = np.logspace(-2, 1, num=precision)
+    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)         
+    if rlog : r_range = np.logspace(-2, 1, num=precision)
+    else : 
+        delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
+        r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
+
     
     # Create a directory and save parameters.txt with r_range and s_range
     if save_fig :
@@ -61,7 +65,7 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
             # Classical heatmap
             if heatmap_type == "classic" :
                 # Speed value for evolution.py
-                heatmap_values[r_index,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0][-1]
+                heatmap_values[r_index,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
                 print("speed :", heatmap_values[r_index,s_index])
                 # First pixel of the line with negative speed (to draw the zero line)
                 if s_index != 0 and heatmap_values[r_index,s_index-1]*heatmap_values[r_index,s_index]<=0 and heatmap_values[r_index,s_index] != 0 and zero_done == False :
@@ -69,18 +73,18 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
                     zero_done = True                     
             # Tanaka cubic speed value     
             if heatmap_type == "speed_cubic" : 
-                heatmap_values[r_index,s_index] = np.abs(evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0]-tanaka(s,"cubic",model_para,num_para,graph_para)[1])          
+                heatmap_values[r_index,s_index] = np.abs(evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]-tanaka(s,"cubic",model_para,num_para,graph_para)[2][-1])          
             # Tanaka fraction speed value     
             if heatmap_type == "speed_fraction" : 
-                heatmap_values[r_index,s_index] = np.abs(evolution(bio_para, model_para, num_para, graph_para, what_to_do)[0]-tanaka(s,"fraction",model_para,num_para,graph_para)[1])            
+                heatmap_values[r_index,s_index] = np.abs(evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]-tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1])            
             # Tanaka cubic r(1-n) value 
             if heatmap_type == "r_one_minus_n_cubic" : 
-                speed_girardin, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+                W, H, D, time_girardin, speed_girardin = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
                 n = D+H+W
                 heatmap_values[r_index,s_index] = np.max(abs(r*(1-n)))           
             # Tanaka fraction r(1-n) value 
             if heatmap_type == "r_one_minus_n_fraction" : 
-                speed_girardin, W, H, D = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
+                W, H, D, time_girardin, speed_girardin  = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
                 p = D/(D+H+W); n = D+H+W
                 heatmap_values[r_index,s_index] = np.max(abs(r*(1-n) - s*p*(2-p)/(1-s+s*(1-p)**2)))
             
@@ -110,9 +114,18 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     # Color choice
     if style == "simple" or style == "eradication" or style == "collapse" :
         # Negative scale
-        colors1 = plt.cm.viridis(np.linspace(0, 0.8, 128))
+        #colors1 = plt.cm.viridis(np.linspace(0, 0.8, 128))
         # Positive scale
-        colors2 = plt.cm.plasma(np.flip(np.linspace(0., 1, 128)))
+        #colors2 = plt.cm.plasma(np.flip(np.linspace(0., 1, 128)))
+        # Merge the two
+        #colors = np.vstack((colors1, colors2))
+        #mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors)
+        # Plot heatmap values
+        #im = ax.imshow(heatmap_values,cmap=mymap, vmin=-4, vmax=4)
+        # Negative scale
+        colors1 = plt.cm.Blues(np.flip(np.linspace(0.3, 1, 128))) #plt.cm.ocean(np.linspace(0.28, 0.95, 128))
+        # Positive scale
+        colors2 = plt.cm.hot(np.flip(np.linspace(0, 0.75, 128)))
         # Merge the two
         colors = np.vstack((colors1, colors2))
         mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors)
@@ -126,16 +139,14 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     delta_square = 1/(precision-1)
     
     # Ticks positions : we want the ticks to start from the bordure, not the center
-    ax.set_xticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))     
-    #ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))  
-    # (for r logarithmic scale)                  
-    ax.set_yticks(np.linspace(0,1,10)*(precision-1))                  
+    ax.set_xticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))                  
+    if rlog : ax.set_yticks(np.linspace(0,1,4)*(precision-1))    
+    else : ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))                
         
     # Ticks labels
-    ax.set_xticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))                                    
-    #ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))   
-    # (for r logarithmic scale)  
-    ax.set_yticklabels(np.around(np.logspace(-2, 1, num=10),2))       
+    ax.set_xticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))                                         
+    if rlog : ax.set_yticklabels(np.around(np.logspace(-2, 1, num=4),2))  
+    else : ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))      
     
     # Colorbar
     ax.figure.colorbar(im, ax=ax)
@@ -153,33 +164,39 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         
         # Zero line
         if np.shape(zero_line)[1] != 0 : 
-           ax.plot(np.array(zero_line[0,:]).ravel(),np.array(zero_line[1,:]).ravel(),color="red",label="zero speed", linewidth = 1.5, linestyle='-.')
+           ax.plot(np.array(zero_line[0,:]).ravel(),np.array(zero_line[1,:]).ravel(),label="zero speed", color="black", linewidth = 1, linestyle='-.')
         
         # Eradication drive line
         eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
-           
         # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel) 
-        ax.plot(abscisse,eradication_drive-0.5, color='orangered',label="eradication drive", linewidth = 2)
+        ax.plot(abscisse,eradication_drive-0.5, label="eradication drive", color="black", linewidth = 1.5)
                    
+        #  Zones s1 and s2
+        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+        s_1 = c/(1-h*(1-c))
+        if homing == "zygote" : 
+            s_2 = c/(2*c + h*(1-c))
+        if homing == "germline" : 
+            s_2 = c/(2*c*h + h*(1-c))
+        ax.vlines((s_1-smin)*((precision-1)/(smax-smin)),-0.5,precision-0.5,label="s_1",color="yellowgreen", linewidth = 2)
+        ax.vlines((s_2-smin)*((precision-1)/(smax-smin)),-0.5,precision-0.5,label="s_2",color="yellowgreen", linewidth = 2)
+        
         # Population eradication line
-        if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) : 
-            s_1 = c/(1-h*(1-c))
-            if homing == "zygote" : 
-                s_2 = c/(2*c + h*(1-c))
+        if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) :
+            if homing == "zygote" :                
                 p_star = (s_range*(1-(1-c)*(1-h)) - c*(1-s_range))/(s_range*(1-2*(1-c)*(1-h)))  
                 mean_fitness = (1-s_range)*p_star**2+2*(c*(1-s_range)+(1-c)*(1-s_range*h))*p_star*(1-p_star)+(1-p_star)**2 
             if homing == "germline" : 
                 p_star = ((1-s_range*h)*(1+c)-1)/(s_range*(1-2*h))
-                mean_fitness = (1-s_range)*p_star**2+2*(1-s_range*h)*p_star*(1-p_star)+(1-p_star)**2 
-                s_2 = c/(2*c*h + h*(1-c))
+                mean_fitness = (1-s_range)*p_star**2+2*(1-s_range*h)*p_star*(1-p_star)+(1-p_star)**2                
             eradication_pop = ((1-mean_fitness)/mean_fitness-rmin)*((precision-1)/(rmax-rmin)) 
             # neglect the negative values (which do not interest us)
-            eradication_pop[eradication_pop<0] = 0
-            # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
-            ax.plot(abscisse, eradication_pop-0.5, color='purple',label="eradication pop", linewidth = 2)
-            ax.vlines((s_1-smin)*((precision-1)/(smax-smin)),-0.5,precision-0.5,label="s_1")
-            ax.vlines((s_2-smin)*((precision-1)/(smax-smin)),-0.5,precision-0.5,label="s_2")
-   
+
+            eradication_pop = eradication_pop[np.where((s_range>s_1) & (s_range<s_2))]  
+            ax.plot(np.where((s_range>s_1) & (s_range<s_2))[0], eradication_pop-0.5, color='forestgreen',label="eradication pop", linewidth = 2)
+            
+       
+
     # Eradication zone
     if style == "eradication":
         abscisse_for_zero_line = np.unique(np.array(zero_line[0,:]).ravel(),return_index=True)
@@ -221,7 +238,7 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     if save_fig :
         save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/h_{h}_c_{c}/T_{T}_L_{L}_M_{M}_N_{N}", fig, [], f"{precision}_heatmap", bio_para, num_para)
 
-      
+
 # To print loaded heatmaps :      
 def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio_para, num_para,save_fig) : 
     r_range,s_range,h,a,difW,difH,difD,c,homing = bio_para

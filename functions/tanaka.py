@@ -27,7 +27,7 @@ from graph import save_fig_or_data
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
 
     # Steps
     dt = T/M    # time
@@ -35,7 +35,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     # Spatial domain (1D)
     X = np.linspace(0,N,N+1)*dx   
-    save_fig_or_data(f"tanaka/{model}/s_{s}", None, X, "abscisse_X", None, num_para)
+    #save_fig_or_data(f"tanaka/{model}/s_{s}", [], X, "abscisse_X", None, num_para)
     
     # Initialization       
     if CI == "center" : 
@@ -55,9 +55,11 @@ def tanaka(s,model,model_para,num_para,graph_para):
     B = sp.identity(N+1)+((1-theta)*dt/dx**2)*A            # Matrix for the explicit side of the Crank Nicholson scheme  
     B_ = sp.identity(N+1)-(theta*dt/dx**2)*A               # Matrix for the implicit side of the Crank Nicholson scheme  
 
-    position = np.array([])   # list containing the first position where the proportion of wild alleles is lower than 0.5.
-    speed_fct_of_time = np.zeros((2,T//mod))   # first line : time, second line : speed of the wave at the corresponding time
-    
+    treshold = 0.5            # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the treshold value.
+    speed_fct_of_time = np.array([])      # speed computed... 
+    time = np.array([])                   # ...for each value of time in this vector.
+ 
     # Evolution
     for t in np.linspace(dt,T,M) : 
         
@@ -75,22 +77,39 @@ def tanaka(s,model,model_para,num_para,graph_para):
             graph_tanaka(s,X,P,t,model,graph_para,num_para)
             nb_graph += 1
             
-        if np.isin(True, (1-P)>0.5) and np.isin(True, (1-P)<0.99) :             # wild pop is still present somewhere in the environment
-            position = np.append(position,np.where((1-P)>0.5)[0][0])            # List containing the first position where the 
-                                                                                # proportion of wild alleles is lower than 0.5.               
-        if t%mod == 0 : 
-            #print("\nTemps :", t) ; print("Speed :", np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt, "\n")
-            speed_fct_of_time[:,int(t)//mod-1] = np.array([t,np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt])
-            # first line : time, second line : speed of the wave at the corresponding time
-                                                                                                                                                 
-    if np.shape(position)[0] != 0 :
-        position = position[position!=0]                          
-        speed = np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt  # Speed of the wave     
-    else :
-        speed = None
-        print(f"Can't determine the speed of the wave for s = {s}.")                                                 
+        if np.isin(True, (1-P)>treshold) and np.isin(True, (1-P)<0.99) and np.where((1-P)>treshold)[0][0] != 0 :             
+            # first position where the Wild-type wave is over the treshold value
+            position = np.append(position,np.where((1-P)>treshold)[0][0])  
+        elif np.isin(True, (1-P)<treshold) and np.isin(True, (1-P)>0.01) and np.where((1-P)<treshold)[0][0] != 0 :             
+            # first position where the Wild-type wave is below the treshold value
+            position = np.append(position,np.where((1-P)<treshold)[0][0])
+                
+        # compute the speed
+        if len(position) > 20 : 
+            time = np.append(time, t)
+            speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
+        # if the treshold value of the wave is outside the window, stop the simulation  
+        if not(np.isin(False, (1-P)>treshold) and np.isin(False, (1-P)<treshold) ) :
+            print("t =",t)
+            break
         
-    return(P, speed, speed_fct_of_time)
+    # last graph
+    if show_graph_fin :   
+        graph_tanaka(s,X,P,t,model,graph_para,num_para)
+        
+    # plot the speed function of time    
+    if len(speed_fct_of_time) != 0 : 
+        if graph_type!= None :
+            fig, ax = plt.subplots()
+            ax.plot(time, speed_fct_of_time) 
+            ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
+            if save_fig :
+                save_fig_or_data(f"tanaka/{model}/s_{s}", fig, speed_fct_of_time, "speed_fct_of_time", None, num_para)
+            plt.show() 
+    else :
+        print('No wave')     
+        
+    return(P, time, speed_fct_of_time)
     
     
     
@@ -99,7 +118,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
 def graph_tanaka(s,X,P,t,model,graph_para,num_para):
     
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
 
         fig, ax = plt.subplots()        
         ax.plot(X, P, label=f'Drive', color = "deeppink", linewidth=line_size)
@@ -121,7 +140,7 @@ def graph_tanaka(s,X,P,t,model,graph_para,num_para):
         
         # Saving figures and data
         if save_fig : 
-            save_fig_or_data(f"tanaka/{model}/s_{s}", fig, P, "t_{t}_X", None, num_para)
+            save_fig_or_data(f"tanaka/{model}/s_{s}", fig, [], f"t_{t}", None, num_para)
         
         
         

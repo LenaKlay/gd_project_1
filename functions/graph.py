@@ -28,7 +28,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
        
         r,s,h,a,difW,difH,difD,c,homing = bio_para
         T,L,M,N,mod,theta = num_para
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
 
         fig, ax = plt.subplots()
         
@@ -95,7 +95,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         if save_fig : 
             directory = f"evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}"
             save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
-            columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
+            #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
     
 
@@ -152,9 +152,8 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
     create_path(directories, bio_para, num_para)
     # Save figure
     if fig != [] :
-        fig.savefig(f"../outputs/{directories}/{title}.pdf"); fig.savefig(f"../outputs/{directories}/{title}.png") 
+        fig.savefig(f"../outputs/{directories}/{title}.pdf") #; fig.savefig(f"../outputs/{directories}/{title}.png") 
     # Save datas
     if data != [] :
-        print(f"../outputs/{directories}/{title}.txt")
         np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
               
