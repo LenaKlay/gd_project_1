@@ -53,16 +53,16 @@ plt.rcParams.update({'font.family':'serif'})
 #       10.92, 11.16, 11.4 , 11.64, 11.88])
     
 r = 0    # growth rate
-s = 0.25   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 0.4     # and sh for heterozygous individuals
+s = 0.38   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+h = 0.1     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.5              # homing rate
-homing = "germline"   # "zygote" or "germline"
+c = 0.75              # homing rate
+homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
 
@@ -80,10 +80,10 @@ linear_mating = False
 
 # Numerical
 
-T = 1000       # final time
-L = 2000       # length of the spatial domain
-M = T*6        # number of time steps
-N = L          # number of spatial steps
+T = 400       # final time
+L = 800       # length of the spatial domain
+M = T*8        # number of time steps
+N = L*4          # number of spatial steps
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
@@ -114,7 +114,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "speed function of s"
+what_to_do = "heatmap"
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
@@ -124,20 +124,49 @@ what_to_do = "speed function of s"
 
 # Evolution
 if what_to_do == "evolution" : 
-
-      for r in [0,1,2,3] :
-        s = 0.7
-        bio_para[0] = r ; bio_para[1] = s 
+        #c=np.linspace(0,1,10)
+        #plt.plot(c, (2+3*c)**2-8*(1+c)*c)
+        #det = (2+3*c)**2-8*(1+c)*c
+        #plt.plot(c,((2+3*c)+np.sqrt((2+3*c)**2-8*(1+c)*c))/(4*(1+c)))
+        #plt.plot(c,((2+3*c)-np.sqrt((2+3*c)**2-8*(1+c)*c))/(4*(1+c)))
+        #plt.show()
+        c=0.75
+        h=0.1
+        poly = (2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))*s**2 +  s*(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))) + c 
+        det = (2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h)))**2 - 4*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))**c
+        rac1 = (-(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))+np.sqrt(det))/(2*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))))
+        rac2 = (-(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))-np.sqrt(det))/(2*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))))
+        
+        
+        c=np.linspace(0.5,1,10)
+        #plt.plot(c, (1-4*c-2*c**2)**2-16*c**3)
+        #det = (2+3*c)**2-8*(1+c)*c
+        plt.plot(c,(-(1-4*c-2*c**2)+np.sqrt( (1-4*c-2*c**2)**2-16*c**3 ))/(8*c**2))
+        plt.plot(c,(-(1-4*c-2*c**2)-np.sqrt( (1-4*c-2*c**2)**2-16*c**3 ))/(8*c**2))
+        plt.plot(c,np.ones(10))
+        plt.show()
+        
+        c=0.75
+        h=np.linspace(0,1,10)
+        plt.plot(h,c/(1-h*(1-c)))
+        plt.plot(h,c/(2*c + h*(1-c)))
+        plt.show()
         s_1 = c/(1-h*(1-c))   
         if homing == "zygote" :
             s_3 = c/(2*c + h*(1-c))
-            print("\nCoexistence", s > s_1 and s < s_3, ":", np.round(s_1,3), "< s <", np.round(s_3,3))
+            if s_1 < s_3 : 
+                print("\nCoexistence", ":", np.round(s_1,3), "< s <", np.round(s_3,3))
+            else :  
+                print("\nBistability", ":", np.round(s_3,3), "< s <", np.round(s_1,3))
             if c*(1-2*s)-(1-c)*s*h > 0 : 
                 print("Linear speed :", 2*np.sqrt(c*(1-2*s)-(1-c)*s*h))
                 print("p_star :", (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h))))                
         if homing == "germline" : 
             s_2 = c/(2*c*h + h*(1-c))
-            print("\nCoexistence", s > s_1 and s < s_2, ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
+            if s_1 < s_2 :
+                print("\nCoexistence", ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
+            else :  
+                print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
             if c*(1-2*s*h)-(1-c)*s*h > 0 : 
                 print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
                 print("p_star :", ((1-s*h)*(1+c)-1)/(s*(1-2*h)))  
@@ -243,7 +272,7 @@ if what_to_do == "speed function of s" :
       
     # Parameters
     if r<10 : 
-        T = 400; L = 800; M = T*8; N = L*4
+        T = 1600; L = 3200; M = T*6; N = L
     if r>=10 :  # for r -> infinity, we need a big time precision (for the simulation to be stable)
         T = 100; L = 400; M = T*40; N = L*4
     # Comparison with the perfect conversion in the zygote model    
@@ -254,8 +283,8 @@ if what_to_do == "speed function of s" :
     bio_para = [r,s,h,a,difW,difH,difD,c,homing]
      
     # Set the x-axis (values of s)
-    s_min = 0.3 ; s_max = 0.4
-    nb_points = 20
+    s_min = 0.32 ; s_max = 0.42
+    nb_points = 100
     s_values = np.linspace(s_min,s_max,nb_points)
     fct_of_s = np.zeros((7,len(s_values))) 
     # first line = s values
@@ -276,9 +305,9 @@ if what_to_do == "speed function of s" :
         # third line = exact bistable speed for Tanaka cubic 
         #fct_of_s[2,s_index] = (2-3*s)/np.sqrt(2*s)     
         # fourth line = numerical speed of Tanaka fraction
-        #fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1]  
+        fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1]  
         # fifth line = numerical speed Leo and Florence's model
-        fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
+        #fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
         if s <= 0.5 : 
             list_s05.append(s)
             # sixth line = numerical speed of KPP model (only defined when s < 0.5)
@@ -292,9 +321,9 @@ if what_to_do == "speed function of s" :
     fig, ax = plt.subplots()    
     #ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="Tanaka Cubic")
     #ax.plot(fct_of_s[0,:],fct_of_s[2,:], label="(2-3*s)/np.sqrt(2*s)")    
-    #ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Tanaka Fraction")
-    if r == 0 : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Leo/Flo")
-    else : print("r est different de 0.")
+    ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Tanaka Fraction")
+    #if r == 0 : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Leo/Flo")
+    #else : print("r est different de 0.")
     ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="KPP numerique")
     ax.plot(list_s05,fct_of_s[6,0:len(list_s05)], label="KPP theorique")
     ax.grid(); ax.legend(); plt.show()
@@ -312,7 +341,7 @@ if what_to_do == "speed function of s" :
 if what_to_do == "speed function of r" :
     
     # No graph at each time
-    graph_para[0] = None    
+    graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False      
     
     # Parameters
     T = 1000; L = 4000; M = T*6; N = L; mod = int(T/100)          
@@ -358,7 +387,7 @@ if what_to_do == "heatmap" :
         heatmap_type = "classic" ; print("heatmap_type =", heatmap_type, "\n")   # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"   
         bio_para[8] = "zygote"   # Homing : "zygote" or "germline"                                   
 
-        graph_para[0] = None        # No evolution graph : graph_type = None.
+        graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False          # No evolution graph
         precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :

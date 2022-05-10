@@ -152,7 +152,8 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
     create_path(directories, bio_para, num_para)
     # Save figure
     if fig != [] :
-        fig.savefig(f"../outputs/{directories}/{title}.pdf") #; fig.savefig(f"../outputs/{directories}/{title}.png") 
+        fig.savefig(f"../outputs/{directories}/{title}.pdf", format='pdf') #; fig.savefig(f"../outputs/{directories}/{title}.png") 
+        fig.savefig(f"../outputs/{directories}/{title}.svg", format='svg')
     # Save datas
     if data != [] :
         np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
