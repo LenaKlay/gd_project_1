@@ -13,12 +13,13 @@ import numpy as np
 
 
 # Graph parameters 
-legend_size = 15
-label_size = 20
+title_size = 15
+label_size = 17
+legend_size = 12
+line_size = 4
 number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
-line_size = 4
 
 # Saving figures
 save_column = True
@@ -53,7 +54,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         # what to plot
         plot = [wild, drive, heterozygous]
         # color for each
-        col = ['green','deeppink','orange']
+        col = ['cornflowerblue','crimson','orange']
         # label for each
         lab = ['Wild-type','Drive','Heterozygous']    
         # plot considering a log y-scale or not
@@ -67,9 +68,11 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         if semilogy : defaultylim = (0.00001,1.1)
         else : defaultylim = (-0.03,1.03)  
         if xlim == None : 
-            ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim, title=f"t = {t}")   
+            ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim)
+            ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
         else : 
-            ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim, title="t = {t}")
+            ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim)
+            ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
             
         # Grid
         if grid == True : 
@@ -86,14 +89,15 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         ax.yaxis.set_tick_params(labelsize=number_y_size)
         ax.yaxis.set_ticks(np.arange(0, 2, 1))
         plt.rc('legend', fontsize=legend_size)  
-        ax.legend()
+        #ax.legend(bbox_to_anchor=(1.02,1.15), ncol=2)
+        ax.legend(bbox_to_anchor=(0.553,1.13), ncol=2)
         
         # Show the graph      
         plt.show()
         
         # Saving figures and datas
         if save_fig : 
-            directory = f"evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}"
+            directory = f"evolution/{homing}/r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
             save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
             #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         

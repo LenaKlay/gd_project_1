@@ -18,7 +18,7 @@ from tanaka import tanaka
 from graph import save_fig_or_data
 
 # Logarithmic scale for r
-rlog = False
+rlog = True
 
 
 def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, graph_para, what_to_do):
@@ -93,9 +93,9 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
             save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], heatmap_values[r_index,:], f"line_r_{np.round(r,2)}", bio_para, num_para)
          
     # Save datas
-    save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], heatmap_values, f"{homing}_c_{c}_h_{h}", bio_para, num_para)
+    save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], heatmap_values, f"heatmap_{homing}_c_{c}_h_{h}", bio_para, num_para)
     if heatmap_type == "classic" : 
-        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], zero_line, f"{homing}_c_{c}_h_{h}", bio_para, num_para)
+        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], zero_line, f"zero_line_{homing}_c_{c}_h_{h}", bio_para, num_para)
 
     return(r_range, s_range, heatmap_values, zero_line) 
     
@@ -166,26 +166,34 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         #if np.shape(zero_line)[1] != 0 :
            # ax.plot(np.array(zero_line[0,:]).ravel(),np.array(zero_line[1,:]).ravel(),label="zero speed", color="deeppink", linewidth = 2)
         
-        # Eradication drive line
-        eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
-        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel) 
-        ax.plot(abscisse,eradication_drive-0.5, label="eradication drive", color="black", linewidth = 1.5)
+        if not rlog :
+            # Eradication drive line
+            eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
+            # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel) 
+            ax.plot(abscisse,eradication_drive-0.5, label="eradication drive", color="black", linewidth = 1.5)
                    
-        #  Zones s1 and s2
-        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+        # Values s1 and s2
         delta_s = s_range[1]-s_range[0]   # = (smax-smin)/precision
         s_1 = c/(1-h*(1-c))
         if homing == "zygote" : 
             s_2 = c/(2*c + h*(1-c))
         if homing == "germline" : 
             s_2 = c/(2*c*h + h*(1-c))
-        ax.vlines((s_1-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
-        ax.vlines((s_2-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
-        
+         
         # Add another x axis on the top of the heatmap to indicate s_1 and s_2
         axtop = ax.twiny()
-        axtop.set_xticks([(s_1-smin)/(smax-smin), (s_2-smin)/(smax-smin)]) 
-        axtop.set_xticklabels(["s1", "s2"])
+        ticks = []
+        ticklabels = []
+        if smin < s_1 and s_1 < smax : 
+            ticks.append((s_1-smin)/(smax-smin)); ticklabels.append("s1")
+            # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+            ax.vlines((s_1-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))        
+        if smin < s_2 and s_2 < smax : 
+            ticks.append((s_2-smin)/(smax-smin)); ticklabels.append("s2")
+            # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+            ax.vlines((s_2-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
+        axtop.set_xticks(ticks) 
+        axtop.set_xticklabels(ticklabels)
           
         # Population eradication line in case of coexistence state
         if (homing == "zygote" and (1-h)*(1-c) > 0.5) or (homing == "germline" and h < 0.5) :
@@ -234,7 +242,7 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
     # Set graph parameters
     ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
     ax.set_ylabel("r (growth rate)", fontsize=12)
-    ax.contour(np.arange(precision),np.arange(precision),heatmap_values,40) 
+    #ax.contour(np.arange(precision),np.arange(precision),heatmap_values,40) 
     #fig.tight_layout()
     plt.gca().invert_yaxis()                 # inverse r axis (increase)
     ax.xaxis.set_tick_params(labelsize=9)
@@ -260,12 +268,13 @@ def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio
         heatmap_values = np.zeros((precision,precision))
         for r_index in range(0,precision):
             heatmap_values[r_index,:] = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}/normal/line_r_{np.round(r_range[r_index],2)}.txt')
+        save_fig_or_data(f"heatmap/{heatmap_type}/{bio_para[8]}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}", [], heatmap_values, f"heatmap_{homing}_c_{c}_h_{h}", bio_para, num_para)  
     else :
-        heatmap_values = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}/{homing}_c_{c}_h_{h}.txt') 
+        heatmap_values = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}/heatmap_{homing}_c_{c}_h_{h}.txt') 
         
     # upload zero_line
     if heatmap_type == "classic" :
-        zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}/{homing}_c_{c}_h_{h}_zero_line.txt')   
+        zero_line = np.loadtxt(f'../outputs/heatmap/{heatmap_type}/{homing}/c_{c}_h_{h}/T_{T}_L_{L}_M_{M}_N_{N}/zero_line_{homing}_c_{c}_h_{h}.txt')   
     else : 
         zero_line = np.matrix([[],[]]) 
     # print heatmap  
@@ -274,7 +283,7 @@ def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio
 
 
 # To load an already existing heatmap : 
-load = False
+load = True
 if load : 
     # style indicates which lines and zones to draw
     c=1; h=1; homing='zygote'; style = 'simple'; save_fig = True
@@ -295,7 +304,7 @@ if load :
        
 # The heatmap_values[r_index,s_index] correspond to the values s : s_range[s_index] and r : r_range[r_index]
 #indice_r = np.where((5.3 < r_range) & (r_range < 5.5))[0] ; print("\nindice r :", indice_r)
-#indice_s = np.where((0.31 < s_range) & (s_range < 0.32))[0] ; print("\nindice s :", indice_s)
+#indice_s = np.where((0.58 < s_range) & (s_range < 0.6))[0] ; print("\nindice s :", indice_s)
 #print(heatmap_values[indice_r,indice_s])
 
 

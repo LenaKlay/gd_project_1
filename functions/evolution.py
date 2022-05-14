@@ -222,7 +222,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
             ax.plot(time, speed_fct_of_time) 
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
-                directory = f"evolution/{homing}/s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}/r_{np.round(r,3)}"
+                directory = f"evolution/{homing}/r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
                 save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para)
             plt.show() 
     else :
