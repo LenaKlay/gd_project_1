@@ -19,11 +19,11 @@ Created on Wed Feb 10 18:13:08 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 # Load functions
 from evolution import evolution
 from tanaka import tanaka
 from graph import save_fig_or_data
+from pulled_pushed_wave import pulled_pushed_wave
 
 # Change font to serif
 plt.rcParams.update({'font.family':'serif'})
@@ -59,21 +59,21 @@ plt.rcParams.update({'font.family':'serif'})
 #       0.684, 0.7  , 0.716, 0.732, 0.748, 0.764, 0.78 , 0.796, 0.812,
 #       0.828, 0.844, 0.86 , 0.876, 0.892])
     
-r = 0.12  # growth rate
-s = 0.29   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 0.1     # and sh for heterozygous individuals
+r = 2  # growth rate
+s = 0.2   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+h = 0     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 0.25              # homing rate
+c = 1              # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
 
-CI = "center"       # "center" for having the border in the center, "left" for having the border on the left
+CI = "left"       # "center" for having the border in the center, "left" for having the border on the left
 
 # How Population Grow and Decrease
 
@@ -87,8 +87,8 @@ linear_mating = False
 
 # Numerical
 
-T = 500       # final time
-L = 1000       # length of the spatial domain
+T = 50        # final time
+L = 200       # length of the spatial domain
 M = T*6        # number of time steps
 N = L          # number of spatial steps
 
@@ -99,12 +99,12 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
 
 graph_type = "Allele densities"                         # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
-show_graph_fin = True                                     # Show graph at time T
+show_graph_fin = False                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//4                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = int(T//4)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
@@ -121,7 +121,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "evolution"
+what_to_do = "pulled pushed"
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
@@ -130,34 +130,8 @@ what_to_do = "evolution"
 ############################### Main program #########################################
 
 # Evolution
-if what_to_do == "evolution" : 
-        #c=np.linspace(0,1,10)
-        #plt.plot(c, (2+3*c)**2-8*(1+c)*c)
-        #det = (2+3*c)**2-8*(1+c)*c
-        #plt.plot(c,((2+3*c)+np.sqrt((2+3*c)**2-8*(1+c)*c))/(4*(1+c)))
-        #plt.plot(c,((2+3*c)-np.sqrt((2+3*c)**2-8*(1+c)*c))/(4*(1+c)))
-        #plt.show()
-        #c=0.75
-        #h=0.1
-        #poly = (2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))*s**2 +  s*(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))) + c 
-        #det = (2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h)))**2 - 4*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))**c
-        #rac1 = (-(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))+np.sqrt(det))/(2*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))))
-        #rac2 = (-(2*(1-c)*(1-h) -1 - 2*c - h*(1-c) -2*c*(1-(1-c)*(1-h))-np.sqrt(det))/(2*(2*c + h*(1-c))*(2*(1-(1-c)*(1-h)))))
-        
-        
-        #c=np.linspace(0.5,1,10)
-        #plt.plot(c, (1-4*c-2*c**2)**2-16*c**3)
-        #det = (2+3*c)**2-8*(1+c)*c
-        #plt.plot(c,(-(1-4*c-2*c**2)+np.sqrt( (1-4*c-2*c**2)**2-16*c**3 ))/(8*c**2))
-        #plt.plot(c,(-(1-4*c-2*c**2)-np.sqrt( (1-4*c-2*c**2)**2-16*c**3 ))/(8*c**2))
-        #plt.plot(c,np.ones(10))
-        #plt.show()
-        
-        #c=0.75
-        #h=np.linspace(0,1,10)
-        #plt.plot(h,c/(1-h*(1-c)))
-        #plt.plot(h,c/(2*c + h*(1-c)))
-        #plt.show()
+if what_to_do == "evolution" :
+                    
         s_1 = c/(1-h*(1-c))   
         if homing == "zygote" :
             s_3 = c/(2*c + h*(1-c))
@@ -193,7 +167,9 @@ if what_to_do == "evolution" :
         
 
         
-        
+# Evolution
+if what_to_do == "pulled pushed" : 
+    pulled_pushed_wave(bio_para, model_para, num_para, graph_para, what_to_do)  
 
 
 # Tanaka cubic
@@ -390,16 +366,17 @@ if what_to_do == "speed function of r" :
 if what_to_do == "heatmap" :
         from heatmap import heatmap
         from heatmap import print_heatmap
+        # To check in heatmap.py : rlog value, load = False, compute_zero_line = False
     
         heatmap_type = "classic" ; print("heatmap_type =", heatmap_type, "\n")   # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"   
-        bio_para[8] = "zygote"   # Homing : "zygote" or "germline"                                   
+        bio_para[8] = "germline"   # Homing : "zygote" or "germline"                                   
 
+        precision = 10             # Number of value on s and r scale (including 0 and 1) for the heatmap
         graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False          # No evolution graph
-        precision = 50              # Number of value on s and r scale (including 0 and 1) for the heatmap
 
         if heatmap_type == "classic" :
             T = 1000; L = 4000; M = T*6; N = L 
-            smin = 0.1; smax = 0.9; rmin = 0; rmax = 12  
+            smin = 0; smax = 1; rmin = 0; rmax = 12  
                 
             # update parameters
             heatmap_para = [precision, smin, smax, rmin, rmax]  
@@ -413,7 +390,7 @@ if what_to_do == "heatmap" :
 
         else :   
             T = 1000; L = 4000; M = T*40; N = L 
-            smin = 0.1; smax = 0.9; rmin = 50 ; rmax = 60 
+            smin = 0; smax = 1; rmin = 50 ; rmax = 60 
             
             # update parameters
             heatmap_para = [precision, smin, smax, rmin, rmax] 

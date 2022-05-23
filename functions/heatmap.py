@@ -209,12 +209,13 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
                 mean_fitness = (1-s_range_12)*p_star**2+2*(1-s_range_12*h)*p_star*(1-p_star)+(1-p_star)**2                
             eradication_pop = ((1-mean_fitness)/mean_fitness-rmin)*((precision-1)/(rmax-rmin)) 
             # rescale for heatmap
-            first_index = np.where((s_range>s_1) & (s_range<s_2))[0][0] 
-            last_index = np.where((s_range>s_1) & (s_range<s_2))[0][-1]
-            abscisse_s_1 = first_index-1 + (s_1-s_range[first_index-1])/delta_s
-            abscisse_s_2 = last_index + (s_2-s_range[last_index])/delta_s
-            abscisse_s_12_range = np.concatenate([np.ones(1)*abscisse_s_1, np.where((s_range>s_1) & (s_range<s_2))[0], np.ones(1)*abscisse_s_2])
-            ax.plot(abscisse_s_12_range, eradication_pop-0.5, color='black',label="eradication pop", linewidth = 2)
+            if len(np.where((s_range>s_1) & (s_range<s_2))[0]) != 0 :
+                first_index = np.where((s_range>s_1) & (s_range<s_2))[0][0] 
+                last_index = np.where((s_range>s_1) & (s_range<s_2))[0][-1]
+                abscisse_s_1 = first_index-1 + (s_1-s_range[first_index-1])/delta_s
+                abscisse_s_2 = last_index + (s_2-s_range[last_index])/delta_s
+                abscisse_s_12_range = np.concatenate([np.ones(1)*abscisse_s_1, np.where((s_range>s_1) & (s_range<s_2))[0], np.ones(1)*abscisse_s_2])
+                ax.plot(abscisse_s_12_range, eradication_pop-0.5, color='black',label="eradication pop", linewidth = 2)
             
 
     # Eradication zone
@@ -283,7 +284,7 @@ def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio
 
 
 # To load an already existing heatmap : 
-load = True
+load = False
 if load : 
     # style indicates which lines and zones to draw
     c=1; h=1; homing='zygote'; style = 'simple'; save_fig = True
