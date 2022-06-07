@@ -23,7 +23,7 @@ plt.rcParams.update({'font.family':'serif'})
 title_size = 15
 label_size = 17
 legend_size = 12
-line_size = 0.01
+line_size = 0.7
 number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
@@ -48,21 +48,13 @@ def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
         T,L,M,N,mod,theta = num_para
         
         fig, ax = plt.subplots()       
-        # color for each
-        col = ['cornflowerblue','crimson','orange']
-        # label for each
-        lab = ['Wild-type','Drive 1','Drive']    
-        # plot considering a log y-scale or not
-        #ax.plot(X, W, color = col[0], label=lab[0], linewidth = line_size)     
-        ax.plot(X, D1, color = "white", linewidth = line_size) 
-        ax.plot(X, D1+D2, color = "white", linewidth = line_size)   
-        plt.fill_between(X, D1, color=col[1], label=lab[1])
-        plt.fill_between(X, D1, D1+D2, color=col[2], label=lab[2])
+        plt.fill_between(X, D1, color="#afe88e", label="back",linestyle="None")
+        plt.fill_between(X, D1, D1+D2, color="#509369", label="front",linestyle="None")
+        plt.plot(X,D1+D2, color="black", linewidth=line_size)                 
                          
         # Graphic size, title and labels
-        defaultylim = (-0.03,1.03)  
-        ax.set(xlabel='Space', ylabel="population densities", ylim = defaultylim)
-        ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
+        ax.set(xlabel='Space', ylabel="population densities", ylim = (0,D1[0]+0.1*D1[0]), xlim=(X[0],X[-1]))
+        #ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
             
         # Grid
         ax.grid()
@@ -70,15 +62,10 @@ def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
         # Labels and legend sizes
         ax.xaxis.label.set_size(label_size)
         ax.yaxis.label.set_size(label_size)     
-        if number_on_x_axe :
-            ax.xaxis.set_tick_params(labelsize=number_x_size)
-        else : 
-            ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-            ax.tick_params(axis='y', which='both', bottom=False, top=False, labelbottom=False)
-        ax.yaxis.set_tick_params(labelsize=number_y_size)
-        ax.yaxis.set_ticks(np.arange(0, 2, 1))
+        # No axis values
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
         plt.rc('legend', fontsize=legend_size)  
-        #ax.legend(bbox_to_anchor=(1.02,1.15), ncol=2)
         ax.legend(bbox_to_anchor=(0.553,1.13), ncol=2)
         
         # Show the graph      
@@ -99,17 +86,23 @@ def pulled_pushed_wave(bio_para, model_para, num_para, graph_para, what_to_do) :
     graph_para[0] = None; graph_para[-1] = False; graph_para[-2] = False  #; graph_para[6] = False
     W, H, D, time, speed = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
     
-    D1 = np.zeros(len(D))
-    D2 = np.zeros(len(D))
-    wave_front = np.where(D<0.01)[0][0]
-    D1[0:wave_front-10] = D[0:wave_front-10]
-    D2[wave_front-10:wave_front] = D[wave_front-10:wave_front] 
-    
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
     graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_fin = graph_para
-                          
+   
+    # Two sub-population of drive
+    D1 = np.zeros(len(D))
+    D2 = np.zeros(len(D))
+    # Very front of the wave index
+    wave_front = np.where(D<0.01)[0][0]
+    # Cut the wave in two parts, and replace it on the left of the domain
+    
+    a=N//40  # size of the front part
+    b=3  # N//b where to replace the wave
+    D1[0:N//b] = D[wave_front-a-N//b:wave_front-a]
+    D2[N//b:N//b+a] = D[wave_front-a:wave_front] 
+                              
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial

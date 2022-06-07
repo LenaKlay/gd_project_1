@@ -59,8 +59,8 @@ plt.rcParams.update({'font.family':'serif'})
 #       0.684, 0.7  , 0.716, 0.732, 0.748, 0.764, 0.78 , 0.796, 0.812,
 #       0.828, 0.844, 0.86 , 0.876, 0.892])
     
-r = 2  # growth rate
-s = 0.2   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+r = 12  # growth rate
+s = 0.1   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
 h = 0     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
@@ -87,10 +87,10 @@ linear_mating = False
 
 # Numerical
 
-T = 50        # final time
-L = 200       # length of the spatial domain
-M = T*6        # number of time steps
-N = L          # number of spatial steps
+T = 30        # final time
+L = 100       # length of the spatial domain
+M = T*20        # number of time steps
+N = L*5          # number of spatial steps
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
@@ -104,7 +104,7 @@ wild = True; heterozygous = True; drive = True            # What to draw on the 
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = int(T//4)                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//3                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
