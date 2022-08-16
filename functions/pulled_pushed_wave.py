@@ -73,7 +73,12 @@ def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
         
         # Saving figures and datas
         directory = f"pulled_pushed/{homing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-        save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
+        
+        num = str(int(t)//mod)
+        if len(num)==1: num = '0'+'0'+num
+        if len(num)==2: num = '0'+num
+        save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para)
+        #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
         #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
     

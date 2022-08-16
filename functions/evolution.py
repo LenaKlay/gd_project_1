@@ -145,17 +145,17 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         
 
     # Matrix
-    C0 = -2*np.ones(N+1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
-    C1 = np.ones(N+1) 
-    A = sp.spdiags([C1,C0,C1],[-1,0,1], N+1, N+1)                # 1D discrete Laplacian with Neumann boundary conditions (derivative=0)  
+    C0 = -2*np.ones(N-1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
+    C1 = np.ones(N-1) 
+    A = sp.spdiags([C1,C0,C1],[-1,0,1], N-1, N-1)                # 1D discrete Laplacian with Neumann boundary conditions (derivative=0)  
     
-    Bw = sp.identity(N+1)+((1-theta)*difW*dt/dx**2)*A            # Matrix for the explicit side of the Crank Nicholson scheme  
-    Bh = sp.identity(N+1)+((1-theta)*difH*dt/dx**2)*A            # for W, H and D.
-    Bd = sp.identity(N+1)+((1-theta)*difD*dt/dx**2)*A     
+    Bw = sp.identity(N-1)+((1-theta)*difW*dt/dx**2)*A            # Matrix for the explicit side of the Crank Nicholson scheme  
+    Bh = sp.identity(N-1)+((1-theta)*difH*dt/dx**2)*A            # for W, H and D.
+    Bd = sp.identity(N-1)+((1-theta)*difD*dt/dx**2)*A     
 
-    Bw_ = sp.identity(N+1)-(theta*difW*dt/dx**2)*A               # Matrix for the implicit side of the Crank Nicholson scheme  
-    Bh_ = sp.identity(N+1)-(theta*difH*dt/dx**2)*A               # for W, H and D.
-    Bd_ = sp.identity(N+1)-(theta*difD*dt/dx**2)*A        
+    Bw_ = sp.identity(N-1)-(theta*difW*dt/dx**2)*A               # Matrix for the implicit side of the Crank Nicholson scheme  
+    Bh_ = sp.identity(N-1)-(theta*difH*dt/dx**2)*A               # for W, H and D.
+    Bd_ = sp.identity(N-1)-(theta*difD*dt/dx**2)*A        
 
     # Evolution
     for t in np.linspace(dt,T,M) :
@@ -166,9 +166,13 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         f2 = (1-s*h)*growth(H,W,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[1] - death(W,H,D,bio_para,model_para)*H
         f3 = (1-s)*growth(D,H,W,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[2] - death(W,H,D,bio_para,model_para)*D
       
-        W = la.spsolve(Bw_, Bw.dot(W) + dt*f1)
-        H = la.spsolve(Bh_, Bh.dot(H) + dt*f2)
-        D = la.spsolve(Bd_, Bd.dot(D) + dt*f3)
+        W[1:-1] = la.spsolve(Bw_, Bw.dot(W[1:-1]) + dt*f1[1:-1])
+        H[1:-1] = la.spsolve(Bh_, Bh.dot(H[1:-1]) + dt*f2[1:-1])
+        D[1:-1] = la.spsolve(Bd_, Bd.dot(D[1:-1]) + dt*f3[1:-1])
+        
+        
+        W[0] = W[1]; H[0] = H[1]; D[0] = D[1]   # Neumann condition alpha=0
+        W[-1] = W[-2]; H[-1] = H[-2]; D[-1] = D[-2]  # Neumann condition beta=0
         
         # Graph
         if t>=mod*nb_graph and graph_type != None : 
@@ -205,9 +209,9 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
                     time = np.append(time,t)
                     speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
             # if the treshold value of the wave is outside the window, stop the simulation  
-            if not(np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
-                print("t =",t)
-                break
+            #if not(np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
+            #    print("t =",t)
+            #    break
  
                     
         # NB : problems encountered when computing the speed : 

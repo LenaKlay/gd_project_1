@@ -32,36 +32,10 @@ plt.rcParams.update({'font.family':'serif'})
 ############################### Parameters ######################################
 
 # Biological
-
-# homing = "germline"
-# s = 0.668
-# h=0.5 et c=0.5
-# r_range = array([ 0.12,  0.36,  0.6 ,  0.84,  (1.08),  (1.32),  1.56,  1.8 ,  2.04,
-#        2.28,  2.52,  2.76,  3.  ,  3.24,  3.48,  3.72,  3.96,  4.2 ,
-#        4.44,  4.68,  4.92,  5.16,  5.4 ,  5.64,  5.88,  6.12,  6.36,
-#        6.6 ,  6.84,  7.08,  7.32,  7.56,  7.8 ,  8.04,  8.28,  8.52,
-#        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
-#       10.92, 11.16, 11.4 , 11.64, 11.88])
-
-
-# s = 0.876
-# r_range = array([ 0.12,  0.36,  0.6 ,  0.84,  1.08,  1.32,  1.56,  1.8 ,  2.04,
-#        2.28,  2.52,  2.76,  3.  ,  3.24,  3.48,  3.72,  3.96,  4.2 ,
-#        4.44,  4.68,  4.92,  5.16,  (5.4 ,  5.64,  5.88,  6.12,  6.36),
-#        6.6 ,  6.84,  7.08,  7.32,  7.56,  7.8 ,  8.04,  8.28,  8.52,
-#        8.76,  9.  ,  9.24,  9.48,  9.72,  9.96, 10.2 , 10.44, 10.68,
-#       10.92, 11.16, 11.4 , 11.64, 11.88])
-
-#s_range = array([0.108, 0.124, 0.14 , 0.156, 0.172, 0.188, 0.204, 0.22 , 0.236,
-#       0.252, 0.268, 0.284, 0.3  , 0.316, 0.332, 0.348, 0.364, 0.38 ,
-#       0.396, 0.412, 0.428, 0.444, 0.46 , 0.476, 0.492, 0.508, 0.524,
-#       0.54 , 0.556, 0.572, 0.588, 0.604, 0.62 , 0.636, 0.652, 0.668,
-#       0.684, 0.7  , 0.716, 0.732, 0.748, 0.764, 0.78 , 0.796, 0.812,
-#       0.828, 0.844, 0.86 , 0.876, 0.892])
     
-r = 12  # growth rate
-s = 0.1   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 0     # and sh for heterozygous individuals
+r = 100   # growth rate
+s = 0.8   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+h = 1     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
@@ -73,7 +47,7 @@ homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
 
-CI = "left"       # "center" for having the border in the center, "left" for having the border on the left
+CI = "center"       # "center" for having the border in the center, "left" for having the border on the left
 
 # How Population Grow and Decrease
 
@@ -87,24 +61,24 @@ linear_mating = False
 
 # Numerical
 
-T = 30        # final time
-L = 100       # length of the spatial domain
-M = T*20        # number of time steps
-N = L*5          # number of spatial steps
+T = 200        # final time
+L = 400       # length of the spatial domain
+M = T*60        # number of time steps
+N = L*10         # number of spatial steps
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
                    
 # Graph
 
-graph_type = "Allele densities"                         # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele densities"                           # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
-show_graph_fin = False                                     # Show graph at time T
+show_graph_fin = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//3                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//4                                            # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 save_fig = True                                           # Save the figures (.pdf) 
 
 # Speed calculus
@@ -121,7 +95,7 @@ graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_
 
 ############################ What to do ? #######################################
 
-what_to_do = "pulled pushed"
+what_to_do = "evolution" 
 # Bring the principal parameters together to make it easier.
 # "evolution",  "tanaka cubic"  "tanaka fraction", "KPP" : simplest task, draw the propagation regarding the parameters above.
 # "speed function of time" : idem + draw the speed as a function of time.
@@ -152,6 +126,10 @@ if what_to_do == "evolution" :
                 print("Linear speed :", 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h))
                 print("p_star :", ((1-s*h)*(1+c)-1)/(s*(1-2*h)))  
 
+        #for i in range(5) : 
+        #    r = [0.36, 3, 0.6, 2, 9][i]  # growth rate
+        #    s = [0.4, 0.3, 0.54, 0.8, 0.8][i]   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+        #    bio_para = [r,s,h,a,difW,difH,difD,c,homing]
         print("\nwhat_to_do =", what_to_do); print("homing =", homing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
         W, H, D, time, speed = evolution(bio_para, model_para, num_para, graph_para, what_to_do)
         # save the speed value
@@ -160,10 +138,10 @@ if what_to_do == "evolution" :
         print("\nspeed :", speed[-1])
         
         # proportion
-        if homing == "zygote" : 
-            print("final prop :", ((D+0.5*H)/(W+H+D))[1000])
-        if homing == "germline" : 
-            print("final prop :", ((D+0.5*(1+c)*H)/(W+H+D))[1000], "\n")
+        #if homing == "zygote" : 
+        #    print("final prop :", ((D+0.5*H)/(W+H+D))[1000])
+        #if homing == "germline" : 
+        #    print("final prop :", ((D+0.5*(1+c)*H)/(W+H+D))[1000], "\n")
         
 
         

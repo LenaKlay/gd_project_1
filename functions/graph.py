@@ -16,7 +16,7 @@ import numpy as np
 title_size = 15
 label_size = 17
 legend_size = 12
-line_size = 4
+line_size = 10
 number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
@@ -69,7 +69,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         else : defaultylim = (-0.03,1.03)  
         if xlim == None : 
             ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim)
-            ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
+            #ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
         else : 
             ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim)
             ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
@@ -98,7 +98,11 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         # Saving figures and datas
         if save_fig : 
             directory = f"evolution/{homing}/r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-            save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
+            #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
+            num = str(int(t)//mod)
+            if len(num)==1: num = '0'+'0'+num
+            if len(num)==2: num = '0'+num
+            save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para)
             #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
     
@@ -156,6 +160,7 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
     create_path(directories, bio_para, num_para)
     # Save figure
     if fig != [] :
+        fig.savefig(f"../outputs/{directories}/{title}.png", format='png')
         fig.savefig(f"../outputs/{directories}/{title}.pdf", format='pdf') #; fig.savefig(f"../outputs/{directories}/{title}.png") 
         fig.savefig(f"../outputs/{directories}/{title}.svg", format='svg')
     # Save datas
