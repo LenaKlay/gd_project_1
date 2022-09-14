@@ -94,7 +94,7 @@ def pulled_pushed_wave(bio_para, model_para, num_para, graph_para, what_to_do) :
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_fin = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_end = graph_para
    
     # Two sub-population of drive
     D1 = np.zeros(len(D))

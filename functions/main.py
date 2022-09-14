@@ -35,14 +35,14 @@ plt.rcParams.update({'font.family':'serif'})
     
 r = 100   # growth rate
 s = 0.8   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
-h = 1     # and sh for heterozygous individuals
+h = 0.1     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
 difW = 1   # diffusion coefficient for WW individuals
 difH = 1   # diffusion coefficientrate for WD individuals
 difD = 1   # diffusion coefficient rate for DD individuals
 
-c = 1              # homing rate
+c = 0.25              # homing rate
 homing = "zygote"   # "zygote" or "germline"
 
 # Initialization
@@ -73,7 +73,7 @@ theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
 
 graph_type = "Allele densities"                           # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
-show_graph_fin = True                                     # Show graph at time T
+show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
@@ -90,7 +90,7 @@ speed_proportion = False            # True : use the wild-type number to compute
 bio_para = [r,s,h,a,difW,difH,difD,c,homing]
 model_para = [CI,growth_dynamic,death_dynamic,linear_growth,linear_mating]
 num_para = [T,L,M,N,mod,theta]
-graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion,show_graph_ini,show_graph_fin]
+graph_para = [graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion,show_graph_ini,show_graph_end]
 
 
 ############################ What to do ? #######################################

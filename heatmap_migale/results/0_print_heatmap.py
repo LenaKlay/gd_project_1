@@ -12,39 +12,42 @@ import matplotlib.colors as mcolors
 
 # A checker avant de lancer :
 # heatmap_type
-# if heatmap_type == "classic" -> style (else stype = None)
 # c et h
 # homing
+# rlog
     
 
 ################################ Paramètres ###################################
-precision = 30
+precision = 50
 heatmap_type = "classic"       # "classic"  "speed_cubic" "speed_fraction" "r_one_minus_n_cubic"  "r_one_minus_n_fraction"                                           
-style = "simple"               # if heatmap_type == "classic : simple", "eradication" or "collapse"
-                               # else : None
 
 homing = "zygote"
-c = 1/4
-h = 1/4
-smin = 0.3; smax=0.9
+c = 3/4
+h = 1/10
+rlog = True
 
-if heatmap_type == "classic" : 
-    rmin=0;rmax=12
-else : 
-    rmin=50;rmax=60
-    
-s_range = np.linspace(smin,smax,precision)          
-r_range = np.linspace(rmin,rmax,precision)          
+smin = 0.1; smax=0.9
+s_range = np.linspace(smin,smax,precision)    
+
+if rlog: 
+    rmin=0.01; rmax=10
+    r_range = np.logspace(-2, 1, num=precision)
+else: 
+    if heatmap_type == "classic" : 
+        rmin=0; rmax=12; r_range = np.linspace(rmin,rmax,precision) 
+    else : 
+        rmin=50;rmax=60
+        
 plt.rcParams.update({'font.family':'serif'})
 
 ###############################################################################
 
 
-def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, style) : 
+def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line) : 
         
     fig, ax = plt.subplots()     
     # Color choice
-    if style == "simple" or style == "eradication" or style == "collapse" :
+    if heatmap_type == "classic" :
         colors1 = plt.cm.viridis(np.linspace(0, 0.8, 128))
         colors2 = plt.cm.plasma(np.flip(np.linspace(0., 1, 128)))
         colors = np.vstack((colors1, colors2))
@@ -75,31 +78,13 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, sty
     abscisse = (s_range-smin)*(precision-1)/(smax-smin)   
     
     # Eradication line
-    if style == "simple" or style == "eradication" or style == "collapse" :
+    if heatmap_type == "classic" :
         if np.shape(zero_line)[1] != 0 : 
             ax.plot(np.array(zero_line[0,:]).ravel(),np.array(zero_line[1,:]).ravel(),color="red",label="zero speed", linewidth = 1.5, linestyle='-.')
         eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin))
         ax.plot(abscisse,eradication_drive, color='orangered',label="eradication drive", linewidth = 2)  
         ax.legend()
-    # Eradication zone
-    if style == "eradication":
-        abscisse_for_zero_line = np.unique(np.array(zero_line[0,:]).ravel(),return_index=True)
-        unique_zero_line = np.array(zero_line[1, abscisse_for_zero_line[1]]).ravel()
-        abscisse_for_zero_line_into_s = abscisse_for_zero_line[0]*(smax-smin)/(precision-1)+smin
-        eradication_drive_for_zero_line = (abscisse_for_zero_line_into_s/(1-abscisse_for_zero_line_into_s)-rmin)*((precision-1)/(rmax-rmin))
-        plt.fill_between(abscisse, eradication_drive, where=np.round(abscisse,2)<=zero_line[0,0], color='orangered')
-        plt.fill_between(abscisse_for_zero_line[0], unique_zero_line, eradication_drive_for_zero_line, where= eradication_drive_for_zero_line>=unique_zero_line, color='orangered')
-    
-    # Collapse line
-    if style == "collapse":
-        if homing == "zygote":
-            collapsing_drive = ((1/((c+1)*(1-s_range)+(1-c)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
-        if homing == "germline":
-            collapsing_drive = ((1/((1-s_range)+(c+1)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
-        ax.plot(abscisse,collapsing_drive, color='deepskyblue',label="collapsing drive", linewidth = 2)
-    # Collapsing zone 
-        plt.fill_between(abscisse, collapsing_drive, color='deepskyblue')
-        
+  
     ax.set_title(f"(c={c} and h={h}, {homing})",fontsize = 13)
     fig.suptitle(f"Travelling wave speed", fontsize=14)
     ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
@@ -107,9 +92,8 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, sty
     fig.tight_layout()
     plt.gca().invert_yaxis()
     plt.xlim([0,precision-1]);plt.ylim([0,precision-1])
-    #plt.title("\n", f"Heatmap : {heatmap_type}")
-     
-    fig.savefig(f'{heatmap_type}_heatmap.png')
+    #plt.title("\n", f"Heatmap : {heatmap_type}")    
+    fig.savefig(f'heatmap_c_{c}_h_{h}.png')
     #ax.xaxis.label.set_size(14)
     #ax.yaxis.label.set_size(14)
     ax.xaxis.set_tick_params(labelsize=9)
@@ -120,7 +104,7 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, sty
 heatmap_values = np.zeros((precision,precision))
 zero_line = np.matrix([[],[]]) 
 for num in range(1,precision+1):
-    heatmap_values[num-1,:] = np.loadtxt(f'{heatmap_type}_heatmap_{num}.txt')
+    heatmap_values[num-1,:] = np.loadtxt(f'heatmap_{num}.txt')
     if heatmap_type == "classic" : 
         zero_line = np.append(zero_line,np.matrix([[int(np.loadtxt(f'{heatmap_type}_zero_line_{num}.txt'))],[num-1]]), axis=1)
         
@@ -129,7 +113,7 @@ if heatmap_type == "classic" : np.savetxt(f'{heatmap_type}_zero_line.txt', heatm
 
 # heatmap_values = np.loadtxt(f'{heatmap_type}_zero_line.txt')
 
-print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line, style)
+print_heatmap(homing, c, h, s_range, r_range, heatmap_values, zero_line)
 
 
 

@@ -27,7 +27,7 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
     
     # Range for r and s
     delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
@@ -287,7 +287,7 @@ def upload_and_plot_heatmap(c, h, homing, style, heatmap_type, heatmap_para, bio
 load = False
 if load : 
     # style indicates which lines and zones to draw
-    c=1; h=1; homing='zygote'; style = 'simple'; save_fig = True
+    c=0.25; h=0.1; homing='zygote'; style = 'simple'; save_fig = True
     T = 1000; L = 4000; M = T*6; N = L    
     # load heatmap from the multiple r_lines or the 50_heatmap file
     r_line = False

@@ -11,6 +11,7 @@ Created on Wed Feb 10 18:13:08 2021
 # heatmap_type
 # h et c
 # homing
+# rlog
 
 num = numero
 
@@ -247,52 +248,61 @@ def tanaka(s,T,L,M,N,theta,model):
 def heatmap(precision,smin,smax,rmin,rmax, what):
      # Range for r and s
     delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)         
-    delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-    r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
+    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)    
+    if rlog : r_range = np.logspace(-2, 1, num=precision)
+    else : 
+        delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
+        r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
 
-    heatmap_values = np.zeros((precision,precision))      
-    # separate the graph in two areas : positiv speed (right side) and negativ speed (left side)
-    zero_line = np.matrix([[],[]])
-    
-    for r_index in range(0, precision) : 
-        print("\n------- NEW r=", r_range[r_index])
-        # Denote that we already meet (or not) the first pixel of the line with negative speed (to draw the zero line)
-        zero_done = False
-        for s_index in range(0, precision) :
-            r = r_range[r_index]
+    heatmap_vect = np.zeros(precision)    
+ 
+    r_index = num-1
+    r = r_range[r_index]
+     
+    # Denote that we already meet (or not) the first pixel of the line with negative speed (to draw the zero line)
+    zero_done = False
+    for s_index in range(0, precision) :
+            
             s = s_range[s_index]
             print("\ns=", np.round(s,3))
             
             if what == "classic" :
-                heatmap_values[s_index] = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta)[0]
-                if s_index != 0 and heatmap_values[r_index,s_index-1]*heatmap_values[r_index,s_index]<=0 and heatmap_values[r_index,s_index] != 0 and zero_done == False :
-                    zero_line = np.array([s_index-0.5])
+                heatmap_vect[s_index] = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta)[0]
+                if s_index != 0 and heatmap_vect[s_index-1]*heatmap_vect[s_index]<=0 and heatmap_vect[s_index] != 0 and zero_done == False :
+                    zero_line = s_index-0.5
                     zero_done = True 
                     
             if what == "speed_cubic" : 
-                heatmap_values[s_index] = np.abs(evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)[0]-tanaka(s,T,L,M,N,0.5,"cubic")[1])
+                heatmap_vect[s_index] = np.abs(evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)[0]-tanaka(s,T,L,M,N,0.5,"cubic")[1])
             if what == "speed_fraction" : 
-                heatmap_values[s_index] = np.abs(evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)[0]-tanaka(s,T,L,M,N,0.5,"fraction")[1])
+                heatmap_vect[s_index] = np.abs(evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)[0]-tanaka(s,T,L,M,N,0.5,"fraction")[1])
             if what == "r_one_minus_n_cubic" : 
                 speed_girardin, W, H, D = evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)
                 n = D+H+W
-                heatmap_values[s_index] = np.max(abs(r*(1-n)))
+                heatmap_vect[s_index] = np.max(abs(r*(1-n)))
             if what == "r_one_minus_n_fraction" :
                 speed_girardin, W, H, D = evolution(r,s,1,1,1,1,1,T,L,M,N,0.5)
                 p = D/(D+H+W); n = D+H+W
-                heatmap_values[s_index] = np.max(abs(r*(1-n) - s*p*(2-p)/(1-s+s*(1-p)**2))) 
+                heatmap_vect[s_index] = np.max(abs(r*(1-n) - s*p*(2-p)/(1-s+s*(1-p)**2))) 
                    
-    return(heatmap_values, zero_line) 
+    return(heatmap_vect, zero_line) 
   
 
 
 
 ############################### Parameters ######################################
 
+
+# Heatmap
+
+heatmap_type = "classic"   #  "classic"   "speed_cubic"   "speed_fraction"   "r_one_minus_n_cubic"   "r_one_minus_n_fraction"                              
+precision = quelle_precision
+  
 # Biological
+
+rlog = True
     
-c = 0.75     # homing rate
+c = 0.25     # homing rate
 h = 0.1     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
@@ -321,26 +331,24 @@ linear_mating = False
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
 
-# Heatmap
-
-heatmap_type = "classic"   #  "classic"   "speed_cubic"   "speed_fraction"   "r_one_minus_n_cubic"   "r_one_minus_n_fraction"                              
-precision = quelle_precision
-                   
+                 
 
 
 ############################### Results #########################################
 
 if heatmap_type == "classic" :             
     T = 500; L = 2000; M = T*6; N = L 
-    smin = 0.3; smax = 0.9; rmin = 0 ; rmax = 12            
+    smin = 0.1; smax = 0.9; 
+    if rlog: rmin = 0.01 ; rmax = 10    
+    else: rmin = 0 ; rmax = 12            
 else :  
     T = 1000; L = 4000; M = T*40; N = L 
-    smin = 0.3; smax = 0.9; rmin = 50 ; rmax = 60 
+    smin = 0.1; smax = 0.9; rmin = 50 ; rmax = 60 
     linear_growth = False ; linear_mating = False              
     homing = "zygote" 
-heatmap_values, zero_line = heatmap(precision,smin,smax,rmin,rmax,heatmap_type)
-np.savetxt(f'heatmap_{num}.txt', heatmap_values)  
-np.savetxt(f'zero_line_{num}.txt', zero_line)  
+heatmap_vect, zero_line = heatmap(precision,smin,smax,rmin,rmax,heatmap_type)
+np.savetxt(f'heatmap_{num}.txt', heatmap_vect)  
+np.savetxt(f'zero_line_{num}.txt', np.ones(1)*zero_line)  
 
         
     

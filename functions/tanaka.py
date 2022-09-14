@@ -27,7 +27,7 @@ from graph import save_fig_or_data
 def tanaka(s,model,model_para,num_para,graph_para): 
     T,L,M,N,mod,theta = num_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
 
     # Steps
     dt = T/M    # time
@@ -94,7 +94,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
             break
         
     # last graph
-    if show_graph_fin :   
+    if show_graph_end :   
         graph_tanaka(s,X,P,t,model,graph_para,num_para)
         
     # plot the speed function of time    
@@ -118,7 +118,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
 def graph_tanaka(s,X,P,t,model,graph_para,num_para):
     
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
 
         fig, ax = plt.subplots()        
         ax.plot(X, P, label=f'Drive', color = "deeppink", linewidth=line_size)

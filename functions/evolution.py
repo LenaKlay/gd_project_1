@@ -92,7 +92,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
     r,s,h,a,difW,difH,difD,c,homing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     T,L,M,N,mod,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_fin = graph_para
+    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_end = graph_para
     
     # Parameters initialization
     increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
@@ -233,7 +233,7 @@ def evolution(bio_para, model_para, num_para, graph_para, what_to_do) :
         print(f"No wave for r = {r} and s = {s}.") 
 
    # last graph
-    if show_graph_fin :   
+    if show_graph_end :   
         graph(X,W,H,D,t,graph_para,bio_para,num_para)                                          
 
     return(W,H,D,time,speed_fct_of_time)

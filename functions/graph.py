@@ -29,7 +29,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
        
         r,s,h,a,difW,difH,difD,c,homing = bio_para
         T,L,M,N,mod,theta = num_para
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_fin = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
 
         fig, ax = plt.subplots()
         
