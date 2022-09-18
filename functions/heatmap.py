@@ -31,8 +31,9 @@ def heatmap(heatmap_type, heatmap_para, mod, bio_para, model_para, num_para, gra
     
     # Range for r and s
     delta_s = (smax-smin)/precision    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)         
-    if rlog : r_range = np.logspace(-2, 1, num=precision)
+    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)       # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)                  
+    if rlog : 
+        r_range = np.logspace(-2, 1, num=precision)
     else : 
         delta_r = (rmax-rmin)/precision    # delta_r is the size of a simulation pixel (size mesured with the r scale)  
         r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
@@ -135,19 +136,19 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
         # Plot heatmap values
         im = ax.imshow(heatmap_values,cmap='Blues',interpolation='bicubic', aspect='auto')
 
-    # Size of a simulation pixel, where the distance 'center of the first pixel' to 'center of the last pixel' is 1. 
-    delta_square = 1/(precision-1)
-    
-    # Ticks positions : we want the ticks to start from the bordure, not the center
+    # Size of a simulation pixel, where the distance 'center of the first pixel' to 'center of the last pixel' is 1. (useful when rlog=False) 
+    delta_square = 1/(precision-1)   
+   # Ticks positions : we want the ticks to start from the bordure, not the center
     ax.set_xticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))                  
     if rlog : ax.set_yticks(np.linspace(0,1,4)*(precision-1))    
-    else : ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))                
-        
+    else : ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1))                        
     # Ticks labels
     ax.set_xticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))                                         
     if rlog : ax.set_yticklabels(np.around(np.logspace(-2, 1, num=4),2))  
     else : ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))   
+
     
+  
     # Colorbar
     ax.figure.colorbar(im, ax=ax)
     # Rotate the xtick labels and set their alignment.
@@ -219,26 +220,26 @@ def print_heatmap(heatmap_values, zero_line, style, heatmap_type, heatmap_para, 
             
 
     # Eradication zone
-    if style == "eradication":
-        abscisse_for_zero_line = np.unique(np.array(zero_line[0,:]).ravel(),return_index=True)
-        unique_zero_line = np.array(zero_line[1, abscisse_for_zero_line[1]]).ravel()
-        abscisse_for_zero_line_into_s = abscisse_for_zero_line[0]*(smax-smin)/(precision-1)+smin
-        eradication_drive_for_zero_line = (abscisse_for_zero_line_into_s/(1-abscisse_for_zero_line_into_s)-rmin)*((precision-1)/(rmax-rmin))
-        # Fill part 1
-        plt.fill_between(abscisse, eradication_drive, where=np.round(abscisse,2)<=zero_line[0,0], color='orangered')
-        # Fill part 2
-        plt.fill_between(abscisse_for_zero_line[0], unique_zero_line, eradication_drive_for_zero_line, where= eradication_drive_for_zero_line>=unique_zero_line, color='orangered')
+    #if style == "eradication":
+    #    abscisse_for_zero_line = np.unique(np.array(zero_line[0,:]).ravel(),return_index=True)
+    #    unique_zero_line = np.array(zero_line[1, abscisse_for_zero_line[1]]).ravel()
+    #    abscisse_for_zero_line_into_s = abscisse_for_zero_line[0]*(smax-smin)/(precision-1)+smin
+    #    eradication_drive_for_zero_line = (abscisse_for_zero_line_into_s/(1-abscisse_for_zero_line_into_s)-rmin)*((precision-1)/(rmax-rmin))
+    #    # Fill part 1
+    #    plt.fill_between(abscisse, eradication_drive, where=np.round(abscisse,2)<=zero_line[0,0], color='orangered')
+    #    # Fill part 2
+    #    plt.fill_between(abscisse_for_zero_line[0], unique_zero_line, eradication_drive_for_zero_line, where= eradication_drive_for_zero_line>=unique_zero_line, color='orangered')
     
     # Collapse line
-    if style == "collapse":
-        if homing == "zygote":
-            collapsing_drive = ((1/((c+1)*(1-s_range)+(1-c)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
-        if homing == "germline":
-            collapsing_drive = ((1/((1-s_range)+(c+1)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
-        # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
-        ax.plot(abscisse,collapsing_drive-0.5, color='deepskyblue',label="collapsing drive", linewidth = 2)
+    #if style == "collapse":
+    #    if homing == "zygote":
+    #        collapsing_drive = ((1/((c+1)*(1-s_range)+(1-c)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
+    #    if homing == "germline":
+    #        collapsing_drive = ((1/((1-s_range)+(c+1)*(1-s_range*h))-1)-rmin)*((precision-1)/(rmax-rmin))
+    #    # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
+    #    ax.plot(abscisse,collapsing_drive-0.5, color='deepskyblue',label="collapsing drive", linewidth = 2)
     # Collapsing zone 
-        plt.fill_between(abscisse, collapsing_drive, color='deepskyblue')
+    #    plt.fill_between(abscisse, collapsing_drive, color='deepskyblue')
                
     # Set graph parameters
     ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
