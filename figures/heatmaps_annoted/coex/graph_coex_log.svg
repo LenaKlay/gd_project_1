@@ -7,8 +7,8 @@
    viewBox="0 0 279.4 190.5"
    version="1.1"
    id="svg8"
-   inkscape:version="1.2.1 (0b8a7e5fb6, 2022-09-14, custom)"
-   sodipodi:docname="graph_coex_2_log.svg"
+   inkscape:version="1.2.1 (0f2f062aeb, 2022-09-21, custom)"
+   sodipodi:docname="graph_coex_log.svg"
    inkscape:export-filename="../7f3574b1/graph_coex_2.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
@@ -1467,11 +1467,11 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="392"
-     inkscape:cy="334.5"
+     inkscape:zoom="0.89406169"
+     inkscape:cx="620.76254"
+     inkscape:cy="359.59487"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="figure_1"
      showgrid="false"
      units="in"
      showguides="true"
@@ -1920,17 +1920,35 @@
       <g
          id="patch_7-2"
          style="stroke-linecap:butt;stroke-linejoin:round"
-         transform="matrix(1.3099968,0,0,1.7916693,278.81971,-56.282171)">
+         transform="matrix(1.3029382,0,0,2.6136757,279.39981,-78.60937)">
         <path
            id="path5417"
            style="opacity:0.8;fill:#ffffff;stroke:#cccccc;stroke-width:1.11111;stroke-linecap:butt;stroke-linejoin:miter"
            d="M 59.715047,36.448128 H 246.65842 q 2.39926,0 2.39926,-2.963873 V 13.003433 q 0,-2.963872 -2.39926,-2.963872 H 59.715047 q -2.399257,0 -2.399257,2.963872 v 20.480822 q 0,2.963873 2.399257,2.963873 z"
            inkscape:connector-curvature="0" />
       </g>
+      <text
+         xml:space="preserve"
+         style="font-size:16.2698px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.871595;stroke-linecap:butt;stroke-linejoin:round"
+         x="391.36954"
+         y="6.4945364"
+         id="text14384-0-3-6-2"><tspan
+           sodipodi:role="line"
+           id="tspan14382-6-5-2-9"
+           style="font-size:16.2698px;stroke-width:0.871595"
+           x="391.36954"
+           y="6.4945364">Gene drive clearance area</tspan></text>
+      <rect
+         style="fill:#999999;fill-opacity:0.843137;stroke:none;stroke-width:3.90064;stroke-linecap:butt;stroke-linejoin:round"
+         id="rect2784"
+         width="16.922977"
+         height="16.922977"
+         x="362.58167"
+         y="-7.4228239" />
       <g
          id="line2d_18-8-3"
          style="stroke-linecap:butt;stroke-linejoin:round"
-         transform="matrix(0.44734089,0,0,0.44734089,286.1389,-35.055427)">
+         transform="matrix(0.44734089,0,0,0.44734089,286.1389,-50.744146)">
         <path
            id="path5450-6"
            style="fill:none;stroke:#73c946;stroke-width:14.728;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1940,7 +1958,7 @@
       <g
          id="line2d_18-8-3-7"
          style="stroke-linecap:butt;stroke-linejoin:round"
-         transform="matrix(0.44734089,0,0,0.44734089,286.05614,-15.221845)">
+         transform="matrix(0.44734089,0,0,0.44734089,286.05614,-30.910564)">
         <path
            id="path5450-6-5"
            style="fill:none;stroke:#40720c;stroke-width:14.728;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1951,24 +1969,24 @@
          xml:space="preserve"
          style="font-size:16.2698px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.871595;stroke-linecap:butt;stroke-linejoin:round"
          x="391.2309"
-         y="-19.978943"
+         y="-35.66766"
          id="text14384-0-3"><tspan
            sodipodi:role="line"
            id="tspan14382-6-5"
            style="font-size:16.2698px;stroke-width:0.871595"
            x="391.2309"
-           y="-19.978943">Pure drive eradication line</tspan></text>
+           y="-35.66766">Pure drive persistence line</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:16.2698px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.871595;stroke-linecap:butt;stroke-linejoin:round"
          x="391.2309"
-         y="-0.80384451"
+         y="-16.492561"
          id="text14384-0-3-6"><tspan
            sodipodi:role="line"
            id="tspan14382-6-5-2"
            style="font-size:16.2698px;stroke-width:0.871595"
            x="391.2309"
-           y="-0.80384451">Coexistence eradication line</tspan></text>
+           y="-16.492561">Composite persistence line</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:20.9183px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.871595;stroke-linecap:butt;stroke-linejoin:round"
