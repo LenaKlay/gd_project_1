@@ -34,9 +34,9 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         fig, ax = plt.subplots()
         
         # Plot evolution for wild, heterozygous, drive (nb of individuals or proportions)
-        if graph_type == "Population densities" : 
+        if graph_type == "Genotype densities" : 
             nb = 3; Y = [W, D, H]
-        if graph_type == "Population proportions" : 
+        if graph_type == "Genotype proportions" : 
             nb = 3; Y = [W/(W+H+D), D/(W+H+D), H/(W+H+D)]            
         if graph_type == "Allele densities" : 
             nb = 2

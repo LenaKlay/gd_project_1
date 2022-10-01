@@ -32,9 +32,9 @@ plt.rcParams.update({'font.family':'serif'})
 ############################### Parameters ######################################
 
 # Biological
-    
-r = 100   # growth rate
-s = 0.8   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
+
+r = 0.12   # growth rate
+s = 0.2   # when selection only acts on survival with a fitness cost s (b=1 and d=1) 
 h = 0.1     # and sh for heterozygous individuals
 a = 0       # coefficient for allee effect (growth or death)
 
@@ -61,17 +61,17 @@ linear_mating = False
 
 # Numerical
 
-T = 200        # final time
-L = 400       # length of the spatial domain
-M = T*60        # number of time steps
-N = L*10         # number of spatial steps
+T = 100       # final time
+L = 200       # length of the spatial domain
+M = T*6        # number of time steps
+N = L          # number of spatial steps
 
 theta = 0.5     # discretization in space : theta = 0.5 for Crank Nicholson
                 # theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
                    
 # Graph
 
-graph_type = "Allele densities"                           # "Population densities", "Population proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele densities"                           # "Genotype densities", "Genotype proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
@@ -233,7 +233,7 @@ if what_to_do == "speed function of s" :
       
     # Parameters
     if r<10 : 
-        T = 1600; L = 3200; M = T*6; N = L
+        T = 3200; L = 6400; M = T*40; N = L*10
     if r>=10 :  # for r -> infinity, we need a big time precision (for the simulation to be stable)
         T = 100; L = 400; M = T*40; N = L*4
     # Comparison with the perfect conversion in the zygote model    
@@ -244,17 +244,17 @@ if what_to_do == "speed function of s" :
     bio_para = [r,s,h,a,difW,difH,difD,c,homing]
      
     # Set the x-axis (values of s)
-    s_min = 0.32 ; s_max = 0.42
-    nb_points = 100
+    s_min = 0.34 ; s_max = 0.34
+    nb_points = 1
     s_values = np.linspace(s_min,s_max,nb_points)
-    fct_of_s = np.zeros((7,len(s_values))) 
+    fct_of_s = np.zeros((7,nb_points)) 
     # first line = s values
     fct_of_s[0,:] = s_values 
     # s values for s < 0.5
     list_s05 = []   
     
     # Print principal parameters
-    print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r); print("s =", s_values); print("h =", h); print("c =", c)
+    print("\nwhat_to_do =", what_to_do); print("homing =", homing);  print("\nr =", r); print("s =", s_values); print("h =", h); print("c =", c, "\n")
       
     # Loop on s_values
     for s_index in range(len(s_values)) :
@@ -262,31 +262,34 @@ if what_to_do == "speed function of s" :
         s = np.round(s_values[s_index],3); print(s); bio_para[1] = s 
                 
         # line = numerical speed of Tanaka cubic
-        #fct_of_s[1,s_index] = tanaka(s,"cubic",model_para,num_para,graph_para)[2][-1] 
+        #fct_of_s[1,s_index] = tanaka(s,"cubic",model_paraé,num_para,graph_para)[2][-1] 
         # third line = exact bistable speed for Tanaka cubic 
         #fct_of_s[2,s_index] = (2-3*s)/np.sqrt(2*s)     
         # fourth line = numerical speed of Tanaka fraction
         fct_of_s[3,s_index] = tanaka(s,"fraction",model_para,num_para,graph_para)[2][-1]  
+        print(fct_of_s[3,s_index])
         # fifth line = numerical speed Leo and Florence's model
         #fct_of_s[4,s_index] = evolution(bio_para, model_para, num_para, graph_para, what_to_do)[4][-1]
         if s <= 0.5 : 
             list_s05.append(s)
             # sixth line = numerical speed of KPP model (only defined when s < 0.5)
             fct_of_s[5,s_index] = tanaka(s,"KPP",model_para,num_para,graph_para)[2][-1]  
+            print(fct_of_s[5,s_index])
             # seventh line = theorical speed of KPP model (only defined when s < 0.5)
             fct_of_s[6,s_index] = 2*np.sqrt(1-2*s)
+            print(fct_of_s[6,s_index])
            
             
     
     # Figure
     fig, ax = plt.subplots()    
-    #ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="Tanaka Cubic")
-    #ax.plot(fct_of_s[0,:],fct_of_s[2,:], label="(2-3*s)/np.sqrt(2*s)")    
-    ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Tanaka Fraction")
-    #if r == 0 : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Leo/Flo")
+    #ax.plot(fct_of_s[0,:],fct_of_s[1,:], label="Barton")
+    #ax.plot(fct_of_s[0,:],fct_of_s[2,:], label="(2-3*s)/sqrt(2*s)")    
+    ax.plot(fct_of_s[0,:],fct_of_s[3,:], label="Model (12)")
+    #if r == 0 : ax.plot(list_s05,fct_of_s[4,0:len(list_s05)], label="Model (4)")
     #else : print("r est different de 0.")
-    ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="KPP numerique")
-    ax.plot(list_s05,fct_of_s[6,0:len(list_s05)], label="KPP theorique")
+    ax.plot(list_s05,fct_of_s[5,0:len(list_s05)], label="Fisher KPP")
+    ax.plot(list_s05,fct_of_s[6,0:len(list_s05)], label="2 sqrt(1-2s)")
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
         bio_para[1] = s_values 
@@ -477,7 +480,7 @@ if what_to_do == "limite r infini" :
     
     T = 1000; L = 4000; M = T*40; N = L; mod=int(T/10)         #T = 150; L = 900; M = 2000; N = 3000  
     CI = "center"
-    graph_type = "Population density" 
+    graph_type = "Genotype density" 
     linear_growth = False ; linear_mating = False              
     homing = "zygote"        # "zygote" or "germline" or "minimum"
     c = 1; h = 1

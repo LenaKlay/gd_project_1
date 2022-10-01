@@ -10,25 +10,53 @@ Created on Wed May 4 15:32:47 2021
 import numpy as np
 import matplotlib.pyplot as plt
 
+    
+# trouver les bons couples
+    
+homing = "germline"
+for h in np.linspace(0.1,0.9,17) : 
+    for c in np.linspace(0.1,0.9,17) :
+        c = np.round(c,2)
+        h = np.round(h,2)
+        s1 = c/(1-h*(1-c))
+        s2 = c/(2*c + h*(1-c))    # zygote
+        s3 = c/(2*c*h + h*(1-c))  # germline
+        
+        if homing == "zygote" :
+            if (1-h)*(1-c) > 0.5 :
+                if s1 > 0.2 and s1 < 0.8 and  s2 > 0.2 and s2 <0.8 and abs(s1-s3) > 0.2 :
+                    print('Coexistance c :',c,'and h :',h)                                    
+            if (1-h)*(1-c) < 0.5 :                          
+                if s1 > 0.2 and s1 < 0.8 and  s2 > 0.2 and s2 <0.8 and abs(s1-s2) > 0.2 :
+                    print('Bistabilite c :',c,'and h :',h)
+        
+        if homing == "germline" :
+            if h < 0.5 :
+                if s1 > 0.2 and s1 < 0.8 and  s3 > 0.2 and s3 <0.8 and abs(s1-s3) > 0.2 :
+                    print('Coexistance c :',c,'and h :',h, abs(s1-s3))           
+            if h > 0.5 :                           
+                if s1 > 0.2 and s1 < 0.8 and  s3 > 0.2 and s3 <0.8 and abs(s1-s3) > 0.2 :
+                    print('Bistabilite c :',c,'and h :',h, abs(s1-s3))
 
-for c in np.linspace(0.1,0.9,9) :
-    h=np.linspace(0.1,1,9)
-    fig, ax = plt.subplots()
-    ax.plot(h,c/(1-h*(1-c)), label='s1')
-    #ax.plot(h, c/(2*c + h*(1-c)), label='s2 zyg')
-    ax.plot(h, c/(2*c*h + h*(1-c)), label='s2 ger')
-    ax.vlines(0.4,0,1)
-    ax.vlines(0.6,0,1)
-    #ax.plot(h,2*np.sqrt(c*(1-2*s*h)- s*h*(1-c)))
-    ax.set(xlabel='h value', ylabel='s value', ylim = (0,1), title=f"c={c}")
-    plt.legend()
-    plt.show()
+# Zygote 
+#c = 0.25; h = 0.1           
+#c = 0.75; h = 0.1    OU   c = 0.25; h = 0.75
 
+# Germline  
+#c = 0.25; h = 0.3            
+#c = 0.25; h = 0.75            
+       
+    
+    
+    
+    
 
-for c in np.linspace(0.1,0.9,9) : 
-    c = np.round(c,2)
-    homing = 'germline'      
-    precision = 500  
+# Divers
+
+for i in range(3) : 
+    c = [0.25, 0.75, 0.25][i]
+    homing = ['zygote', 'zygote', 'germline'][i]      
+    precision = 1000  
     res = np.zeros((precision,precision))
     values = np.linspace(0.01,0.99,precision)
     for s_index in range(precision) :
@@ -52,44 +80,20 @@ for c in np.linspace(0.1,0.9,9) :
     fig, ax = plt.subplots()
     im = ax.imshow(res)
     ax.figure.colorbar(im, ax=ax)
-    ax.set_title(f"c = {c}")
+    ax.set_title(f"{homing} c = {c}")
+    ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
+    ax.set_ylabel("h (dominance)", fontsize=12)
     plt.gca().invert_yaxis()  
     fig.tight_layout()
     plt.show()
     
     
     
-# trouver les bons couples
     
-for c in np.linspace(0.1,0.9,17) :
-    for h in np.linspace(0.1,0.9,17) : 
-        c = np.round(c,2)
-        h = np.round(h,2)
-        if h < 0.5 : 
-                s1 = c/(1-h*(1-c))
-                s3 = c/(2*c + h*(1-c))
-                s2 = c/(2*c*h + h*(1-c))               
-                if s1 > 0.2 and s1 < 0.8 and  s2 > 0.2 and s2 <0.8 and abs(s1-s2) > 0.2 :
-                    print('Coexistance c :',c,'and h :',h)
-                                    
-        if h > 0.5 :
-                s1 = c/(1-h*(1-c))
-                s3 = c/(2*c + h*(1-c))
-                s2 = c/(2*c*h + h*(1-c))               
-                if s1 > 0.2 and s1 < 0.8 and  s2 > 0.2 and s2 <0.8 and s3 > 0.2 and abs(s1-s2) > 0.2 :
-                    print('Bistabilite c :',c,'and h :',h)
-            
     
-
-for c in np.linspace(0.1,0.9,9) :
-    h=np.linspace(0.1,1,9)
-    fig, ax = plt.subplots()
-    ax.plot(h,c/(1-h*(1-c)), label='s1')
-    #ax.plot(h, c/(2*c + h*(1-c)), label='s2 zyg')
-    ax.plot(h, c/(2*c*h + h*(1-c)), label='s2 ger')
-    ax.vlines(0.4,0,1)
-    ax.vlines(0.6,0,1)
-    #ax.plot(h,2*np.sqrt(c*(1-2*s*h)- s*h*(1-c)))
-    ax.set(xlabel='h value', ylabel='s value', ylim = (0,1), title=f"c={c}")
-    plt.legend()
-    plt.show()
+    
+    
+    
+    
+    
+    

@@ -53,7 +53,7 @@ def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
         plt.plot(X,D1+D2, color="black", linewidth=line_size)                 
                          
         # Graphic size, title and labels
-        ax.set(xlabel='Space', ylabel="population densities", ylim = (0,D1[0]+0.1*D1[0]), xlim=(X[0],X[-1]))
+        ax.set(xlabel='Space', ylabel="Genotype densities", ylim = (0,D1[0]+0.1*D1[0]), xlim=(X[0],X[-1]))
         #ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
             
         # Grid

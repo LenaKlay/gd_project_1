@@ -130,18 +130,20 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values) :
              s1_s2_range = np.linspace(s_1,s_2,s1_s2_len) 
              
              if homing == "zygote" :    
-                p_star = (s1_s2_range*(1-(1-c)*(1-h)) - c*(1-s1_s2_range))/(s1_s2_range*(1-2*(1-c)*(1-h)))  
-                mean_fitness = (1-s1_s2_range)*p_star**2+2*(c*(1-s1_s2_range)+(1-c)*(1-s1_s2_range*h))*p_star*(1-p_star)+(1-p_star)**2 
+                #p_star = (s1_s2_range*(1-(1-c)*(1-h)) - c*(1-s1_s2_range))/(s1_s2_range*(1-2*(1-c)*(1-h)))  
+                #mean_fitness = (1-s1_s2_range)*p_star**2+2*(c*(1-s1_s2_range)+(1-c)*(1-s1_s2_range*h))*p_star*(1-p_star)+(1-p_star)**2 
+                era_pop = (c+s*c*h-2*c*s-s*h)*(c+(1-c)*s*h)/(c**2*(2*s-1)+s*(1-2*h+2*c*h-2*c)+(1-c)*s**2*h*((1-c)*h+2*c))
              if homing == "germline" : 
-                p_star = ((1-s1_s2_range*h)*(1+c)-1)/(s1_s2_range*(1-2*h))
-                mean_fitness = (1-s1_s2_range)*p_star**2+2*(1-s1_s2_range*h)*p_star*(1-p_star)+(1-p_star)**2   
-            
+                #p_star = ((1-s1_s2_range*h)*(1+c)-1)/(s1_s2_range*(1-2*h))
+                #mean_fitness = (1-s1_s2_range)*p_star**2+2*(1-s1_s2_range*h)*p_star*(1-p_star)+(1-p_star)**2   
+                era_pop = s*(1-2*h)/(s**2*h**2 - c**2*(1-s*h)**2 +  s*(1-2*h))
             
      ################################ Verifier pour rlog = False; si ok copier le tout dans heatmap.py ###################################
        
              eradication_pop = np.zeros(s1_s2_len)
              for i in range(s1_s2_len):
-                 eradication_pop[i] = np.where((1-mean_fitness[i])/mean_fitness[i] < r_range_precise)[0][0]/100 
+                 #eradication_pop[i] = np.where((1-mean_fitness[i])/mean_fitness[i] < r_range_precise)[0][0]/100 
+                 eradication_pop[i] = np.where(era_pop[i] < r_range_precise)[0][0]/100
              eradication_pop = eradication_pop[0:np.where(eradication_pop==0)[0][0] + 1]
              abscisse_pop = ((s1_s2_range-s_range[0])*((precision-1)/(s_range[-1]-s_range[0])))[0:np.where(eradication_pop==0)[0][0] + 1]
              ax.plot(abscisse_pop, eradication_pop-0.5, color='#40720cff', linewidth = 4) 
@@ -160,3 +162,5 @@ def print_heatmap(homing, c, h, s_range, r_range, heatmap_values) :
 path = f'../figures/heatmaps/{homing}_c_{c}_h_{h}'
 heatmap_values = np.loadtxt(f'{path}/heatmap_c_{c}_h_{h}.txt') 
 print_heatmap(homing, c, h, s_range, r_range, heatmap_values)
+    
+    
