@@ -19,15 +19,15 @@ label_size = 20
 number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
-line_size = 4
+line_size = 10
 
 # External functions
 from graph import save_fig_or_data
 
 def tanaka(s,model,model_para,num_para,graph_para): 
-    T,L,M,N,mod,theta = num_para
+    T,L,M,N,theta = num_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
+    wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
 
     # Steps
     dt = T/M    # time

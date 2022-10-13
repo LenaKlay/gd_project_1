@@ -27,9 +27,9 @@ save_column = True
 
 def graph(X,W,H,D,t,graph_para,bio_para,num_para):
        
-        r,s,h,a,difW,difH,difD,c,homing = bio_para
-        T,L,M,N,mod,theta = num_para
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
+        r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
+        T,L,M,N,theta = num_para
+        wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
 
         fig, ax = plt.subplots()
         
@@ -40,15 +40,15 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
             nb = 3; Y = [W/(W+H+D), D/(W+H+D), H/(W+H+D)]            
         if graph_type == "Allele densities" : 
             nb = 2
-            if homing == "zygote" : 
+            if conversion_timing == "zygote" : 
                 Y = [W+0.5*H, D+0.5*H]
-            if homing == "germline" : 
+            if conversion_timing == "germline" : 
                 Y = [W+0.5*(1-c)*H, D+0.5*(1+c)*H]
         if graph_type == "Allele proportions" : 
             nb = 2
-            if homing == "zygote" : 
+            if conversion_timing == "zygote" : 
                 Y = [(W+0.5*H)/(W+H+D), (D+0.5*H)/(W+H+D) ]
-            if homing == "germline" : 
+            if conversion_timing == "germline" : 
                 Y = [(W+0.5*(1-c)*H)/(W+H+D), (D+0.5*(1+c)*H)/(W+H+D) ]
                 
         # what to plot
@@ -97,7 +97,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         
         # Saving figures and datas
         if save_fig : 
-            directory = f"evolution/{homing}/r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
+            directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
             #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
             num = str(int(t)//mod)
             if len(num)==1: num = '0'+'0'+num
@@ -105,6 +105,70 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
             save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para)
             #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
+    
+    
+  
+def graph_2D(t, W, H, D, N, graph_para, bio_para, num_para):
+    # Parameters
+    wild, heterozygous, drive = graph_para[0:3]; save_fig = graph_para[-1]
+    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
+    # Figure
+    for i in range(3):
+        if [wild, heterozygous, drive][i] :
+            genotype = ["WW","DW","DD"][i]
+            heatmap_values = np.resize([W,H,D][i],(N+1,N+1)).transpose()
+            fig, ax = plt.subplots() 
+            im = ax.imshow(heatmap_values,cmap='Blues', aspect='auto', vmin=0, vmax=1)  
+            ax.figure.colorbar(im, ax=ax)   
+            fig.suptitle(f"Genotype {genotype} at time {np.round(t,2)}", fontsize=14)
+            if save_fig :
+                directory = f"evolution_2D/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"                       
+                save_fig_or_data(directory, fig, [], f"{genotype}_t_{t}", bio_para, num_para)
+            plt.show() 
+    
+def graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para):
+    # Parameters
+    wild, heterozygous, drive, mod = graph_para[0:4]; save_fig = graph_para[-1]
+    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
+    # Figure
+    contour_threshold = 0.2
+    for i in range(3):
+        if [wild, heterozygous, drive][i] :
+            genotype = ["WW","DW","DD"][i]
+            heatmap_values = np.resize([W,H,D][i],(N+1,N+1)).transpose()
+            fig, ax = plt.subplots() 
+            g1 = lambda x,y: heatmap_values[int(y),int(x)] 
+            g2 = np.vectorize(g1)
+            x = np.linspace(0,heatmap_values.shape[1], 1001)[:-1]
+            y = np.linspace(0,heatmap_values.shape[0], 1001)[:-1]
+            X, Y= np.meshgrid(x,y)
+            Z = g2(X,Y)  
+            Z_list[nb_graph-1] = Z
+            #x = np.linspace(0,heatmap_values.shape[1], heatmap_values.shape[1]*100)
+            #y = np.linspace(0,heatmap_values.shape[0], heatmap_values.shape[0]*100)
+            #X, Y= np.meshgrid(x[:-1],y[:-1])
+            #Z = g2(X[:-1],Y[:-1])  
+            #Z_list[nb_graph-1] = Z[:,1:]
+            ax.set_aspect('equal', adjustable='box')
+            #im = ax.imshow(heatmap_values,cmap='Blues', aspect='auto', vmin=0, vmax=1)  
+            #ax.figure.colorbar(im, ax=ax)   
+            #ax.contour(np.arange(N+1), np.arange(N+1), heatmap_values, levels=[0.4]) 
+            for i in range(nb_graph) : 
+                label = f'{int(mod*i)}'
+                if i == nb_graph - 1 : label = f'{int(t)}'
+                if np.any(Z_list[i] > contour_threshold) and np.any(Z_list[i] < contour_threshold): contour = ax.contour(Z_list[i], [contour_threshold], linewidths=3, extent=[0-0.5, x[:-1].max()-0.5,0-0.5, y[:-1].max()-0.5])
+                fmt = {}; fmt[contour_threshold] = label
+                ax.clabel(contour, np.ones(1)*contour_threshold, inline=True, fmt=fmt, fontsize=10) 
+            if save_fig :
+                directory = f"evolution_2D/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"       
+                save_fig_or_data(directory, fig, [], f"contour_{genotype}_t_{t}", bio_para, num_para)
+            plt.show()   
+    return(Z_list)
+             
+    
+    
+    
+    
     
 
 
@@ -123,14 +187,14 @@ def create_directory(path, bio_para, num_para, parameters_txt) :
                         
             # Write parameters in the new directory
             if parameters_txt : 
-                T,L,M,N,mod,theta = num_para
+                T,L,M,N,theta = num_para
                 file = open(f"../outputs{path}/0_parameters.txt", "w") 
                 
                 if bio_para == None :  #  no bio_para for tanaka
-                    file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}")  
+                    file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")  
                 else : 
-                    r,s,h,a,difW,difH,difD,c,homing = bio_para
-                    file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nhoming = {homing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta} \nmod = {mod}")                     
+                    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
+                    file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nconversion_timing = {conversion_timing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")                     
                 file.close() 
     #else : 
     #    print("Already exists : %s" % new_dir)
@@ -161,8 +225,8 @@ def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
     # Save figure
     if fig != [] :
         fig.savefig(f"../outputs/{directories}/{title}.png", format='png')
-        fig.savefig(f"../outputs/{directories}/{title}.pdf", format='pdf') #; fig.savefig(f"../outputs/{directories}/{title}.png") 
         fig.savefig(f"../outputs/{directories}/{title}.svg", format='svg')
+        #fig.savefig(f"../outputs/{directories}/{title}.pdf", format='pdf')       
     # Save datas
     if data != [] :
         np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
