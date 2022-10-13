@@ -45,8 +45,8 @@ what_to_do = "evolution 2D"
 
 ## Biological
 r = 2                              # intrinsic growth rate
-s = 0.6                           # fitness disadvantage for drive
-h = 0.5                            # dominance coefficient
+s = 0.2                            # fitness disadvantage for drive
+h = 0                              # dominance coefficient
 c = 1                              # conversion rate
 conversion_timing = "zygote"       # "zygote" or "germline"
 
