@@ -113,16 +113,14 @@ def s1_s2(conversion_timing, c, h, s, graph_type) :
             if 0<p_star and p_star<1 : 
                 WT_allele_wave = True; treshold = ((1-p_star)+1)/2 
         else :  
-            if graph_type != None: print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
+            if graph_type != None: 
+                print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
         lin = c*(1-2*s*h)-(1-c)*s*h > 0 
         if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))
         
     return(treshold, p_star, WT_allele_wave, s_1, s_2)
     
-       
-        
-    
-    
+
 # Main evolution function (1D)     
 def evolution(bio_para, model_para, num_para, graph_para) :  
 

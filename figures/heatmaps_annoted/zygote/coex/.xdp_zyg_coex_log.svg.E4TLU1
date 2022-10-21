@@ -9,7 +9,7 @@
    id="svg8"
    inkscape:version="1.2.1 (0f2f062aeb, 2022-09-21, custom)"
    sodipodi:docname="zyg_coex_log.svg"
-   inkscape:export-filename="../d74bc90e/graph_coex_log.png"
+   inkscape:export-filename="../dd5a9682/zyg_coex_log.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
@@ -1951,6 +1951,15 @@
        d="M 14.203125,0 V 5.171875 H 26.90625 v 60.65625 l -14.703125,-9.53125 v 6.40625 L 29.984375,74.21875 H 36.71875 V 5.171875 H 49.421875 V 0 Z"
        inkscape:connector-curvature="0"
        style="stroke-linecap:butt;stroke-linejoin:round" />
+    <clipPath
+       id="p840022f3ac-17-2">
+      <rect
+         id="rect6186-7-6"
+         y="41.472"
+         x="57.599998"
+         width="357.12"
+         height="266.112" />
+    </clipPath>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -6365,15 +6374,7 @@
     <g
        id="line2d_14-1-3-1"
        style="stroke-linecap:butt;stroke-linejoin:round"
-       transform="matrix(0.1103447,0,0,0.1103447,316.05568,99.893233)">
-      <path
-         id="path6083-8-1"
-         style="fill:none;stroke:#ff9c00;stroke-width:11.3473;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         d="m 73.832727,300.05253 117.768433,-0.10173 0.16233,-0.45445 0.16233,-2.11004 0.16232,-7.60168 0.2435,-31.43823 0.73047,-110.74426 0.48698,-38.955 0.48698,-22.548148 0.48698,-13.529516 0.48699,-8.375581 0.56814,-5.979688 0.56815,-3.579669 0.56814,-2.170945 0.56815,-1.327313 0.56814,-0.815613 0.64931,-0.556753 0.81164,-0.3773 1.05513,-0.22583 1.7856,-0.122407 5.1133,-0.03444 191.22153,-4.68e-4 v 0"
-         clip-path="url(#p840022f3ac-17-4)"
-         inkscape:connector-curvature="0"
-         transform="translate(66.04149,107.79181)" />
-    </g>
+       transform="matrix(0.1103447,0,0,0.1103447,316.05568,99.893233)" />
     <text
        xml:space="preserve"
        style="font-size:4.00262px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.214426;stroke-linecap:butt;stroke-linejoin:round"
@@ -7085,5 +7086,18 @@
          y="106.48927">s<tspan
    style="font-size:65%;baseline-shift:sub"
    id="tspan5446">2,z</tspan></tspan></text>
+    <g
+       id="line2d_14-1-3-10"
+       style="stroke-linecap:butt;stroke-linejoin:round"
+       transform="matrix(-0.1103447,0,0,0.1103447,382.54972,99.853401)">
+      <path
+         id="path6083-8-6"
+         style="fill:none;stroke:#ff9c00;stroke-width:11.3473;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 73.832727,300.05253 203.891413,0.076 0.16233,-0.45445 0.16233,-2.11004 0.16232,-7.60168 0.2435,-31.43823 0.73047,-110.74426 0.48698,-38.955 0.48698,-22.548143 0.48698,-13.529516 0.48699,-8.375581 0.56814,-5.979688 0.56815,-3.579669 0.56814,-2.170945 0.56815,-1.327313 0.56814,-0.815613 0.64931,-0.556753 0.81164,-0.3773 1.05513,-0.22583 1.7856,-0.122407 5.1133,-0.03444 191.22153,-4.68e-4 -58.58865,1.297664"
+         clip-path="url(#p840022f3ac-17-2)"
+         inkscape:connector-curvature="0"
+         transform="translate(61.245912,107.79181)"
+         sodipodi:nodetypes="ccccccccccccccccccccccc" />
+    </g>
   </g>
 </svg>

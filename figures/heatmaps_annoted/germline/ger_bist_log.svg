@@ -2,10 +2,10 @@
 <!-- Created with matplotlib (https://matplotlib.org/) -->
 
 <svg
-   height="385.60001pt"
+   height="411.60001pt"
    version="1.1"
-   viewBox="0 0 460.8 385.6"
-   width="460.79999pt"
+   viewBox="0 0 419.8 411.6"
+   width="419.79999pt"
    id="svg1123"
    sodipodi:docname="ger_bist_log.svg"
    inkscape:version="1.2.1 (0f2f062aeb, 2022-09-21, custom)"
@@ -31,15 +31,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="pt"
      showgrid="false"
-     inkscape:zoom="1.1633323"
-     inkscape:cx="244.98589"
-     inkscape:cy="326.21805"
-     inkscape:window-width="1853"
-     inkscape:window-height="1018"
-     inkscape:window-x="67"
-     inkscape:window-y="34"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="figure_1"
+     inkscape:zoom="0.82260016"
+     inkscape:cx="271.69944"
+     inkscape:cy="285.6795"
+     inkscape:window-width="966"
+     inkscape:window-height="879"
+     inkscape:window-x="117"
+     inkscape:window-y="84"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1123"
      showguides="true" />
   <metadata
      id="metadata672">
@@ -65,10 +65,10 @@
   </defs>
   <g
      id="figure_1"
-     transform="translate(0,55.5)">
+     transform="translate(-18,46.5)">
     <g
        id="axes_1"
-       transform="translate(0,-72)">
+       transform="translate(25.5,9)">
       <g
          id="patch_2">
         <path
@@ -673,7 +673,7 @@
     </g>
     <g
        id="axes_2"
-       transform="translate(0,-72)">
+       transform="translate(25.5,9)">
       <g
          id="patch_7">
         <path
@@ -968,7 +968,7 @@
     </g>
     <g
        id="axes_3"
-       transform="translate(0.17268328,-0.05802096)">
+       transform="translate(25.672683,80.941979)">
       <g
          id="matplotlib.axis_5"
          transform="translate(0,-72)">
@@ -1080,7 +1080,7 @@
            id="tspan17915"
            style="font-size:8px;stroke-width:0.75"
            x="116.77724"
-           y="-37.171448">2g</tspan></text>
+           y="-37.171448">2,g</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:8px;line-height:1.25;font-family:serif;-inkscape-font-specification:serif;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:round"
@@ -1097,7 +1097,7 @@
   <g
      id="patch_7-2"
      style="stroke-linecap:butt;stroke-linejoin:round"
-     transform="matrix(1.1254083,0,0,2.3558918,125.40325,293.9712)">
+     transform="matrix(1.1254083,0,0,2.3558918,122.89863,-16.53004)">
     <path
        id="path5417"
        style="opacity:0.8;fill:#ffffff;stroke:#cccccc;stroke-width:1.09139;stroke-linecap:butt;stroke-linejoin:miter"
@@ -1107,7 +1107,7 @@
   <g
      id="line2d_18-8-3"
      style="stroke-linecap:butt;stroke-linejoin:round"
-     transform="matrix(0.38493283,0,0,0.38493283,132.92698,338.16153)">
+     transform="matrix(0.38493283,0,0,0.38493283,130.42236,27.66029)">
     <path
        id="path5450-6"
        style="fill:none;stroke:#73c946;stroke-width:14.728;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1117,18 +1117,18 @@
   <text
      xml:space="preserve"
      style="font-size:14px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:round"
-     x="221.85768"
-     y="351.1347"
+     x="219.35307"
+     y="40.633461"
      id="text14384-0-3"><tspan
        sodipodi:role="line"
        id="tspan14382-6-5"
        style="font-size:14px;stroke-width:0.75"
-       x="221.85768"
-       y="351.1347">Pure drive persistence line</tspan></text>
+       x="219.35307"
+       y="40.633461">Pure drive persistence line</tspan></text>
   <g
      id="line2d_18-8-3-3"
      style="stroke-linecap:butt;stroke-linejoin:round"
-     transform="matrix(0.38493283,0,0,0.38493283,132.6029,301.91127)">
+     transform="matrix(0.38493283,0,0,0.38493283,130.09828,-8.5899704)">
     <path
        id="path5450-6-6"
        style="fill:none;stroke:#40720c;stroke-width:14.728;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -1138,32 +1138,32 @@
   <text
      xml:space="preserve"
      style="font-size:14px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:round"
-     x="221.53362"
-     y="332.88446"
+     x="219.02901"
+     y="22.383219"
      id="text14384-0-3-7"><tspan
        sodipodi:role="line"
        id="tspan14382-6-5-5"
        style="font-size:14px;stroke-width:0.75"
-       x="221.53362"
-       y="332.88446">Composite persistence line</tspan></text>
+       x="219.02901"
+       y="22.383219">Composite persistence line</tspan></text>
   <text
      xml:space="preserve"
      style="font-size:14px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.75;stroke-linecap:butt;stroke-linejoin:round"
-     x="221.85768"
-     y="370.6347"
+     x="219.35307"
+     y="60.133446"
      id="text14384-0-3-6"><tspan
        sodipodi:role="line"
        id="tspan14382-6-5-2"
        style="font-size:14px;stroke-width:0.75"
-       x="221.85768"
-       y="370.6347">Gene drive clearance area</tspan></text>
+       x="219.35307"
+       y="60.133446">Gene drive clearance area</tspan></text>
   <rect
      style="fill:#999999;fill-opacity:0.843137;stroke:none;stroke-width:3.35647;stroke-linecap:butt;stroke-linejoin:round"
      id="rect2784"
      width="14.562072"
      height="14.562072"
-     x="198.60277"
-     y="358.22986" />
+     x="196.09816"
+     y="47.728615" />
   <defs
      id="defs1121">
     <clipPath
@@ -1187,7 +1187,34 @@
   </defs>
   <path
      style="fill:#999999;fill-opacity:0.843137;stroke:#999999;stroke-width:0.75px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:0.843137"
-     d="m 342.89419,32.68628 0.002,257.99951 H 117.62588 c 0,0 0.47104,-23.57476 1.04345,-35.34898 0.30238,-6.21971 0.70863,-12.43609 1.26272,-18.63844 0.65683,-7.35244 1.30066,-14.71721 2.4432,-22.00997 0.80777,-5.15594 1.65552,-10.37303 2.74087,-15.47776 1.13166,-5.32249 2.29416,-10.6071 3.91591,-15.80128 1.26534,-4.05263 2.89383,-8.00417 4.80145,-11.79705 1.76222,-3.50379 3.55827,-7.03269 5.49114,-10.44531 2.06376,-3.64369 4.02683,-7.32661 6.47242,-10.72582 1.86078,-2.58635 3.77215,-5.17649 5.9536,-7.49876 3.44697,-3.66949 8.04502,-7.44974 12.33854,-10.27369 7.17526,-4.71934 22.92384,-11.08346 22.92384,-11.08346 l 21.63662,-9.15821 23.10795,-10.1623 17.37472,-8.00468 15.85081,-7.53382 11.15359,-5.64962 12.6601,-6.86731 14.65225,-8.8219 12.28312,-8.42705 9.72568,-7.55362 6.3456,-5.62372 7.65727,-7.63187 z"
+     d="m 350.39419,104.68628 0.002,257.99951 H 125.12588 c 0,0 0.47104,-23.57476 1.04345,-35.34898 0.30238,-6.21971 0.70863,-12.43609 1.26272,-18.63844 0.65683,-7.35244 1.30066,-14.71721 2.4432,-22.00997 0.80777,-5.15594 1.65552,-10.37303 2.74087,-15.47776 1.13166,-5.32249 2.29416,-10.6071 3.91591,-15.80128 1.26534,-4.05263 2.89383,-8.00417 4.80145,-11.79705 1.76222,-3.50379 3.55827,-7.03269 5.49114,-10.44531 2.06376,-3.64369 4.02683,-7.32661 6.47242,-10.72582 1.86078,-2.58635 3.77215,-5.17649 5.9536,-7.49876 3.44697,-3.66949 8.04502,-7.44974 12.33854,-10.27369 7.17526,-4.71934 22.92384,-11.08346 22.92384,-11.08346 l 21.63662,-9.15821 23.10795,-10.1623 17.37472,-8.00468 15.85081,-7.53382 11.15359,-5.64962 12.6601,-6.86731 14.65225,-8.8219 12.28312,-8.42705 9.72568,-7.55362 6.3456,-5.62372 7.65727,-7.63187 z"
      id="path1457"
      sodipodi:nodetypes="cccssssssssssccccccccccccc" />
+  <text
+     xml:space="preserve"
+     style="font-size:18px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.749999;stroke-linecap:butt;stroke-linejoin:round"
+     x="-324.28256"
+     y="28.921021"
+     id="text14384-0-7-1"
+     inkscape:transform-center-x="18.359158"
+     inkscape:transform-center-y="17.957108"
+     transform="rotate(-90)"><tspan
+       sodipodi:role="line"
+       id="tspan14382-6-7-1"
+       style="font-weight:normal;font-size:18px;stroke-width:0.749999"
+       x="-324.28256"
+       y="28.921021">r (intrinsic growth rate)</tspan></text>
+  <text
+     xml:space="preserve"
+     style="font-size:18px;line-height:1.25;font-family:Sawasdee;-inkscape-font-specification:Sawasdee;stroke-width:0.749999;stroke-linecap:butt;stroke-linejoin:round"
+     x="84.24437"
+     y="401.11716"
+     id="text14384-0-7-1-6"
+     inkscape:transform-center-x="17.95711"
+     inkscape:transform-center-y="-18.35916"><tspan
+       sodipodi:role="line"
+       id="tspan14382-6-7-1-7"
+       style="font-weight:normal;font-size:18px;stroke-width:0.749999"
+       x="84.24437"
+       y="401.11716">s (fitness disadvantage for drive)</tspan></text>
 </svg>
