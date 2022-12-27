@@ -25,11 +25,11 @@ def growth(equ, oth1, oth2, bio_para, model_para):
     r,s,h,a,difW,difH,difD,c,conversion_timing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     # Function
-    n = (equ+oth1+oth2)
-    if growth_dynamic == "exponential":
+    n = equ+oth1+oth2; N = len(n)
+    if growth_dynamic == "constant":
         return(r+1)
     if growth_dynamic == "allee_effect" :
-        return(np.max(r*(1-n)*(n-a)+1,0))
+        return(np.maximum(r*(1-n)*(n-a)+1, np.zeros(N)))
     if growth_dynamic == "logistical" and linear_growth == False :
         return(r*(1-n)+1)
     if growth_dynamic == "logistical" and linear_growth == True :  
@@ -43,7 +43,7 @@ def death(equ, oth1, oth2, bio_para, model_para):
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     # Function
     n = (equ+oth1+oth2)
-    if death_dynamic == "exponential" :
+    if death_dynamic == "constant" :
         return(1)
     if death_dynamic == "logistical" :
         return(1+r*n)
@@ -58,7 +58,7 @@ def mating(W, H, D, bio_para, model_para):
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     
     # Function
-    if linear_mating == False : 
+    if not linear_mating : 
         
         WW = (W**2)/(W+H+D)
         HH = (H**2)/(W+H+D)
@@ -77,7 +77,7 @@ def mating(W, H, D, bio_para, model_para):
             mat2 = (1+c)*WH + 2*WD + 0.5*(1-c**2)*HH + (1-c)*HD
             mat3 = 0.25*(c+1)**2*HH + (1+c)*HD + DD
             
-    if linear_mating == True and conversion_timing == "zygote" : 
+    if linear_mating and conversion_timing == "zygote" : 
         mat1 = (W>D)
         mat2 = 0
         mat3 = ((W>D)+1)  
@@ -88,7 +88,7 @@ def mating(W, H, D, bio_para, model_para):
 
 def s1_s2(conversion_timing, c, h, s, graph_type) :
     
-    treshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     WT_allele_wave = False
     p_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
     
@@ -100,7 +100,7 @@ def s1_s2(conversion_timing, c, h, s, graph_type) :
             if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3), "< s <", np.round(s_2,3))
             p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))
             if 0<p_star and p_star<1 : 
-                WT_allele_wave = True; treshold = ((1-p_star)+1)/2 
+                WT_allele_wave = True; threshold = ((1-p_star)+1)/2 
         else :  
             if graph_type != None: print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
         lin = c*(1-2*s)-(1-c)*s*h
@@ -111,14 +111,40 @@ def s1_s2(conversion_timing, c, h, s, graph_type) :
             if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
             p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
             if 0<p_star and p_star<1 : 
-                WT_allele_wave = True; treshold = ((1-p_star)+1)/2 
+                WT_allele_wave = True; threshold = ((1-p_star)+1)/2 
         else :  
             if graph_type != None: 
                 print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
         lin = c*(1-2*s*h)-(1-c)*s*h > 0 
         if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))
         
-    return(treshold, p_star, WT_allele_wave, s_1, s_2)
+    return(threshold, p_star, WT_allele_wave, s_1, s_2)
+    
+    
+
+# Determine values of s1 and s2, and in which regime we are.   
+def s1_s2_num(conversion_timing, c, h, s, graph_type) :
+    s_1 = c/(1-h*(1-c))   
+    if conversion_timing == "zygote" :
+        s_2 = c/(2*c + h*(1-c))
+        if s_1 < s_2 : 
+            if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3), "< s <", np.round(s_2,3))
+            #p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))
+        else :  
+            if graph_type != None: print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
+        lin = c*(1-2*s)-(1-c)*s*h
+        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))               
+    if conversion_timing == "germline" : 
+        s_2 = c/(2*c*h + h*(1-c))
+        if s_1 < s_2 :
+            if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
+            #p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
+        else :  
+            if graph_type != None: 
+                print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
+        lin = c*(1-2*s*h)-(1-c)*s*h > 0 
+        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))
+    return(s_1, s_2)
     
 
 # Main evolution function (1D)     
@@ -126,15 +152,20 @@ def evolution(bio_para, model_para, num_para, graph_para) :
 
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para
-    wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
+    T,L,M,N,theta = num_para[0:5]
+    wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
     
     # Parameters initialization
-    increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
-    position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the treshold value.
+    position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    treshold, p_star, WT_allele_wave, s_1, s_2 = s1_s2(conversion_timing, c, h, s, graph_type)         
+    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
+    
+    # Regimes 
+    if growth_dynamic == "logistical" and death_dynamic == "constant" : 
+        s1, s2 = s1_s2_num(conversion_timing, c, h, s, graph_type)
+    
     
     # Steps
     dt = T/M    # time
@@ -154,7 +185,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         D = np.zeros(N+1); D[0:N//10] = 1   # Drive individuals at t=0
        
     if graph_type != None and show_graph_ini :
-        graph(X,W,H,D,0,graph_para,bio_para,num_para)
+        graph(X,W,H,D,0,graph_para,bio_para,num_para, model_para)
     nb_graph = 1
         
     # Matrix
@@ -182,56 +213,56 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         W[1:-1] = la.spsolve(Bw_, Bw.dot(W[1:-1]) + dt*f1[1:-1])
         H[1:-1] = la.spsolve(Bh_, Bh.dot(H[1:-1]) + dt*f2[1:-1])
         D[1:-1] = la.spsolve(Bd_, Bd.dot(D[1:-1]) + dt*f3[1:-1])
-        
-        
-        W[0] = W[1]; H[0] = H[1]; D[0] = D[1]   # Neumann condition alpha=0
+             
+        W[0] = W[1]; H[0] = H[1]; D[0] = D[1]    # Neumann condition alpha=0
         W[-1] = W[-2]; H[-1] = H[-2]; D[-1] = D[-2]  # Neumann condition beta=0
         
         # Graph
-        if t>=mod*nb_graph and graph_type != None : 
-            graph(X,W,H,D,t,graph_para,bio_para,num_para)
+        if t>mod*nb_graph and graph_type != None : 
+            graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para)
             nb_graph += 1
                                           
         # Compute the speed on WT allele proportion or density
         if conversion_timing == "zygote" : 
-            if speed_proportion : WT = (W+0.5*H)/(W+H+D) 
-            else : WT = W+0.5*H
+            WT = (W+0.5*H)/(W+H+D) 
         if conversion_timing == "germline" : 
-            if speed_proportion : WT = (W+0.5*(1-c)*H)/(W+H+D) 
-            else : WT = W+0.5*(1-c)*H
+            WT = (W+0.5*(1-c)*H)/(W+H+D) 
         
-        # If the WT wave is partially decreasing, index_neg is not empty.
-        epsilon = -0.0001 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
+        # Check if the WT wave is strictly increasing
+        epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
+        if len(index_neg) != 0 : print("WT prop decreasing :", index_neg) 
+               
+        # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
+        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((WT[center_index]>0.05) & (WT[center_index]<0.95))
+        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((WT[left_index]>0.05) & (WT[left_index]<0.95))
+        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((WT[right_index]>0.05) & (WT[right_index]<0.95))
+        if (cond1 or cond2 or cond3) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
+            pw_star = np.mean(WT[center_index])           # if this palliate is above the threshold value
+            threshold = (pw_star+1)/2
+            position = np.array([])   
+            speed_fct_of_time = np.array([])   
+            time = np.array([]) 
+            print("coex ! p_w* =", pw_star)
+            print("threshold =", threshold)
+            
+        # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
+        if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
+            # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
+            position = np.append(position, np.where(WT>threshold)[0][0])
+            # Wait a minimum time and a minimum number of positions to compute the speed
+            if len(position) > 20  : 
+                # The speed is computed on the last fifth of the position vector.
+                time = np.append(time,t)
+                speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
+        # if the threshold value of the wave is outside the window, stop the simulation  
+        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
+            print("t =",t)
+            break
+
+    # last graph
+    if show_graph_end :   
+        graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para)          
         
-        # if the wave is increasing OR if the first increasing section come above the treshold : the position will be correct.       
-        if len(index_neg) == 0 or WT[index_neg[0]] > treshold :
-            # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again. index_neg[0]>3 is there to assure 
-            # that the decreasing is not a numerical error due to borders. 
-            if len(index_neg) != 0 and increasing_WT_wave and index_neg[0]>3 :
-                position = np.array([])   
-                speed_fct_of_time = np.array([])   
-                time = np.array([])   
-                increasing_WT_wave = False
-            # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the treshold value of the wave might be outside the window.
-            if np.isin(True, WT>treshold) and np.isin(True, WT<0.99) and np.where(WT>treshold)[0][0] != 0:  
-                # List containing the first position of WT where the proportion of wild alleles is higher than the treshold.  
-                position = np.append(position, np.where(WT>treshold)[0][0])
-                # Wait a minimum time and a minimum number of positions to compute the speed
-                if len(position) > 20  : 
-                    # The speed is computed on the last fifth of the position vector.
-                    time = np.append(time,t)
-                    speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-            # if the treshold value of the wave is outside the window, stop the simulation  
-            #if not(np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
-            #    print("t =",t)
-            #    break
- 
-                    
-        # NB : problems encountered when computing the speed : 
-        # - decreasing section   ->     r=1.08 s=0.668 c=h=0.5 conversion_timing="germline"  T=1000  L=5000  M=6000  N=5000 
-        # - small perturbation at the border, which can create fake decreasing sections 
-        # - coexistance with WT equilibrium under the 0.2 treshold value   ->    r=0.36 s=0.332 c=h=0.25 conversion_timing="zygote"  T=5000  L=10000  M=T*6  N=L 
-    
     # plot the speed function of time    
     if len(speed_fct_of_time) != 0 : 
         if graph_type!= None :
@@ -240,14 +271,10 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
                 directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para)
+                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para, model_para)
             plt.show() 
     else :
         print(f"No wave for r = {r} and s = {s}.") 
-
-   # last graph
-    if show_graph_end :   
-        graph(X,W,H,D,t,graph_para,bio_para,num_para)                                          
 
     return(W,H,D,time,speed_fct_of_time)
 
@@ -260,16 +287,20 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
     # Parameters loading
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para
-    wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
+    T,L,M,N,theta = num_para[0:5]
+    wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
     
     # Parameters initialization
-    increasing_WT_wave = True # indicates if the WT wave is monotone increasing (can be decreasing for a short transition phase at the beginning)
-    position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the treshold value.
+    position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    treshold, p_star, WT_allele_wave, s_1, s_2 = s1_s2(conversion_timing, c, h, s, graph_type)    
-       
+    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
+    
+    # Regimes 
+    if growth_dynamic == "logistical" and death_dynamic == "constant" : 
+        s1, s2 = s1_s2_num(conversion_timing, c, h, s, graph_type)
+    
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
@@ -284,8 +315,8 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
     # First graph (initial condition)
     if graph_type != None and show_graph_ini :
         nb_graph = 1; Z_list = np.zeros((T//mod+2,1000,1000))
-        graph_2D(0, W, H, D, N, graph_para, bio_para, num_para)
-        Z_list = graph_2D_contour(0, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para) 
+        graph_2D(0, W, H, D, N, graph_para, bio_para, num_para, model_para)
+        Z_list = graph_2D_contour(0, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para) 
            
     # Laplacian matrix 
     index_diag_mat = np.arange(0,(N-1)**2+1,N-1)                  # (0, N-1, 2*(N-1), 3*(N-1), ....)
@@ -336,48 +367,43 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
         # Graph
         if t>=mod*nb_graph and graph_type != None : 
             nb_graph += 1
-            graph_2D(t, W, H, D, N, graph_para, bio_para, num_para)
-            Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para) 
+            graph_2D(t, W, H, D, N, graph_para, bio_para, num_para, model_para)
+            Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para) 
                                                    
         # Compute the speed on WT allele proportion or density
         if conversion_timing == "zygote" : 
-            if speed_proportion : WT = (W+0.5*H)/(W+H+D) 
-            else : WT = W+0.5*H
+            WT = (W+0.5*H)/(W+H+D) 
         if conversion_timing == "germline" : 
-            if speed_proportion : WT = (W+0.5*(1-c)*H)/(W+H+D) 
-            else : WT = W+0.5*(1-c)*H
+            WT = (W+0.5*(1-c)*H)/(W+H+D) 
         
-        # If the WT wave is partially decreasing, index_neg is not empty.
-        epsilon = -0.0001 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        
-        # if the wave is increasing OR if the first increasing section come above the treshold : the position will be correct.       
-        if len(index_neg) == 0 or WT[index_neg[0]] > treshold :
-            # if we realize only now that the wave is not increasing, it means that the previously recorded positions are false. We erase it and start again. index_neg[0]>3 is there to assure 
-            # that the decreasing is not a numerical error due to borders. 
-            if len(index_neg) != 0 and increasing_WT_wave and index_neg[0]>3 :
-                position = np.array([])   
-                speed_fct_of_time = np.array([])   
-                time = np.array([])   
-                increasing_WT_wave = False
-            # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the treshold value of the wave might be outside the window.
-            if np.isin(True, WT>treshold) and np.isin(True, WT<0.99) and np.where(WT>treshold)[0][0] != 0:  
-                # List containing the first position of WT where the proportion of wild alleles is higher than the treshold.  
-                position = np.append(position, np.where(WT>treshold)[0][0])
-                # Wait a minimum time and a minimum number of positions to compute the speed
-                if len(position) > 20  : 
-                    # The speed is computed on the last fifth of the position vector.
-                    time = np.append(time,t)
-                    speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-            # if the treshold value of the wave is outside the window, stop the simulation  
-            # if not(np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
-            #    print("t =",t)
-            #    break
+        # Check if the WT wave is strictly increasing
+        epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
+        if len(index_neg) != 0 : print("WT proportion decreasing : problem !") 
+               
+        # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
+        center_index = np.arange(N//2-N//10,N//2+N//10)
+        if np.all((WT[center_index]>0.05) & (WT[center_index]<0.95)) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
+            pw_star = np.mean(WT[center_index])                                            # if this palliate is above the threshold value
+            threshold = (pw_star+1)/2
+            position = np.array([])   
+            speed_fct_of_time = np.array([])   
+            time = np.array([]) 
+            print("coex ! p* =", pw_star)
+            print("threshold =", threshold)
+        # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
+        if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
+            # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
+            position = np.append(position, np.where(WT>threshold)[0][0])
+            # Wait a minimum time and a minimum number of positions to compute the speed
+            if len(position) > 20  : 
+                # The speed is computed on the last fifth of the position vector.
+                time = np.append(time,t)
+                speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
+        # if the threshold value of the wave is outside the window, stop the simulation  
+        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
+            print("t =",t)
+            break
  
-                    
-        # NB : problems encountered when computing the speed : 
-        # - decreasing section   ->     r=1.08 s=0.668 c=h=0.5 conversion_timing="germline"  T=1000  L=5000  M=6000  N=5000 
-        # - small perturbation at the border, which can create fake decreasing sections 
-        # - coexistance with WT equilibrium under the 0.2 treshold value   ->    r=0.36 s=0.332 c=h=0.25 conversion_timing="zygote"  T=5000  L=10000  M=T*6  N=L 
     
     # plot the speed function of time    
     if len(speed_fct_of_time) != 0 : 
@@ -387,7 +413,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
                 directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para)
+                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para, model_para)
             plt.show() 
     else :
         print(f"No wave for r = {r} and s = {s}.") 
@@ -395,7 +421,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
    # last graph
     if show_graph_end :   
         nb_graph += 1
-        graph_2D(t, W, H, D, N, graph_para, bio_para, num_para) 
-        Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para)                                  
+        graph_2D(t, W, H, D, N, graph_para, bio_para, num_para, model_para) 
+        Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para)                                  
 
     return(W,H,D,time,speed_fct_of_time)

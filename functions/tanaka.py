@@ -25,9 +25,9 @@ line_size = 10
 from graph import save_fig_or_data
 
 def tanaka(s,model,model_para,num_para,graph_para): 
-    T,L,M,N,theta = num_para
+    T,L,M,N,theta = num_para[0:5]
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
+    wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
 
     # Steps
     dt = T/M    # time
@@ -35,7 +35,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
     # Spatial domain (1D)
     X = np.linspace(0,N,N+1)*dx   
-    #save_fig_or_data(f"tanaka/{model}/s_{s}", [], X, "abscisse_X", None, num_para)
+    #save_fig_or_data(f"tanaka/{model}/s_{s}", [], X, "abscisse_X", None, num_para, None)
     
     # Initialization       
     if CI == "center" : 
@@ -104,7 +104,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
             ax.plot(time, speed_fct_of_time) 
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
-                save_fig_or_data(f"tanaka/{model}/s_{s}", fig, speed_fct_of_time, "speed_fct_of_time", None, num_para)
+                save_fig_or_data(f"tanaka/{model}/s_{s}", fig, speed_fct_of_time, "speed_fct_of_time", None, num_para, None)
             plt.show() 
     else :
         print('No wave')     
@@ -118,7 +118,7 @@ def tanaka(s,model,model_para,num_para,graph_para):
     
 def graph_tanaka(s,X,P,t,model,graph_para,num_para):
     
-        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, speed_proportion, show_graph_ini, show_graph_end = graph_para
+        graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, show_graph_ini, show_graph_end = graph_para
 
         fig, ax = plt.subplots()        
         ax.plot(X, P, label=f'Drive', color = "deeppink", linewidth=line_size)
@@ -140,7 +140,7 @@ def graph_tanaka(s,X,P,t,model,graph_para,num_para):
         
         # Saving figures and data
         if save_fig : 
-            save_fig_or_data(f"tanaka/{model}/s_{s}", fig, [], f"t_{t}", None, num_para)
+            save_fig_or_data(f"tanaka/{model}/s_{s}", fig, [], f"t_{t}", None, num_para, None)
         
         
         

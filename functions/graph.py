@@ -25,11 +25,11 @@ number_y_size = 20
 save_column = True
 
 
-def graph(X,W,H,D,t,graph_para,bio_para,num_para):
+def graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para):
        
         r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-        T,L,M,N,theta = num_para
-        wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
+        T,L,M,N,theta = num_para[0:5]
+        wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
 
         fig, ax = plt.subplots()
         
@@ -69,10 +69,10 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         else : defaultylim = (-0.03,1.03)  
         if xlim == None : 
             ax.set(xlabel='Space', ylabel=graph_type, ylim = defaultylim)
-            #ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
+            ax.set_title(f"{graph_type} t = {t}", fontsize = title_size, loc='right')
         else : 
             ax.set(xlabel='Space', xlim = xlim, ylabel=graph_type, ylim = defaultylim)
-            ax.set_title(f"t = {t}", fontsize = title_size, loc='right')
+            ax.set_title(f"{graph_type} t = {t}", fontsize = title_size, loc='right')
             
         # Grid
         if grid == True : 
@@ -98,17 +98,17 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para):
         # Saving figures and datas
         if save_fig : 
             directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-            #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
-            num = str(int(t)//mod)
-            if len(num)==1: num = '0'+'0'+num
-            if len(num)==2: num = '0'+num
-            save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para)
+            save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para, model_para)
+            #num = str(int(t)//mod)
+            #if len(num)==1: num = '0'+'0'+num
+            #if len(num)==2: num = '0'+num
+            #save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para, model_para)
             #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
     
     
   
-def graph_2D(t, W, H, D, N, graph_para, bio_para, num_para):
+def graph_2D(t, W, H, D, N, graph_para, bio_para, num_para, model_para):
     # Parameters
     wild, heterozygous, drive = graph_para[0:3]; save_fig = graph_para[-1]
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
@@ -123,10 +123,10 @@ def graph_2D(t, W, H, D, N, graph_para, bio_para, num_para):
             fig.suptitle(f"Genotype {genotype} at time {np.round(t,2)}", fontsize=14)
             if save_fig :
                 directory = f"evolution_2D/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"                       
-                save_fig_or_data(directory, fig, [], f"{genotype}_t_{t}", bio_para, num_para)
+                save_fig_or_data(directory, fig, [], f"{genotype}_t_{t}", bio_para, num_para, model_para)
             plt.show() 
     
-def graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para):
+def graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para):
     # Parameters
     wild, heterozygous, drive, mod = graph_para[0:4]; save_fig = graph_para[-1]
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
@@ -161,7 +161,7 @@ def graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_
                 ax.clabel(contour, np.ones(1)*contour_threshold, inline=True, fmt=fmt, fontsize=10) 
             if save_fig :
                 directory = f"evolution_2D/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"       
-                save_fig_or_data(directory, fig, [], f"contour_{genotype}_t_{t}", bio_para, num_para)
+                save_fig_or_data(directory, fig, [], f"contour_{genotype}_t_{t}", bio_para, num_para, model_para)
             plt.show()   
     return(Z_list)
              
@@ -173,7 +173,7 @@ def graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_
 
 
 # Create a new directory at the localisation f"../outputs{path}"
-def create_directory(path, bio_para, num_para, parameters_txt) :
+def create_directory(path) :
     # Directory to create
     new_dir = f"../outputs{path}"
     # ... if it doesn't already exist
@@ -182,52 +182,51 @@ def create_directory(path, bio_para, num_para, parameters_txt) :
             os.mkdir(new_dir)
         except OSError:
             print ("Fail : %s " % new_dir)
-        #else:
-            #print ("Success : %s " % new_dir)
-                        
-            # Write parameters in the new directory
-            if parameters_txt : 
-                T,L,M,N,theta = num_para
-                file = open(f"../outputs{path}/0_parameters.txt", "w") 
-                
-                if bio_para == None :  #  no bio_para for tanaka
-                    file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")  
-                else : 
-                    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-                    file.write(f"Parameters : \nr = {r} \ns = {s} \nh = {h} \nc = {c} \nconversion_timing = {conversion_timing} \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")                     
-                file.close() 
-    #else : 
-    #    print("Already exists : %s" % new_dir)
+
+   
     
+def create_para_txt(path, bio_para, num_para, model_para):
+    T,L,M,N,theta = num_para[0:5]
+    file = open(f"../outputs/{path}/0_parameters.txt", "w") 
+    file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")  
+    if bio_para != None :
+        r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
+        file.write(f"\nr = {r} \ns = {s} \nh = {h} \nc = {c} \nconversion_timing = {conversion_timing} \na = {a} \ndifWW = {difWW} \ndifDW = {difDW} \ndifDD = {difDD}")                     
+    if model_para != None : 
+        CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
+        file.write(f"\ngrowth_dynamic = {growth_dynamic} \ndeath_dynamic = {death_dynamic}")  
+    file.close()
     
 
 # Create the tree of directories at the localisation f"../outputs{path}" with parameters.txt
-def create_path(directories, bio_para, num_para):
+def create_path(directory):
     #actual_dir = os.getcwd()
     #print ("\nWorking directory : %s" % actual_dir) 
     lst_slash_index = [-1]
     path = ""          
-    for pos,char in enumerate(directories):
+    for pos,char in enumerate(directory):
         if(char == "/"):
             lst_slash_index.append(pos)
-            path = path+"/"+directories[lst_slash_index[-2]+1:lst_slash_index[-1]]
-            create_directory(path, bio_para, num_para, False)
-    path = path+"/"+directories[lst_slash_index[-1]+1:len(directories)]    
-    create_directory(path, bio_para, num_para, True)
+            path = path+"/"+directory[lst_slash_index[-2]+1:lst_slash_index[-1]]
+            create_directory(path)
+    path = path+"/"+directory[lst_slash_index[-1]+1:len(directory)]    
+    create_directory(path)
                  
     
 # Save figures and datas regarding what we are doing. 
 # fig is the figure to save (title.png and title.pdf)
 # data is the data to save (title.txt)
-def save_fig_or_data(directories, fig, data, title, bio_para, num_para):
+def save_fig_or_data(directory, fig, data, title, bio_para, num_para, model_para):
     # Create the tree of directories in outputs (if it does not exist) with parameters.txt
-    create_path(directories, bio_para, num_para)
+    create_path(directory)
+    if not os.path.exists(f"../outputs/{directory}/0_parameters.txt") :
+        create_para_txt(directory, bio_para, num_para, model_para)
     # Save figure
     if fig != [] :
-        fig.savefig(f"../outputs/{directories}/{title}.png", format='png')
-        fig.savefig(f"../outputs/{directories}/{title}.svg", format='svg')
+        fig.savefig(f"../outputs/{directory}/{title}.png", format='png')
+        fig.savefig(f"../outputs/{directory}/{title}.svg", format='svg')
         #fig.savefig(f"../outputs/{directories}/{title}.pdf", format='pdf')       
     # Save datas
     if data != [] :
-        np.savetxt(f"../outputs/{directories}/{title}.txt", data)   
+        np.savetxt(f"../outputs/{directory}/{title}.txt", data)   
               

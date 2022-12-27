@@ -72,14 +72,14 @@ for i in range(3) :
             elif s > max(s_1,s_2) : 
                 res[h_index, s_index] = 4 # Wild monostable
             elif s_1 < s_2 : 
-                res[h_index, s_index] = 2 # Coexistence
+                res[h_index, s_index] = 3 # Coexistence
             elif s_2 < s_1 : 
-                res[h_index, s_index] = 3  # Bistability
+                res[h_index, s_index] = 2  # Bistability
             else : 
                 print('problème...')
             
     fig, ax = plt.subplots()
-    cmap = ListedColormap(["#ff7c7ce2", "#ea77eba1",  "#7ab552a2", "#bbcfffff"])  
+    cmap = ListedColormap(["#ff7c7ce2", "#7ab552a2", "#ea77eba1", "#bbcfffff",])  
     im = ax.imshow(res, cmap=cmap)
     ax.set_xticks(np.linspace(0,precision,5)); ax.set_yticks(np.linspace(0,precision,5))  
     ax.set_xticklabels(np.linspace(0,1,5)); ax.set_yticklabels(np.linspace(0,1,5))  
@@ -88,8 +88,8 @@ for i in range(3) :
     ax.set_ylabel("h (dominance)", fontsize=12)
     plt.gca().invert_yaxis()  
     fig.tight_layout()
-    fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.png", format='png')
-    fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.svg", format='svg')
+    #fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.png", format='png')
+    #fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.svg", format='svg')
     plt.show()
     
 
@@ -105,10 +105,82 @@ plt.plot(x,y2, color="#ea77eba1", label='coex')
 plt.plot(x,y1, color="#ff7c7ce2", label='drive')
 plt.legend()
 plt.show()
+
+
+
+
+c = 0.85
+conversion_timing = 'germline'      
+precision = 1000  
+res = np.zeros((precision,precision))
+values = np.linspace(0.01,0.99,precision)
+for s_index in range(precision) :
+    for h_index in range(precision) :
+        s = values[s_index]
+        h = values[h_index]
+        s_1 =  c/(1-h*(1-c))
+        if conversion_timing == "zygote" : s_2 = c/(2*c + h*(1-c))
+        if conversion_timing == "germline" : s_2 = c/(2*c*h + h*(1-c))
+        if s < min(s_1,s_2) : 
+            res[s_index, h_index] = 1 # Drive monostable
+        elif s > max(s_1,s_2) : 
+            res[s_index, h_index] = 4 # Wild monostable
+        elif s_1 < s_2 : 
+            res[s_index, h_index] = 3 # Coexistence
+        elif s_2 < s_1 : 
+            res[s_index, h_index] = 2  # Bistability
+        else : 
+            print('problème...')
+
+fig, ax = plt.subplots()
+cmap = ListedColormap(["#ff7c7ce2", "#7ab552a2", "#ea77eba1", "#bbcfffff",])  
+im = ax.imshow(res, cmap=cmap)
+ax.vlines(precision//2,-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))    
+ax.set_xticks(np.linspace(0,precision,5)); ax.set_yticks(np.linspace(0,precision,5))  
+ax.set_xticklabels(np.linspace(0,1,5)); ax.set_yticklabels(np.linspace(0,1,5))  
+ax.set_title(f"{conversion_timing} c = {c}")
+ax.set_xlabel("h (dominance)", fontsize=12) 
+ax.set_ylabel("s (fitness disadvantage for drive)", fontsize=12)    
+plt.gca().invert_yaxis()  
+fig.tight_layout()
+#fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.png", format='png')
+#fig.savefig(f"../figures/rode_debarre_2019/{conversion_timing}_c_{c}.svg", format='svg')
+plt.show()
     
-  
-    
-    
+
+
+
+c=0.85; s=0.95
+# s1
+(s-c)/(s*(1-c))
+# s2 
+c/((s*(1+c)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     
     

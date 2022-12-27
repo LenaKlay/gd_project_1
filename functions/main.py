@@ -36,7 +36,7 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "evolution 2D"
+what_to_do = "heatmap"
 
 
 ######################### General parameters ##################################
@@ -44,16 +44,19 @@ what_to_do = "evolution 2D"
 ### General parameters
 
 ## Biological
-r = 2                              # intrinsic growth rate
-s = 0.2                            # fitness disadvantage for drive
-h = 0                              # dominance coefficient
-c = 1                              # conversion rate
-conversion_timing = "zygote"       # "zygote" or "germline"
+r = 10                               # intrinsic growth rate
+s = 1                                # fitness disadvantage for drive
+h = 0.4                              # dominance coefficient
+c = 0.85                             # conversion rate
+conversion_timing = "germline"       # "zygote" or "germline"
+
+# Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
+ 
 
 # Particular growth/death terms
-a = 0                              # coefficient for allee effect (growth or death)
-growth_dynamic = "logistical"      # exponential or logistical (growth rate is r+1 for expon, r*coef+1 for logist)
-death_dynamic = "exponential"      # exponential or logistical  (death rate is always 1)
+a = 0.2                              # coefficient for allee effect (growth or death)
+growth_dynamic = "logistical"        # constant or logistical or allee_effect
+death_dynamic = "constant"           # constant or logistical or allee_effect
 linear_growth = False  
 linear_mating = False     
 
@@ -62,19 +65,18 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 50                            # final time
-L = 200                            # length of the spatial domain
-M = T*6                            # number of time steps
+T = 1000                            # final time
+L = 4000                           # length of the spatial domain
+M = T*6                           # number of time steps
 N = L                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
-speed_proportion = False           # True : use the wild-type density to compute the speed, False : use the wild-type proportion. 
-      
+    
 ## Save outputs
 save_fig = True                    # Save the figures (.svg and .png) 
 
 
 
-################ Parameters specific for each what_to_do ######################
+### Parameters specific for each what_to_do
 
 ## Evolution
 graph_type = "Allele densities"                           # "Genotype densities", "Genotype proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
@@ -84,7 +86,7 @@ wild = True; heterozygous = True; drive = True            # What to draw on the 
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//4                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//10                                              # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 ## Evolution 2D
 CI_lenght = N//4
  
@@ -97,8 +99,9 @@ r_min = 6 ; r_max = 10
 r_nb_points = 10       # r values are taken in np.linspace(r_min,r_max,r_nb_points) 
 
 ## Heatmap
-# I grouped the parameters in the part : if what_to_do == "heatmap" (see end of the code) 
-    
+# I grouped all the other parameters in the part : if what_to_do == "heatmap" (see end of the code) 
+vmin = -8
+vmax = 8      # Range min and max for the heatmap colour scale
 
 ### Small particularities
 # Do not show graph for these tasks
@@ -114,8 +117,8 @@ if what_to_do in ["speed function of time","speed function of s","speed function
 
 bio_para = [r,s,h,a,difWW,difDW,difDD,c,conversion_timing]
 model_para = [CI,growth_dynamic,death_dynamic,linear_growth,linear_mating]
-num_para = [T,L,M,N,theta]
-graph_para = [wild, heterozygous, drive, mod, grid, semilogy, xlim, speed_proportion, graph_type, show_graph_ini, show_graph_end, save_fig]
+num_para = [T,L,M,N,theta,[vmin,vmax]]
+graph_para = [wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig]
 
 
 ############################### Main program ##################################
@@ -160,9 +163,7 @@ if what_to_do == "KPP" :
 
 ## Speed function of time 
 if what_to_do == "speed function of time" :    
-    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing);  print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)      
-    # To compare speed, we have to use the WT proportion front (because Tanaka doesn't deal with number)
-    graph_para[7] = True  
+    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing);  print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)       
     # compute speed for Leo/Flo and Tanaka's models
     W, H, D, time_leoflo, speed_leoflo = evolution(bio_para, model_para, num_para, graph_para)
     p_cubic, time_cubic, speed_cubic = tanaka(s,"cubic",model_para,num_para,graph_para) 
@@ -181,11 +182,11 @@ if what_to_do == "speed function of time" :
     ax.set(xlabel='Time', ylabel='Speed')   
     ax.grid();plt.legend(); plt.show()      
     if save_fig : 
-        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", fig, [], "speeds_fct_of_time", bio_para, num_para)
-        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_leoflo, "speed_flo_leo", bio_para, num_para)
-        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_cubic, "speed_tanaka_cubic", bio_para, num_para)
-        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fraction, "speed_tanaka_fraction", bio_para, num_para)
-        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_KPP, "speed_KPP", bio_para, num_para)
+        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", fig, [], "speeds_fct_of_time", bio_para, num_para, model_para)
+        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_leoflo, "speed_flo_leo", bio_para, num_para, model_para)
+        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_cubic, "speed_tanaka_cubic", bio_para, num_para, model_para)
+        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_fraction, "speed_tanaka_fraction", bio_para, num_para, model_para)
+        save_fig_or_data(f"speed_fct_of_time/r_{r}_s_{s}_h_{h}_c_{c}", [], speed_KPP, "speed_KPP", bio_para, num_para, model_para)
     
     
             
@@ -236,7 +237,7 @@ if what_to_do == "speed function of s" :
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
         bio_para[1] = s_values 
-        save_fig_or_data(f"speed_function_of_s/r_{r}_h_{h}_c_{c}", fig, fct_of_s, f"s_from_{s_min}_to_{s_max}", bio_para, num_para)
+        save_fig_or_data(f"speed_function_of_s/r_{r}_h_{h}_c_{c}", fig, fct_of_s, f"s_from_{s_min}_to_{s_max}", bio_para, num_para, model_para)
         
         
 
@@ -260,30 +261,38 @@ if what_to_do == "speed function of r" :
     ax.grid(); ax.legend(); plt.show()
     if save_fig : 
         bio_para[0] = r_values         
-        save_fig_or_data(f"speed_function_of_r/s_{s}_h_{h}_c_{c}", fig, fct_of_r, f"r_from_{r_min}_to_{r_max}", bio_para, num_para)
+        save_fig_or_data(f"speed_function_of_r/s_{s}_h_{h}_c_{c}", fig, fct_of_r, f"r_from_{r_min}_to_{r_max}", bio_para, num_para, model_para)
 
 
     
 ## Heatmaps
 if what_to_do == "heatmap" :
         # Parameters
-        conversion_timing = "germline"; c = 0.25; h = 0.75   
-        T = 1000; L = 4000; M = T*6; N = L; model_para[0] = 'center'
-        rlog = True           # r in log scale or not 
-        precision = 50        # Number of value on s and r scale for the heatmap
-        load = False          # do we load the datas (True) or create them (False)
+        conversion_timing = "germline"; r = 10 ; c = 0.85; h = 0; s = 0  
+        T = 1000; L = 4000; M = T*8; N = L*4; model_para[0] = 'center'
+        rlog = None          # r in log scale or not (or None if r is constant)
+        precision = 50       # Number of value on s and r scale for the heatmap
+        load = True          # do we load the datas (True) or create them (False)
         migale = False        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
-      
+        cas = "cas_a"
+        
         # Update parameters
-        num_para = [T,L,M,N,theta] 
+        num_para = [T,L,M,N,theta,[vmin,vmax]] 
         bio_para = [r,s,h,a,difWW,difDW,difDD,c,conversion_timing]
         # Obtain the heatmap values                       
         if load : 
-            heatmap_values = load_heatmap(conversion_timing, c, h, rlog, precision, migale) 
+            heatmap_values, coex_values = load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas)
         else :
             heatmap_values = heatmap(bio_para, model_para, num_para, graph_para, rlog, precision)            
         # Print heatmap
-        print_heatmap(heatmap_values, bio_para, num_para, rlog, precision) 
+        print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precision) 
+        # Print coex
+        coex_values[np.where(coex_values == -1)] = -0.1
+        num_para[-1][0] = -1; num_para[-1][1] = 1
+        print_heatmap(coex_values, bio_para, num_para, model_para, rlog, precision) 
+        # Superposition
+        num_para[-1][0] = -8; num_para[-1][1] = 8
+        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, model_para, rlog, precision) 
 
                 
 

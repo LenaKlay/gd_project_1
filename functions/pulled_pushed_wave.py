@@ -42,10 +42,10 @@ number_y_size = 20
 
 
 
-def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
+def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para,model_para,mod):
        
         r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-        T,L,M,N,theta = num_para
+        T,L,M,N,theta = num_para[0:5]
         
         fig, ax = plt.subplots()       
         plt.fill_between(X, D1, color="#afe88e", label="back",linestyle="None")
@@ -77,8 +77,8 @@ def pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para):
         num = str(int(t)//mod)
         if len(num)==1: num = '0'+'0'+num
         if len(num)==2: num = '0'+num
-        save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para)
-        #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para)
+        save_fig_or_data(directory, fig, [], f"{num}", bio_para, num_para, model_para)
+        #save_fig_or_data(directory, fig, [], f"t_{t}", bio_para, num_para, model_para)
         #columns = [X,W,D]; np.savetxt(f"../outputs/{directory}/t_{t}.txt", np.column_stack(columns), fmt='%.3e', delimiter="  ") 
         
     
@@ -91,8 +91,8 @@ def pulled_pushed_wave(bio_para, model_para, num_para, graph_para) :
     W, H, D, time, speed = evolution(bio_para, model_para, num_para, graph_para)  
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para
-    graph_type, wild, heterozygous, drive, grid, semilogy, xlim, save_fig, WT_proportion_wave, show_graph_ini, show_graph_end = graph_para
+    T,L,M,N,theta = num_para[0:5]
+    wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
    
     # Two sub-population of drive
     D1 = np.zeros(len(D))
@@ -112,7 +112,7 @@ def pulled_pushed_wave(bio_para, model_para, num_para, graph_para) :
     
     # Spatial domain (1D)
     X = np.linspace(0,N,N+1)*dx   
-    pulled_pushed_graph(X,W,D1,D2,0,bio_para,num_para)
+    pulled_pushed_graph(X,W,D1,D2,0,bio_para,num_para,model_para,mod)
     nb_graph = 1
 
     # Matrix
@@ -143,7 +143,7 @@ def pulled_pushed_wave(bio_para, model_para, num_para, graph_para) :
         
         # Graph
         if t>=mod*nb_graph : 
-            pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para)
+            pulled_pushed_graph(X,W,D1,D2,t,bio_para,num_para,model_para,mod)
             nb_graph += 1
 
         # if the treshold value of the wave is outside the window, stop the simulation  
