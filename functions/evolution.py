@@ -25,15 +25,17 @@ def growth(equ, oth1, oth2, bio_para, model_para):
     r,s,h,a,difW,difH,difD,c,conversion_timing = bio_para
     CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
     # Function
-    n = equ+oth1+oth2; N = len(n)
+    n = equ+oth1+oth2
     if growth_dynamic == "constant":
         return(r+1)
     if growth_dynamic == "allee_effect" :
-        return(np.maximum(r*(1-n)*(n-a)+1, np.zeros(N)))
+        #return(r*(1-n)*(n-a)+1)
+        return(np.maximum(r*(1-n)*(n-a)+1, np.zeros(len(n))))
     if growth_dynamic == "logistical" and linear_growth == False :
         return(r*(1-n)+1)
     if growth_dynamic == "logistical" and linear_growth == True :  
-        return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)         
+        return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)        
+       
 
 
 # Death function    
@@ -230,12 +232,15 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        if len(index_neg) != 0 : print("WT prop decreasing :", index_neg) 
+        if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
-        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((WT[center_index]>0.05) & (WT[center_index]<0.95))
-        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((WT[left_index]>0.05) & (WT[left_index]<0.95))
-        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((WT[right_index]>0.05) & (WT[right_index]<0.95))
+        # palliate centered
+        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((WT[center_index]>0.01) & (WT[center_index]<0.99))
+        # palliate left (if the wave move faster to the left)
+        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((WT[left_index]>0.01) & (WT[left_index]<0.99))
+        # palliate right (if the wave move faster to the left)
+        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((WT[right_index]>0.01) & (WT[right_index]<0.99))
         if (cond1 or cond2 or cond3) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
             pw_star = np.mean(WT[center_index])           # if this palliate is above the threshold value
             threshold = (pw_star+1)/2
@@ -254,10 +259,18 @@ def evolution(bio_para, model_para, num_para, graph_para) :
                 # The speed is computed on the last fifth of the position vector.
                 time = np.append(time,t)
                 speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
+                # if there is a big jump in the speed, stop the simulation. This sometimes happens in coexistance, when the palliate too close to 1.
+                if len(speed_fct_of_time) > 100 : 
+                    if abs(np.mean(speed_fct_of_time) - speed_fct_of_time[-1]) > 10: 
+                        print("t =",t,"(coex : palliate very close to one)")
+                        # erase the false value 
+                        speed_fct_of_time = speed_fct_of_time[:-1]; time = time[:-1]
+                        break
         # if the threshold value of the wave is outside the window, stop the simulation  
         if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
             print("t =",t)
             break
+        
 
     # last graph
     if show_graph_end :   
@@ -378,7 +391,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
         
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        if len(index_neg) != 0 : print("WT proportion decreasing : problem !") 
+        if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
         center_index = np.arange(N//2-N//10,N//2+N//10)

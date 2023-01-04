@@ -36,22 +36,22 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "heatmap"
+what_to_do = "evolution"
 
 
 ######################### General parameters ##################################
+
 
 ### General parameters
 
 ## Biological
 r = 10                               # intrinsic growth rate
-s = 1                                # fitness disadvantage for drive
-h = 0.4                              # dominance coefficient
+s = 0.8                            # fitness disadvantage for drive
+h = 0.5                             # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
-
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
- 
+
 
 # Particular growth/death terms
 a = 0.2                              # coefficient for allee effect (growth or death)
@@ -60,15 +60,23 @@ death_dynamic = "constant"           # constant or logistical or allee_effect
 linear_growth = False  
 linear_mating = False     
 
+# Different cases studied (if not concerned, use "cas = None" below)
+cas = "b_pos"
+if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"
+if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
+if cas == "b_neg": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = -0.2
+if cas == "c" : growth_dynamic = "constant"; death_dynamic = "logistical"
+if cas == "d" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = 0.2
+
 # Diffusion
 difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or DD individuals
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 1000                            # final time
-L = 4000                           # length of the spatial domain
-M = T*6                           # number of time steps
-N = L                              # number of spatial steps
+T = 2000                           # final time
+L = 8000                           # length of the spatial domain
+M = T*24                           # number of time steps
+N = L*4                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs
@@ -76,23 +84,24 @@ save_fig = True                    # Save the figures (.svg and .png)
 
 
 
+
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = "Allele densities"                           # "Genotype densities", "Genotype proportions", "Allele densities" or "Allele proportions" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele frequencies"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//10                                              # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//4                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 ## Evolution 2D
 CI_lenght = N//4
  
 ## Speed function of s
 s_min = 0.32 ; s_max = 0.4   
-s_nb_points = 10      # s values are taken in np.linspace(s_min,s_max,s_nb_points) 
+s_nb_points = 10       # s values are taken in np.linspace(s_min,s_max,s_nb_points) 
 
 ## Speed function of r
 r_min = 6 ; r_max = 10           
@@ -273,9 +282,9 @@ if what_to_do == "heatmap" :
         rlog = None          # r in log scale or not (or None if r is constant)
         precision = 50       # Number of value on s and r scale for the heatmap
         load = True          # do we load the datas (True) or create them (False)
-        migale = False        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
-        cas = "cas_a"
-        
+        migale = False       # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
+       
+
         # Update parameters
         num_para = [T,L,M,N,theta,[vmin,vmax]] 
         bio_para = [r,s,h,a,difWW,difDW,difDD,c,conversion_timing]

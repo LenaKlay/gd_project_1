@@ -84,14 +84,13 @@ def mating(W,H,D):
 # Main evolution function (1D)     
 def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :  
 
-    # Parameters initialization
+  # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
     threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
-    coex_density = -1  # made to be replace by the total population density in the coexistence state (if any)
-    
+   
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
@@ -139,17 +138,22 @@ def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :
         
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        if len(index_neg) != 0 : print("WT proportion decreasing : problem !") 
+        if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
-        center_index = np.arange(N//2-N//10,N//2+N//10)
-        if np.all((WT[center_index]>0.05) & (WT[center_index]<0.95)) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
-            pw_star = np.mean(WT[center_index])                                            # if this palliate is above the threshold value
+        # palliate centered
+        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((WT[center_index]>0.01) & (WT[center_index]<0.99))
+        # palliate left (if the wave move faster to the left)
+        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((WT[left_index]>0.01) & (WT[left_index]<0.99))
+        # palliate right (if the wave move faster to the left)
+        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((WT[right_index]>0.01) & (WT[right_index]<0.99))
+        if (cond1 or cond2 or cond3) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
+            pw_star = np.mean(WT[center_index])           # if this palliate is above the threshold value
             threshold = (pw_star+1)/2
-            coex_density = (W+H+D)[N//2]
+	    coex_density = (W+H+D)[N//2]
             position = np.array([])   
             speed_fct_of_time = np.array([])   
-            time = np.array([]) 
+            time = np.array([])          
         # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
         if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
             # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
@@ -165,7 +169,7 @@ def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :
             break
 
     # return the speed, and 1 if there was a coexistence state (0 otherwise)
-    return(speed_fct_of_time[-1], coex_density)
+    return(speed_fct_of_time[-1])
 
 
 

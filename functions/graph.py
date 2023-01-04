@@ -36,7 +36,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para):
         # Plot evolution for wild, heterozygous, drive (nb of individuals or proportions)
         if graph_type == "Genotype densities" : 
             nb = 3; Y = [W, D, H]
-        if graph_type == "Genotype proportions" : 
+        if graph_type == "Genotype frequencies" : 
             nb = 3; Y = [W/(W+H+D), D/(W+H+D), H/(W+H+D)]            
         if graph_type == "Allele densities" : 
             nb = 2
@@ -44,7 +44,7 @@ def graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para):
                 Y = [W+0.5*H, D+0.5*H]
             if conversion_timing == "germline" : 
                 Y = [W+0.5*(1-c)*H, D+0.5*(1+c)*H]
-        if graph_type == "Allele proportions" : 
+        if graph_type == "Allele frequencies" : 
             nb = 2
             if conversion_timing == "zygote" : 
                 Y = [(W+0.5*H)/(W+H+D), (D+0.5*H)/(W+H+D) ]

@@ -24,23 +24,30 @@ from graph import save_fig_or_data
 #### Give the heatmap axes (r in log scale or not) ####
     
 def heatmap_axes(rlog, precision):
-    smin = 0; smax=1
-    # delta_s is the size of a simulation pixel (size mesured with the s scale)  
-    delta_s = (smax-smin)/precision    
-    # s values for simulations (NB : smin and smax are not simulated, we simulate values centered on the simulation pixels)
-    s_range = np.arange(smin+delta_s/2,smax+delta_s/2,delta_s)      
+    x_min = 0; x_max=1
+    # x_delta is the size of a simulation pixel (size mesured with the s scale)  
+    x_delta = (x_max-x_min)/precision    
+    # x values for simulations (NB : x_min and x_max are not simulated, we simulate values centered on the simulation pixels)
+    x_axis = np.arange(x_min+x_delta/2,x_max+x_delta/2,x_delta)      
     # r in log scale                   
-    if rlog : 
-        rmin=0.01; rmax=10; delta_r = None
-        r_range = np.logspace(-2, 1, num=precision)
+    if rlog == True : 
+        y_min=0.01; y_max=10; y_delta = None
+        y_axis = np.logspace(-2, 1, num=precision)
     # r in normal scale
-    else : 
-        rmin=0; rmax=12
-        # delta_r is the size of a simulation pixel (size mesured with the r scale)  
-        delta_r = (rmax-rmin)/precision    
-        # r values for simulations (NB : rmin and rmax are not simulated, we simulate values centered on the simulation pixels)
-        r_range = np.arange(rmin+delta_r/2,rmax+delta_r/2,delta_r)       
-    return(s_range, smin, smax, delta_s, r_range, rmin, rmax, delta_r)
+    if rlog == False : 
+        y_min=0; y_max=12
+        # y_delta is the size of a simulation pixel (size mesured with the r scale)  
+        y_delta = (y_max-y_min)/precision    
+        # y values for simulations (NB : y_min and y_max are not simulated, we simulate values centered on the simulation pixels)
+        y_axis = np.arange(y_min+y_delta/2,y_max+y_delta/2,y_delta)               
+    # y_axis do not represent r (more probably s)
+    if rlog == None : 
+        y_min = 0; y_max=1
+        # y_delta is the size of a simulation pixel (size mesured with the s scale)  
+        y_delta = (y_max-y_min)/precision    
+        # y values for simulations (NB : y_min and y_max are not simulated, we simulate values centered on the simulation pixels)
+        y_axis = np.arange(y_min+y_delta/2,y_max+y_delta/2,y_delta)       
+    return(x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta)
 
 
 
@@ -48,14 +55,14 @@ def heatmap_axes(rlog, precision):
 
 def heatmap(bio_para, model_para, num_para, graph_para, rlog, precision):
     r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-    s_range, smin, smax, delta_s, r_range, rmin, rmax, delta_r = heatmap_axes(rlog, precision)
+    x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta = heatmap_axes(rlog, precision)
     
-    # Create a directory and save parameters.txt with r_range and s_range
-    bio_para[0] = r_range; bio_para[1] = s_range
+    # Create a directory and save parameters.txt with y_axis and x_axis
+    bio_para[0] = y_axis; bio_para[1] = x_axis
     save_fig_or_data(f"heatmaps/{conversion_timing}_c_{c}_h_{h}", [], [], None, bio_para, num_para, model_para)
      
     # Print principal parameters
-    print("conversion_timing =", bio_para[8]);  print("\nr =", r_range); print("s =", s_range); print("h =", h); print("c =", c)
+    print("conversion_timing =", bio_para[8]);  print("\nr =", y_axis); print("s =", x_axis); print("h =", h); print("c =", c)
             
     # Initialization
     # matrix containing all the wave speeds for the different values of s and r 
@@ -63,12 +70,12 @@ def heatmap(bio_para, model_para, num_para, graph_para, rlog, precision):
 
     # Loop to calculate the speed, for each couple (s,r)
     for r_index in range(0, precision) : 
-        print("\n------- NEW r=", r_range[r_index])
+        print("\n------- NEW r=", y_axis[r_index])
         for s_index in range(0, precision) :
-            print("\ns=", np.round(s_range[s_index],3))             
+            print("\ns=", np.round(x_axis[s_index],3))             
             # Update values in bio_para
-            bio_para[0] = r_range[r_index]
-            bio_para[1] = s_range[s_index]                    
+            bio_para[0] = y_axis[r_index]
+            bio_para[1] = x_axis[s_index]                    
             # Speed value given by evolution.py
             heatmap_values[r_index,s_index] = evolution(bio_para, model_para, num_para, graph_para)[4][-1] 
             print("speed :", heatmap_values[r_index,s_index])
@@ -109,16 +116,16 @@ def load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas) :
             if os.path.exists(f'../figures/heatmaps/{conversion_timing}_c_{c}_h_{h}/{conversion_timing}_c_{c}_h_{h}_coex.txt') :
                 coex_values = np.loadtxt(f'../figures/heatmaps/{conversion_timing}_c_{c}_h_{h}/{conversion_timing}_c_{c}_h_{h}_coex.txt')     
         else : 
-            heatmap_values = np.loadtxt(f'../outputs/heatmaps/{cas}/{conversion_timing}_c_{c}_r_{r}.txt')  
-            if os.path.exists(f'../outputs/heatmaps/{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt') :
-                coex_values = np.loadtxt(f'../outputs/heatmaps/{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt')     
+            heatmap_values = np.loadtxt(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}.txt')  
+            if os.path.exists(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt') :
+                coex_values = np.loadtxt(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt')     
     return(heatmap_values, coex_values)
   
     
 #### How do we store the values in heatmap_values ? ####
-# The heatmap_values[r_index,s_index] correspond to the values s : s_range[s_index] and r : r_range[r_index]
-#indice_r = np.where((5.3 < r_range) & (r_range < 5.5))[0] ; print("\nindice r :", indice_r)
-#indice_s = np.where((0.58 < s_range) & (s_range < 0.6))[0] ; print("\nindice s :", indice_s)
+# The heatmap_values[r_index,s_index] correspond to the values s : x_axis[s_index] and r : y_axis[r_index]
+#indice_r = np.where((5.3 < y_axis) & (y_axis < 5.5))[0] ; print("\nindice r :", indice_r)
+#indice_s = np.where((0.58 < x_axis) & (x_axis < 0.6))[0] ; print("\nindice s :", indice_s)
 #print(heatmap_values[indice_r,indice_s])
 
 
@@ -126,23 +133,23 @@ def load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas) :
     
 def print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precision) :    
     r, s, h, a, difWW, difDW, difDD, c, conversion_timing = bio_para
-    s_range, smin, smax, delta_s, r_range, rmin, rmax, delta_r = heatmap_axes(rlog, precision)
+    x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta = heatmap_axes(rlog, precision)
     
     # Figure
     fig, ax = plt.subplots()     
     
     # Size of a simulation pixel, where the distance 'center of the first pixel' to 'center of the last pixel' is 1. (useful when rlog=False) 
-    delta_square = 1/(precision-1)   
+    pixel = 1/(precision-1)   
     # Ticks positions : we want the ticks to start from the bordure, not the center
-    ax.set_xticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))                  
+    ax.set_xticks(np.linspace(0-pixel/2,1+pixel/2,len(np.arange(x_min,x_max+0.1,0.1)))*(precision-1))                  
     if rlog == True : ax.set_yticks(np.linspace(0,1,4)*(precision-1))    
-    elif rlog == False : ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(int(rmin),rmax+1,1)))*(precision-1)) 
-    else : ax.set_yticks(np.linspace(0-delta_square/2,1+delta_square/2,len(np.arange(smin,smax+0.1,0.1)))*(precision-1))                                        
+    elif rlog == False : ax.set_yticks(np.linspace(0-pixel/2,1+pixel/2,len(np.arange(int(y_min),y_max+1,1)))*(precision-1)) 
+    else : ax.set_yticks(np.linspace(0-pixel/2,1+pixel/2,len(np.arange(x_min,x_max+0.1,0.1)))*(precision-1))                                        
     # Ticks labels
-    ax.set_xticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))                                         
+    ax.set_xticklabels(np.around(np.arange(x_min,x_max+0.1,0.1),2))                                         
     if rlog == True : ax.set_yticklabels(np.around(np.logspace(-2, 1, num=4),2))  
-    elif rlog == False : ax.set_yticklabels(np.around(np.arange(int(rmin),rmax+1,1),2))   
-    else : ax.set_yticklabels(np.around(np.arange(smin,smax+0.1,0.1),2))   
+    elif rlog == False : ax.set_yticklabels(np.around(np.arange(int(y_min),y_max+1,1),2))   
+    else : ax.set_yticklabels(np.around(np.arange(x_min,x_max+0.1,0.1),2))   
      
     # Colorbar creation
     colors1 = plt.cm.Blues(np.flip(np.linspace(0.3, 1, 128))); colors2 = plt.cm.hot(np.flip(np.linspace(0, 0.75, 128)))  # Create the color scale   
@@ -161,31 +168,31 @@ def print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precisio
     #    if h != 0 : s_2 = c/(2*c*h + h*(1-c))  
     #    else : s_2 = 100                      # inf in reality
     #axtop = ax.twiny(); ticks = []; ticklabels = []
-    #if smin < s_1 and s_1 < smax : 
-        #ticks.append((s_1-smin)/(smax-smin)); ticklabels.append("s1")
+    #if x_min < s_1 and s_1 < x_max : 
+        #ticks.append((s_1-x_min)/(x_max-x_min)); ticklabels.append("s1")
         # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
-        #ax.vlines((s_1-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))        
-    #if smin < s_2 and s_2 < smax : 
-        #ticks.append((s_2-smin)/(smax-smin)); ticklabels.append("s2")
+        #ax.vlines((s_1-x_axis[0])*(1/x_delta),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))        
+    #if x_min < s_2 and s_2 < x_max : 
+        #ticks.append((s_2-x_min)/(x_max-x_min)); ticklabels.append("s2")
         # - 0.5 to correct the biais in the heatmap (0 is centered in the middle of the first pixel)
-        #ax.vlines((s_2-s_range[0])*(1/delta_s),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
+        #ax.vlines((s_2-x_axis[0])*(1/x_delta),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
     #axtop.set_xticks(ticks) 
     #axtop.set_xticklabels(ticklabels)
         
     # Plot lines    
     #abscisse = np.arange(precision)    
     # Tool to draw precise line
-    #if rlog : r_range_precise = np.logspace(-2, 1, num=precision*100)
-    #else : r_range_precise = np.arange(rmin+delta_r/2, rmax+delta_r/2, delta_r/100)
+    #if rlog : y_axis_precise = np.logspace(-2, 1, num=precision*100)
+    #else : y_axis_precise = np.arange(y_min+y_delta/2, y_max+y_delta/2, y_delta/100)
         
     # Pure drive persistance line
     #if rlog :
     #    eradication_drive = np.zeros(precision)
     #    for i in range(precision):
-    #        s = s_range[i]
-    #        eradication_drive[i] = np.where(s/(1-s) < r_range_precise)[0][0]/100         
+    #        s = x_axis[i]
+    #        eradication_drive[i] = np.where(s/(1-s) < y_axis_precise)[0][0]/100         
     #else : 
-    #    eradication_drive = (s_range/(1-s_range)-rmin)*((precision-1)/(rmax-rmin)) 
+    #    eradication_drive = (x_axis/(1-x_axis)-y_min)*((precision-1)/(y_max-y_min)) 
     #ax.plot(abscisse,eradication_drive-0.5, color='#73c946ff', label="eradication drive", linewidth = 4)           
                  
     # Composite persistance line
@@ -203,11 +210,32 @@ def print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precisio
       
         #eradication_pop = np.zeros(s1_s2_len)
         #for i in range(s1_s2_len):
-        #    eradication_pop[i] = np.where((1-mean_fitness[i])/mean_fitness[i] < r_range_precise)[0][0]/100 
+        #    eradication_pop[i] = np.where((1-mean_fitness[i])/mean_fitness[i] < y_axis_precise)[0][0]/100 
         #eradication_pop = eradication_pop[0:np.where(eradication_pop==0)[0][0]+1]
-        #abscisse_pop = ((s1_s2_range-s_range[0])*((precision-1)/(s_range[-1]-s_range[0])))[0:np.where(eradication_pop==0)[0][0] + 1]
+        #abscisse_pop = ((s1_s2_range-x_axis[0])*((precision-1)/(x_axis[-1]-x_axis[0])))[0:np.where(eradication_pop==0)[0][0] + 1]
         #ax.plot(abscisse_pop, eradication_pop-0.5, color='#40720cff', linewidth = 4) 
-               
+
+      
+    nb_precise = 1001
+    abscisse_precise = np.linspace(0,precision, nb_precise)
+    x_axis_precise = np.linspace(x_min, x_max, nb_precise)  
+    y_axis_precise = np.linspace(y_min, y_max, nb_precise)  
+    s1_line = np.ones(nb_precise)*1.1; s2_line = np.ones(nb_precise)*1.1
+    s1_line[0] = c; s1_line[-1] = 1
+    if conversion_timing == "zygote" : s2_line[0] = 1/2; s2_line[-1] = c/(1+c)
+    if conversion_timing == "germline" : s2_line[-1] = c/(1+c)
+    for i in range(1,nb_precise-1):
+        h_loc = x_axis_precise[i]
+        s1_line[i] = np.where(c/(1-h_loc*(1-c)) < y_axis_precise)[0][0]/nb_precise   
+        if conversion_timing == "zygote" : 
+                s2_line[i] = np.where(c/(2*c + h_loc*(1-c)) < y_axis_precise)[0][0]/nb_precise 
+        if conversion_timing == "germline" :
+            if c/(h_loc*2*c + h_loc*(1-c)) < 1:
+                s2_line[i] = np.where(c/(h_loc*2*c + h_loc*(1-c)) < y_axis_precise)[0][0]/nb_precise 
+                
+    ax.plot(abscisse_precise-0.5, s1_line*(precision/(y_max-y_min))-0.5, label="s1", linewidth = 2)    
+    ax.plot(abscisse_precise-0.5, s2_line*(precision/(y_max-y_min))-0.5, label="s2", linewidth = 2)    
+                 
     # Axis and label sizes
     plt.gca().invert_yaxis()                 # inverse r axis (increasing values)
     ax.xaxis.set_tick_params(labelsize=9)
