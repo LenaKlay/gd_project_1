@@ -169,7 +169,7 @@ def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :
             break
 
     # return the speed, and 1 if there was a coexistence state (0 otherwise)
-    return(speed_fct_of_time[-1])
+    return(speed_fct_of_time[-1], coex_density)
 
 
 

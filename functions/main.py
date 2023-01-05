@@ -46,7 +46,7 @@ what_to_do = "evolution"
 
 ## Biological
 r = 10                               # intrinsic growth rate
-s = 0.8                            # fitness disadvantage for drive
+s = 0.8                              # fitness disadvantage for drive
 h = 0.5                             # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
@@ -73,10 +73,10 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 2000                           # final time
-L = 8000                           # length of the spatial domain
-M = T*24                           # number of time steps
-N = L*4                              # number of spatial steps
+T = 400                           # final time
+L = 4000                           # length of the spatial domain
+M = T*12                           # number of time steps
+N = L*2                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs

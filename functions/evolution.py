@@ -161,8 +161,9 @@ def evolution(bio_para, model_para, num_para, graph_para) :
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
+    coex_density = -1 
     
     # Regimes 
     if growth_dynamic == "logistical" and death_dynamic == "constant" : 
@@ -224,32 +225,43 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para)
             nb_graph += 1
                                           
-        # Compute the speed on WT allele proportion or density
-        if conversion_timing == "zygote" : 
-            WT = (W+0.5*H)/(W+H+D) 
-        if conversion_timing == "germline" : 
-            WT = (W+0.5*(1-c)*H)/(W+H+D) 
-        
+
+        # Compute the speed on WT allele density when coexistence density is close to zero
+        # to avoid numerical errors (because then, proportions are very approximative), or when
+        # there is no coexistence (coex_density = -1)         
+        if coex_density < 0.1: 
+            if conversion_timing == "zygote" : 
+                WT = W+0.5*H
+            if conversion_timing == "germline" : 
+                WT = W+0.5*(1-c)*H
+            p = WT/(W+H+D)
+        # Else (coexistence state with final density > 0.1), compute the speed on WT allele density
+        else : 
+            if conversion_timing == "zygote" : 
+                WT = (W+0.5*H)/(W+H+D) 
+            if conversion_timing == "germline" : 
+                WT = (W+0.5*(1-c)*H)/(W+H+D) 
+            
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
         if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
         # palliate centered
-        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((WT[center_index]>0.01) & (WT[center_index]<0.99))
+        center_index = np.arange(N//2-N//20,N//2+N//20); cond1 = np.all((p[center_index]>0.01) & (p[center_index]<0.99))
         # palliate left (if the wave move faster to the left)
-        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((WT[left_index]>0.01) & (WT[left_index]<0.99))
+        left_index = np.arange(N//2-N//10,N//2); cond2 = np.all((p[left_index]>0.01) & (p[left_index]<0.99))
         # palliate right (if the wave move faster to the left)
-        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((WT[right_index]>0.01) & (WT[right_index]<0.99))
+        right_index = np.arange(N//2,N//2+N//10); cond3 = np.all((p[right_index]>0.01) & (p[right_index]<0.99))
         if (cond1 or cond2 or cond3) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
-            pw_star = np.mean(WT[center_index])           # if this palliate is above the threshold value
+            pw_star = np.mean(p[center_index])           
+            coex_density = (W+H+D)[N//2]
             threshold = (pw_star+1)/2
             position = np.array([])   
             speed_fct_of_time = np.array([])   
             time = np.array([]) 
             print("coex ! p_w* =", pw_star)
-            print("threshold =", threshold)
-            
+            print("threshold =", threshold)          
         # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
         if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
             # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
@@ -307,7 +319,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
     
     # Regimes 
