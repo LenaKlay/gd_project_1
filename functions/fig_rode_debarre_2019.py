@@ -55,7 +55,7 @@ for h in np.linspace(0.1,0.9,17) :
 # Divers
 
 for i in range(3) : 
-    c = [0.25, 0.75, 0.25][i]
+    c = [0.25, 0.75, 0.85][i]
     conversion_timing = ['zygote', 'zygote', 'germline'][i]      
     precision = 1000  
     res = np.zeros((precision,precision))

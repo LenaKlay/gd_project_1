@@ -248,11 +248,11 @@ def evolution(bio_para, model_para, num_para, graph_para) :
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
         # palliate centered
-        center_index = np.arange(N//2-N//20,N//2+N//20); cond1 = np.all((p[center_index]>0.01) & (p[center_index]<0.99))
+        center_index = np.arange(N//2-N//10,N//2+N//10); cond1 = np.all((p[center_index]>0.01) & (p[center_index]<0.99))
         # palliate left (if the wave move faster to the left)
-        left_index = np.arange(N//2-N//10,N//2); cond2 = np.all((p[left_index]>0.01) & (p[left_index]<0.99))
+        left_index = np.arange(N//2-N//5,N//2); cond2 = np.all((p[left_index]>0.01) & (p[left_index]<0.99))
         # palliate right (if the wave move faster to the left)
-        right_index = np.arange(N//2,N//2+N//10); cond3 = np.all((p[right_index]>0.01) & (p[right_index]<0.99))
+        right_index = np.arange(N//2,N//2+N//5); cond3 = np.all((p[right_index]>0.01) & (p[right_index]<0.99))
         if (cond1 or cond2 or cond3) and pw_star < 0 :    # if there exists a palliate in ]0,1[ around N//2 (and pw_star as not been changed yet)
             pw_star = np.mean(p[center_index])           
             coex_density = (W+H+D)[N//2]
@@ -261,7 +261,22 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             speed_fct_of_time = np.array([])   
             time = np.array([]) 
             print("coex ! p_w* =", pw_star)
-            print("threshold =", threshold)          
+            print("coex_density  =", coex_density) 
+            print("threshold =", threshold)  
+            
+        # Check if there is a big jump in the speed (if so, erase all the precedent values)
+        # This sometimes happens in coexistance, when the coex density is too close to 0.
+        # Or in a preliminary phase where a decreasing section appears.
+        if len(speed_fct_of_time) > 20 : 
+            if abs(np.mean(speed_fct_of_time) - speed_fct_of_time[-1]) > 1: 
+                print("Big jump in the speed for t =",t,"")
+                position = np.array([])   
+                speed_fct_of_time = np.array([])   
+                time = np.array([]) 
+                coex_density = -1
+                pw_star = -1 
+                threshold = 0.5
+            
         # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
         if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
             # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
@@ -271,13 +286,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
                 # The speed is computed on the last fifth of the position vector.
                 time = np.append(time,t)
                 speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-                # if there is a big jump in the speed, stop the simulation. This sometimes happens in coexistance, when the palliate too close to 1.
-                if len(speed_fct_of_time) > 100 : 
-                    if abs(np.mean(speed_fct_of_time) - speed_fct_of_time[-1]) > 10: 
-                        print("t =",t,"(coex : palliate very close to one)")
-                        # erase the false value 
-                        speed_fct_of_time = speed_fct_of_time[:-1]; time = time[:-1]
-                        break
+               
         # if the threshold value of the wave is outside the window, stop the simulation  
         if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
             print("t =",t)

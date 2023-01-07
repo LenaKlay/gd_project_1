@@ -46,8 +46,8 @@ what_to_do = "evolution"
 
 ## Biological
 r = 10                               # intrinsic growth rate
-s = 0.8                              # fitness disadvantage for drive
-h = 0.5                             # dominance coefficient
+s = 0.91                              # fitness disadvantage for drive
+h = 0.51                             # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
@@ -61,7 +61,7 @@ linear_growth = False
 linear_mating = False     
 
 # Different cases studied (if not concerned, use "cas = None" below)
-cas = "b_pos"
+cas = "a"
 if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
 if cas == "b_neg": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = -0.2
@@ -73,10 +73,10 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 400                           # final time
+T = 1000                           # final time
 L = 4000                           # length of the spatial domain
-M = T*12                           # number of time steps
-N = L*2                              # number of spatial steps
+M = T*8                            # number of time steps
+N = L*4                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs
@@ -88,14 +88,14 @@ save_fig = True                    # Save the figures (.svg and .png)
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = "Allele frequencies"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele densities"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//4                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//10                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 ## Evolution 2D
 CI_lenght = N//4
  
@@ -277,14 +277,14 @@ if what_to_do == "speed function of r" :
 ## Heatmaps
 if what_to_do == "heatmap" :
         # Parameters
-        conversion_timing = "germline"; r = 10 ; c = 0.85; h = 0; s = 0  
+        x = "h"; y = "s"
+        conversion_timing = "germline"; r = 10 ; c = 0.85; h = 0.9; s = 0.9 
         T = 1000; L = 4000; M = T*8; N = L*4; model_para[0] = 'center'
-        rlog = None          # r in log scale or not (or None if r is constant)
+        rlog = True          # r in log scale or not (when y = "r")
         precision = 50       # Number of value on s and r scale for the heatmap
         load = True          # do we load the datas (True) or create them (False)
-        migale = False       # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
-       
-
+        migale = True        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
+         
         # Update parameters
         num_para = [T,L,M,N,theta,[vmin,vmax]] 
         bio_para = [r,s,h,a,difWW,difDW,difDD,c,conversion_timing]
@@ -292,16 +292,16 @@ if what_to_do == "heatmap" :
         if load : 
             heatmap_values, coex_values = load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas)
         else :
-            heatmap_values = heatmap(bio_para, model_para, num_para, graph_para, rlog, precision)            
+            heatmap_values = heatmap(bio_para, model_para, num_para, graph_para, rlog, precision, y)            
         # Print heatmap
-        print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precision) 
+        print_heatmap(heatmap_values, bio_para, num_para, model_para, rlog, precision, x, y, "1") 
         # Print coex
         coex_values[np.where(coex_values == -1)] = -0.1
         num_para[-1][0] = -1; num_para[-1][1] = 1
-        print_heatmap(coex_values, bio_para, num_para, model_para, rlog, precision) 
+        print_heatmap(coex_values, bio_para, num_para, model_para, rlog, precision, x, y, "2") 
         # Superposition
         num_para[-1][0] = -8; num_para[-1][1] = 8
-        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, model_para, rlog, precision) 
+        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, model_para, rlog, precision, x, y, "3") 
 
                 
 
