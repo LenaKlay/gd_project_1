@@ -24,9 +24,8 @@ line_size = 10
 # External functions
 from graph import save_fig_or_data
 
-def tanaka(s,model,model_para,num_para,graph_para): 
-    T,L,M,N,theta = num_para[0:5]
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
+def tanaka(s,model,num_para,graph_para): 
+    CI,T,L,M,N,theta = num_para[:-1]
     wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
 
     # Steps

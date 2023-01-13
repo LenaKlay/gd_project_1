@@ -209,6 +209,7 @@ def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :
                     time = np.append(time,t)
                     speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
             # if the treshold value of the wave is outside the window, stop the simulation  
+            print(WT)
             if not(np.isin(False, WT>treshold) and np.isin(False, WT<treshold) ) :
                 print("t =",t)
                 break
@@ -217,7 +218,6 @@ def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :
         # - decreasing section   ->     r=1.08 s=0.668 c=h=0.5 conversion_timing="germline"  T=1000  L=5000  M=6000  N=5000 
         # - small perturbation at the border, which can create fake decreasing sections 
         # - coexistance with WT equilibrium under the 0.2 treshold value   ->    r=0.36 s=0.332 c=h=0.25 conversion_timing="zygote"  T=5000  L=10000  M=T*6  N=L 
-
     return(speed_fct_of_time[-1])
 
 
@@ -244,8 +244,9 @@ def heatmap(precision,hmin,hmax,smin,smax):
             print("c=", np.round(c,3)) 
             print("r=", np.round(r,3)) 
             print("s=", np.round(s,3)) 
-            heatmap_vect[h_index] = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta, homing)
-            print("speed=", heatmap_vect[h_index]) 
+            if h > 0.8 :
+                heatmap_vect[h_index] = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta, homing)
+                print("speed=", heatmap_vect[h_index]) 
 
     return(heatmap_vect) 
   

@@ -20,29 +20,25 @@ from graph import graph, graph_2D, graph_2D_contour, save_fig_or_data
 # oth1 and oth2 are the two other alleles, indifferently.
 
 # Growth function
-def growth(equ, oth1, oth2, bio_para, model_para):
+def growth(equ, oth1, oth2, bio_para):
     # Parameters
-    r,s,h,a,difW,difH,difD,c,conversion_timing = bio_para
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     # Function
     n = equ+oth1+oth2
-    if growth_dynamic == "constant":
+    if growth_dynamic == "constant" :
         return(r+1)
     if growth_dynamic == "allee_effect" :
         #return(r*(1-n)*(n-a)+1)
         return(np.maximum(r*(1-n)*(n-a)+1, np.zeros(len(n))))
-    if growth_dynamic == "logistical" and linear_growth == False :
-        return(r*(1-n)+1)
-    if growth_dynamic == "logistical" and linear_growth == True :  
-        return(r*np.minimum(1-(equ+oth1+oth2),equ) + equ)        
+    if growth_dynamic == "logistical" :
+        return(r*(1-n)+1)     
        
 
 
 # Death function    
-def death(equ, oth1, oth2, bio_para, model_para):
+def death(equ, oth1, oth2, bio_para):
     # Parameters
-    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     # Function
     n = (equ+oth1+oth2)
     if death_dynamic == "constant" :
@@ -54,75 +50,32 @@ def death(equ, oth1, oth2, bio_para, model_para):
     
     
 # Mating function
-def mating(W, H, D, bio_para, model_para):  
+def mating(W, H, D, bio_para):  
     # Parameters
-    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     
     # Function
-    if not linear_mating : 
-        
-        WW = (W**2)/(W+H+D)
-        HH = (H**2)/(W+H+D)
-        DD = (D**2)/(W+H+D)    
-        WH = (W*H)/(W+H+D)   # *2
-        WD = (W*D)/(W+H+D)   # *2 
-        HD = (D*H)/(W+H+D)   # *2
+    WW = (W**2)/(W+H+D)
+    HH = (H**2)/(W+H+D)
+    DD = (D**2)/(W+H+D)    
+    WH = (W*H)/(W+H+D)   # *2
+    WD = (W*D)/(W+H+D)   # *2 
+    HD = (D*H)/(W+H+D)   # *2
     
-        if conversion_timing == "zygote" :       
-            mat1 = WW + WH + 0.25*HH 
-            mat2 = (1-c)*(WH + 2*WD + 0.5*HH + HD) 
-            mat3 = c*WH + 2*c*WD + (0.5*c+0.25)*HH + (1+c)*HD + DD  
+    if conversion_timing == "zygote" :       
+        mat1 = WW + WH + 0.25*HH 
+        mat2 = (1-c)*(WH + 2*WD + 0.5*HH + HD) 
+        mat3 = c*WH + 2*c*WD + (0.5*c+0.25)*HH + (1+c)*HD + DD  
             
-        if conversion_timing == "germline":
-            mat1 = WW + (1-c)*WH + 0.25*(1-c)**2*HH 
-            mat2 = (1+c)*WH + 2*WD + 0.5*(1-c**2)*HH + (1-c)*HD
-            mat3 = 0.25*(c+1)**2*HH + (1+c)*HD + DD
-            
-    if linear_mating and conversion_timing == "zygote" : 
-        mat1 = (W>D)
-        mat2 = 0
-        mat3 = ((W>D)+1)  
+    if conversion_timing == "germline":
+        mat1 = WW + (1-c)*WH + 0.25*(1-c)**2*HH 
+        mat2 = (1+c)*WH + 2*WD + 0.5*(1-c**2)*HH + (1-c)*HD
+        mat3 = 0.25*(c+1)**2*HH + (1+c)*HD + DD
 
     return([mat1,mat2,mat3])   
 
 
 
-def s1_s2(conversion_timing, c, h, s, graph_type) :
-    
-    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
-    WT_allele_wave = False
-    p_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
-    
-    # Determine values of s1 and s2, and in which regime we are.
-    s_1 = c/(1-h*(1-c))   
-    if conversion_timing == "zygote" :
-        s_2 = c/(2*c + h*(1-c))
-        if s_1 < s_2 : 
-            if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3), "< s <", np.round(s_2,3))
-            p_star = (s*(1-(1-c)*(1-h)) - c*(1-s))/(s*(1-2*(1-c)*(1-h)))
-            if 0<p_star and p_star<1 : 
-                WT_allele_wave = True; threshold = ((1-p_star)+1)/2 
-        else :  
-            if graph_type != None: print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
-        lin = c*(1-2*s)-(1-c)*s*h
-        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))               
-    if conversion_timing == "germline" : 
-        s_2 = c/(2*c*h + h*(1-c))
-        if s_1 < s_2 :
-            if graph_type != None: print("\nCoexistence", ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
-            p_star = ((1-s*h)*(1+c)-1)/(s*(1-2*h))
-            if 0<p_star and p_star<1 : 
-                WT_allele_wave = True; threshold = ((1-p_star)+1)/2 
-        else :  
-            if graph_type != None: 
-                print("\nBistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
-        lin = c*(1-2*s*h)-(1-c)*s*h > 0 
-        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))
-        
-    return(threshold, p_star, WT_allele_wave, s_1, s_2)
-    
-    
 
 # Determine values of s1 and s2, and in which regime we are.   
 def s1_s2_num(conversion_timing, c, h, s, graph_type) :
@@ -150,18 +103,17 @@ def s1_s2_num(conversion_timing, c, h, s, graph_type) :
     
 
 # Main evolution function (1D)     
-def evolution(bio_para, model_para, num_para, graph_para) :  
+def evolution(bio_para, num_para, graph_para) :  
 
-    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para[0:5]
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
+    CI,T,L,M,N,theta = num_para[:-1]
     wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
     
     # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
     coex_density = -1 
     
@@ -188,7 +140,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         D = np.zeros(N+1); D[0:N//10] = 1   # Drive individuals at t=0
        
     if graph_type != None and show_graph_ini :
-        graph(X,W,H,D,0,graph_para,bio_para,num_para, model_para)
+        graph(X,W,H,D,0,graph_para,bio_para,num_para)
     nb_graph = 1
         
     # Matrix
@@ -209,9 +161,9 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         
         t = round(t,2)
         
-        f1 = growth(W,H,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[0] - death(W,H,D,bio_para,model_para)*W
-        f2 = (1-s*h)*growth(H,W,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[1] - death(W,H,D,bio_para,model_para)*H
-        f3 = (1-s)*growth(D,H,W,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[2] - death(W,H,D,bio_para,model_para)*D
+        f1 = growth(W,H,D,bio_para)*mating(W,H,D,bio_para)[0] - death(W,H,D,bio_para)*W
+        f2 = (1-s*h)*growth(H,W,D,bio_para)*mating(W,H,D,bio_para)[1] - death(W,H,D,bio_para)*H
+        f3 = (1-s)*growth(D,H,W,bio_para)*mating(W,H,D,bio_para)[2] - death(W,H,D,bio_para)*D
       
         W[1:-1] = la.spsolve(Bw_, Bw.dot(W[1:-1]) + dt*f1[1:-1])
         H[1:-1] = la.spsolve(Bh_, Bh.dot(H[1:-1]) + dt*f2[1:-1])
@@ -222,7 +174,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
         
         # Graph
         if t>mod*nb_graph and graph_type != None : 
-            graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para)
+            graph(X,W,H,D,t,graph_para,bio_para,num_para)
             nb_graph += 1
                                           
 
@@ -266,7 +218,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             
         # Check if there is a big jump in the speed (if so, erase all the precedent values)
         # This sometimes happens in coexistance, when the coex density is too close to 0.
-        # Or in a preliminary phase where a decreasing section appears.
+        # Or in a preliminary phase where a decreasing section appears. (ex : germline r=10 s=0.92 h=0.51 c=0.85 cas a)
         if len(speed_fct_of_time) > 20 : 
             if abs(np.mean(speed_fct_of_time) - speed_fct_of_time[-1]) > 1: 
                 print("Big jump in the speed for t =",t,"")
@@ -275,7 +227,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
                 time = np.array([]) 
                 coex_density = -1
                 pw_star = -1 
-                threshold = 0.5
+                threshold = 0.2
             
         # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
         if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
@@ -292,10 +244,15 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             print("t =",t)
             break
         
-
+    # False coexistence detection
+    if speed_fct_of_time[-1] < 0 : 
+        print("False coex detection (speed<0)")
+        coex_density = -1
+        pw_star = -1 
+        
     # last graph
     if show_graph_end :   
-        graph(X,W,H,D,t,graph_para,bio_para,num_para, model_para)          
+        graph(X,W,H,D,t,graph_para,bio_para,num_para)          
         
     # plot the speed function of time    
     if len(speed_fct_of_time) != 0 : 
@@ -305,7 +262,7 @@ def evolution(bio_para, model_para, num_para, graph_para) :
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
                 directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para, model_para)
+                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para)
             plt.show() 
     else :
         print(f"No wave for r = {r} and s = {s}.") 
@@ -316,19 +273,18 @@ def evolution(bio_para, model_para, num_para, graph_para) :
 
         
 # Main evolution function      
-def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :  
+def evolution_2D(bio_para, num_para, graph_para, CI_lenght) :  
     
     # Parameters loading
-    r,s,h,a,difWW,difDW,difDD,c,conversion_timing = bio_para
-    CI,growth_dynamic,death_dynamic,linear_growth,linear_mating = model_para
-    T,L,M,N,theta = num_para[0:5]
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
+    CI,T,L,M,N,theta = num_para[:-1]
     wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
     
     # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
     
     # Regimes 
@@ -349,8 +305,8 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
     # First graph (initial condition)
     if graph_type != None and show_graph_ini :
         nb_graph = 1; Z_list = np.zeros((T//mod+2,1000,1000))
-        graph_2D(0, W, H, D, N, graph_para, bio_para, num_para, model_para)
-        Z_list = graph_2D_contour(0, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para) 
+        graph_2D(0, W, H, D, N, graph_para, bio_para, num_para)
+        Z_list = graph_2D_contour(0, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para) 
            
     # Laplacian matrix 
     index_diag_mat = np.arange(0,(N-1)**2+1,N-1)                  # (0, N-1, 2*(N-1), 3*(N-1), ....)
@@ -380,9 +336,9 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
         
         t = round(t,2)
         
-        f1 = growth(W,H,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[0] - death(W,H,D,bio_para,model_para)*W
-        f2 = (1-s*h)*growth(H,W,D,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[1] - death(W,H,D,bio_para,model_para)*H
-        f3 = (1-s)*growth(D,H,W,bio_para,model_para)*mating(W,H,D,bio_para,model_para)[2] - death(W,H,D,bio_para,model_para)*D
+        f1 = growth(W,H,D,bio_para)*mating(W,H,D,bio_para)[0] - death(W,H,D,bio_para)*W
+        f2 = (1-s*h)*growth(H,W,D,bio_para)*mating(W,H,D,bio_para)[1] - death(W,H,D,bio_para)*H
+        f3 = (1-s)*growth(D,H,W,bio_para)*mating(W,H,D,bio_para)[2] - death(W,H,D,bio_para)*D
       
         # Interior
         W[index_interior] = la.spsolve(Bw_, Bw.dot(W[index_interior]) + dt*f1[index_interior])
@@ -401,8 +357,8 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
         # Graph
         if t>=mod*nb_graph and graph_type != None : 
             nb_graph += 1
-            graph_2D(t, W, H, D, N, graph_para, bio_para, num_para, model_para)
-            Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para) 
+            graph_2D(t, W, H, D, N, graph_para, bio_para, num_para)
+            Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para) 
                                                    
         # Compute the speed on WT allele proportion or density
         if conversion_timing == "zygote" : 
@@ -447,7 +403,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
             ax.set(xlabel='Time', ylabel='Speed', title = f'Speed function of time')   
             if save_fig :
                 directory = f"evolution/{conversion_timing}_r_{np.round(r,3)}_s_{np.round(s,3)}_h_{np.round(h,2)}_c_{np.round(c,2)}"
-                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para, model_para)
+                save_fig_or_data(directory, fig, speed_fct_of_time, "speed_fct_of_time", bio_para, num_para)
             plt.show() 
     else :
         print(f"No wave for r = {r} and s = {s}.") 
@@ -455,7 +411,7 @@ def evolution_2D(bio_para, model_para, num_para, graph_para, CI_lenght) :
    # last graph
     if show_graph_end :   
         nb_graph += 1
-        graph_2D(t, W, H, D, N, graph_para, bio_para, num_para, model_para) 
-        Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para, model_para)                                  
+        graph_2D(t, W, H, D, N, graph_para, bio_para, num_para) 
+        Z_list = graph_2D_contour(t, W, H, D, N, Z_list, nb_graph, graph_para, bio_para, num_para)                                  
 
     return(W,H,D,time,speed_fct_of_time)
