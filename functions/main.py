@@ -36,7 +36,7 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "evolution"
+what_to_do = "heatmap"
 
 
 ######################### General parameters ##################################
@@ -45,8 +45,8 @@ what_to_do = "evolution"
 ### General parameters
 
 ## Biological
-r = s/(a-s)                              # intrinsic growth rate
-s = 0.5                              # fitness disadvantage for drive
+r = 10                        # intrinsic growth rate
+s = 0.9                            # fitness disadvantage for drive
 h = 0.9                             # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
@@ -66,10 +66,10 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 10                            # final time
-L = 2000                           # length of the spatial domain
-M = T*60                            # number of time steps
-N = L*10                              # number of spatial steps
+T = 1000                            # final time
+L = 4000                           # length of the spatial domain
+M = T*6                            # number of time steps
+N = L                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs

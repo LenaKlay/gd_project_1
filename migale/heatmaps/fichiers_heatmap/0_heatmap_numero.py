@@ -66,25 +66,28 @@ def mating(W,H,D):
             
 # Main evolution function (1D)     
 def evolution(r,s,h,difWW,difDW,difDD,c,T,L,M,N,theta,conversion_timing) :  
-
-  # Parameters initialization
+    
+    # Carrying capacity (in a wild-type population)
+    if cas == "d" : K = a
+    else : K = 1
+    
+    # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = K/2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
-    coex_density = -1   
-	
+    coex_density = -1       
+      
+    # Initial conditions for the system          
+    W = np.ones(N+1)*K; W[0:N//2] = 0    # Wild individuals at t=0  
+    H = np.zeros(N+1)                  # Heterozygous individuals at t=0
+    D = np.zeros(N+1); D[0:N//2] = K   # Drive individuals at t=0
+
     # Steps
     dt = T/M    # time
     dx = L/N    # spatial
-      
-    # Initialization             
-    W = np.ones(N+1); W[0:N//2] = 0    # Wild individuals at t=0  
-    H = np.zeros(N+1)                  # Heterozygous individuals at t=0
-    D = np.zeros(N+1); D[0:N//2] = 1   # Drive individuals at t=0
-
-        
+    
     # Matrix
     C0 = -2*np.ones(N-1); C0[0]=C0[0]+1; C0[-1]=C0[-1]+1               
     C1 = np.ones(N-1) 
@@ -249,13 +252,13 @@ def heatmap(precision, x, y, rlog, r, s, h, c):
 ############################### Parameters ######################################
 
 ## Biological
-cas = "a"                            # None "a" "b_pos" "b_neg" "c" "d"
-x = "h"
+cas = "d"                            # None "a" "b_pos" "b_neg" "c" "d"
+x = "s"
 y = "r"
 rlog = True
 r = 10                               # intrinsic growth rate
-s = 0.9                             # fitness disadvantage for drive
-h = 0.9                             # dominance coefficient
+s = 0.9                              # fitness disadvantage for drive
+h = 0.9                              # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
 
@@ -275,8 +278,8 @@ difW = 1; difH = 1; difD = 1       # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 500                            # final time
-L = 2000                           # length of the spatial domain
+T = 1000                            # final time
+L = 4000                           # length of the spatial domain
 M = T*6                            # number of time steps
 N = L                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
@@ -294,9 +297,6 @@ np.savetxt(f'coex_{num}.txt', coex_vect)
 
   
         
-    
-    
-
 
 
 

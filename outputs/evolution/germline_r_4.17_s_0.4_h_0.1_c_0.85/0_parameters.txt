@@ -1,0 +1,18 @@
+Parameters : 
+T = 1000 
+L = 4000 
+M = 6000 
+N = 4000 
+theta = 0.5
+r = 4.17 
+s = 0.4 
+h = 0.1 
+c = 0.85 
+conversion_timing = germline
+difWW = 1 
+difDW = 1 
+difDD = 1 
+cas = b_pos 
+a = 0.2 
+growth_dynamic = allee_effect 
+death_dynamic = constant

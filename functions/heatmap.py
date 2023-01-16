@@ -215,7 +215,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         # Pure drive persistance line        
         # index for which we have a pure drive persistance line in between y_min and y_max
         if cas in ['a','b_pos','b_neg','c'] :            
-            index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) >= ((a+1)/2)**2*y_min)[0], np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) <= ((a+1)/2)**2*y_max)[0])
+            index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) >= ((a-1)/2)**2*y_min)[0], np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) <= ((a-1)/2)**2*y_max)[0])
         elif cas in ['d'] :
             index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(a-x_axis_precise[:-1]) >= y_min)[0], np.where(x_axis_precise[:-1]/(a-x_axis_precise[:-1]) <= y_max)[0])
         # values of the pure drive persistance line
@@ -224,7 +224,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
             for i in range(len(eradication_drive)):
                 # s_loc = local value of s (inside the for loop)
                 s_loc = x_axis_precise[index_eradication_drive[i]]
-                eradication_drive[i] = np.where(s_loc/(1-s_loc) < ((a+1)/2)**2*y_axis_precise)[0][0]/nb_precise  
+                eradication_drive[i] = np.where(s_loc/(1-s_loc) < ((a-1)/2)**2*y_axis_precise)[0][0]/nb_precise  
         elif cas in ['d'] :
             for i in range(len(eradication_drive)):
                 # s_loc = local value of s (inside the for loop)
