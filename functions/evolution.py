@@ -46,7 +46,7 @@ def death(equ, oth1, oth2, bio_para):
     if death_dynamic == "logistical" :
         return(1+r*n)
     if death_dynamic == "allee_effect" :
-        return(r+1+r*(1-n)*(n-a))
+        return(r+1+r*(n-1)*(n-a))
     
     
 # Mating function
@@ -116,27 +116,23 @@ def evolution(bio_para, num_para, graph_para) :
     # Spatial domain (1D)
     X = np.linspace(0,N,N+1)*dx   
     
-    # Carrying capacity (with only wild-type individuals)
-    if cas == "d" : K = a
-    else : K = 1
-    
     # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = K/2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
     coex_density = -1 
     
     # Initial condition of the system       
     if CI == "center" : 
-        W = np.ones(N+1)*K; W[0:N//2] = 0    # Wild individuals at t=0  
+        W = np.ones(N+1); W[0:N//2] = 0    # Wild individuals at t=0  
         H = np.zeros(N+1)                  # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//2] = K   # Drive individuals at t=0
+        D = np.zeros(N+1); D[0:N//2] = 1   # Drive individuals at t=0
     if CI == "left" : 
-        W = np.ones(N+1)*K; W[0:N//10] = 0    # Wild individuals at t=0  
+        W = np.ones(N+1); W[0:N//10] = 0    # Wild individuals at t=0  
         H = np.zeros(N+1)                   # Heterozygous individuals at t=0
-        D = np.zeros(N+1); D[0:N//10] = K   # Drive individuals at t=0
+        D = np.zeros(N+1); D[0:N//10] = 1   # Drive individuals at t=0
         
     # Print regimes 
     if cas == "a" : s1, s2 = s1_s2_num(conversion_timing, c, h, s, graph_type)   
@@ -268,7 +264,6 @@ def evolution(bio_para, num_para, graph_para) :
             plt.show() 
     else :
         print(f"No wave for r = {r} and s = {s}.") 
-    print(position[int(4*len(position)/5):len(position)])
     return(W,H,D,time,speed_fct_of_time)
 
 
@@ -281,24 +276,20 @@ def evolution_2D(bio_para, num_para, graph_para, CI_lenght) :
     r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     CI,T,L,M,N,theta = num_para[:-1]
     wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, show_graph_ini, show_graph_end, save_fig = graph_para
-       
-    # Carrying capacity (with only wild-type individuals)
-    if cas == "d" : K = a
-    else : K = 1
 
     # Parameters initialization
     position = np.array([])   # list containing the first position where the proportion of wild alleles is higher than the threshold value.
     speed_fct_of_time = np.array([])      # speed computed... 
     time = np.array([])       # ...for each value of time in this vector.
-    threshold = K/2 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
+    threshold = 0.5 # indicates which position of the wave we follow to compute the speed (first position where the WT wave come above the threshold)    
     pw_star = -1 # a value not admissible ; the value of the equilibrium will be change if there exists a coexistence stable state
       
     # Initial conditions of the system
     if CI_lenght >= N : print('CI_lenght bigger than the domain lenght')   
     else: edge = np.arange((N-CI_lenght)//2+1, (N+CI_lenght)//2+1); CI_where = np.tile(edge, len(edge))+np.repeat(edge, len(edge))*(N+1)
-    W = np.ones((N+1)**2)*K; W[CI_where] = 0    # Wild individuals at t=0  
+    W = np.ones((N+1)**2); W[CI_where] = 0    # Wild individuals at t=0  
     H = np.zeros((N+1)**2)                    # Heterozygous individuals at t=0
-    D = np.zeros((N+1)**2); D[CI_where] = K   # Drive individuals at t=0
+    D = np.zeros((N+1)**2); D[CI_where] = 1   # Drive individuals at t=0
     
     
     # Print regimes 

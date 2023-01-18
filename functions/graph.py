@@ -186,9 +186,10 @@ def create_directory(path) :
    
     
 def create_para_txt(path, bio_para, num_para):
-    CI,T,L,M,N,theta = num_para[:-1]
     file = open(f"../outputs/{path}/0_parameters.txt", "w") 
-    file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")  
+    if num_para != None :
+        CI,T,L,M,N,theta = num_para[:-1]
+        file.write(f"Parameters : \nT = {T} \nL = {L} \nM = {M} \nN = {N} \ntheta = {theta}")  
     if bio_para != None :
         r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
         file.write(f"\nr = {r} \ns = {s} \nh = {h} \nc = {c} \nconversion_timing = {conversion_timing}\ndifWW = {difWW} \ndifDW = {difDW} \ndifDD = {difDD} \ncas = {cas} \na = {a} \ngrowth_dynamic = {growth_dynamic} \ndeath_dynamic = {death_dynamic}")                     

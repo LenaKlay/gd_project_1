@@ -36,7 +36,7 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "heatmap"
+what_to_do = "evolution"
 
 
 ######################### General parameters ##################################
@@ -45,15 +45,15 @@ what_to_do = "heatmap"
 ### General parameters
 
 ## Biological
-r = 10                        # intrinsic growth rate
-s = 0.9                            # fitness disadvantage for drive
+r = 4.94                        # intrinsic growth rate
+s = 0.51                            # fitness disadvantage for drive
 h = 0.9                             # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
 
 # Particular growth/death terms
-cas = "d"
+cas = "b_pos"
 # detailled cases (a : allee effect coefficient)
 if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"; a = -1  # a not taken into acount in case a (but I use a=-1 it in the persistent line, heatmap.py)
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
@@ -66,10 +66,10 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 1000                            # final time
-L = 4000                           # length of the spatial domain
-M = T*6                            # number of time steps
-N = L                              # number of spatial steps
+T = 2000                            # final time
+L = 2000                           # length of the spatial domain
+M = T*8                            # number of time steps
+N = L*4                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs
@@ -77,11 +77,10 @@ save_fig = True                    # Save the figures (.svg and .png)
 
 
 
-
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = "Allele densities"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele frequencies"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
@@ -101,9 +100,12 @@ r_min = 6 ; r_max = 10
 r_nb_points = 10       # r values are taken in np.linspace(r_min,r_max,r_nb_points) 
 
 ## Heatmap
-# I grouped all the other parameters in the part : if what_to_do == "heatmap" (see end of the code) 
-vmin = -8
-vmax = 8      # Range min and max for the heatmap colour scale
+x = "s"; y = "r"         # Heatmap axes
+rlog = True          # r in log scale or not (when y = "r")
+precision = 50       # Number of value on s and r scale for the heatmap
+load = True          # do we load the datas (True) or create them (False)
+migale = False        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
+vmin = -8; vmax = 8      # Range min and max for the heatmap colour scale
 
 ### Small particularities
 # Do not show graph for these tasks
@@ -268,31 +270,24 @@ if what_to_do == "speed function of r" :
 ## Heatmaps
 if what_to_do == "heatmap" :
         # Parameters
-        x = "s"; y = "r"
-        conversion_timing = "germline"; r = 10 ; c = 0.85; h = 0.9; s = 0.9 
         T = 500; L = 2000; M = T*6; N = L; CI = 'center'
-        rlog = True          # r in log scale or not (when y = "r")
-        precision = 50       # Number of value on s and r scale for the heatmap
-        load = True          # do we load the datas (True) or create them (False)
-        migale = True        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
-         
         # Update parameters
         num_para = [CI,T,L,M,N,theta,[vmin,vmax]] 
         bio_para = [r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic]
         # Obtain the heatmap values                       
         if load : 
-            heatmap_values, coex_values = load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas)
+            heatmap_values, coex_values = load_heatmap(bio_para, rlog, precision, migale, x, y)
         else :
             heatmap_values = heatmap(bio_para, num_para, graph_para, rlog, precision, x, y)            
         # Print heatmap
-        print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, "1") 
-        # Print coex
-        coex_values[np.where(coex_values == -1)] = -0.1
+        print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, "fig_speed") 
+        # Print coex       
         num_para[-1][0] = -1; num_para[-1][1] = 1
-        print_heatmap(coex_values, bio_para, num_para, rlog, precision, x, y, "2") 
+        print_heatmap(coex_values, bio_para, num_para, rlog, precision, x, y, "fig_coex") 
         # Superposition
+        coex_values[np.where(coex_values == -1)] = -0.1
         num_para[-1][0] = -8; num_para[-1][1] = 8
-        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, rlog, precision, x, y, "3") 
+        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, rlog, precision, x, y, "fig_superposition") 
 
                 
 

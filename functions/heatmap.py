@@ -19,8 +19,6 @@ from evolution import evolution
 from graph import save_fig_or_data
 
 
-
-
 #### Give the heatmap axes (r in log scale or not) ####
     
 def heatmap_axes(y, rlog, precision):
@@ -42,7 +40,21 @@ def heatmap_axes(y, rlog, precision):
         y_delta = (y_max-y_min)/precision    
         y_axis = np.arange(y_min+y_delta/2,y_max+y_delta/2,y_delta)       
     return(x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta)
+    
+    
+#### Where to save the heatmap and data ####
 
+def where_to_save(r,s,h,c,conversion_timing,x,y,cas):
+    rshc = [['r','s','h','c'], [r,s,h,c]] 
+    xnum = rshc[0].index(x); ynum = rshc[0].index(y)
+    x_bio_index = [0,1,2,6][xnum]; y_bio_index = [0,1,2,6][ynum]  
+    for i in range(2) :
+        del rshc[i][xnum]; del rshc[i][ynum]
+    if cas == None : dir_cas = ''
+    else : dir_cas = f'/cas_{cas}'           
+    save_loc = f"heatmaps/{conversion_timing}_{y}_fct_{x}/{rshc[0][0]}_{rshc[1][0]}_{rshc[0][1]}_{rshc[1][1]}{dir_cas}"
+    return(save_loc, x_bio_index, y_bio_index)
+    
 
 
 #### Create an heatmap (speed of the traveling wave for couples (s,r) ####
@@ -51,15 +63,10 @@ def heatmap(bio_para, num_para, graph_para, rlog, precision, x, y):
     r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta = heatmap_axes(y, rlog, precision)
     
-    # Create a directory and save parameters.txt with y_axis and x_axis
-    rshc = [['r','s','h','c'], [0,1,2,6]] 
-    for i in range(4) : 
-        if x == rshc[0][i] : xnum = rshc[1][i]; bio_para[xnum] = x_axis 
-        if y == rshc[0][i] : ynum = rshc[1][i]; bio_para[ynum] = y_axis
-  
-    # cstnum = which values are constant in r,s,h,c (given by their index in bio_para)
-    rshc[0].remove(x); rshc[0].remove(y); rshc[1].remove(xnum); rshc[1].remove(ynum)
-    save_fig_or_data(f"heatmaps/{conversion_timing}_{y}_fct_{x}/{rshc[0][0]}_{bio_para[rshc[1][0]]}_{rshc[0][1]}_{bio_para[rshc[1][1]]}", [], [], None, bio_para, num_para)
+    # Create a directory and save parameters.txt with y_axis and x_axis 
+    save_loc, x_bio, y_bio = where_to_save(r,s,h,c,conversion_timing,x,y,cas)
+    bio_para[x_bio] = x_axis; bio_para[y_bio] = y_axis
+    save_fig_or_data(save_loc, [], [], None, bio_para, num_para)
      
     # Print principal parameters
     print("conversion_timing =", conversion_timing); print("\n", x, "=", x_axis);  print(y, "=", y_axis); print("h =", h); print("c =", c)
@@ -74,52 +81,54 @@ def heatmap(bio_para, num_para, graph_para, rlog, precision, x, y):
         for x_index in range(0, precision) :
             print("\n", x, "=", np.round(x_axis[x_index],3))             
             # Update values in bio_para
-            bio_para[xnum] = y_axis[y_index]
-            bio_para[ynum] = x_axis[x_index]                    
+            bio_para[x_bio] = x_axis[x_index] 
+            bio_para[y_bio] = y_axis[y_index]                               
             # Speed value given by evolution.py
             heatmap_values[y_index,x_index] = evolution(bio_para, num_para, graph_para)[4][-1] 
             print("speed :", heatmap_values[y_index,x_index])
                      
         # for each r, save the corresponding line
-        save_fig_or_data(f"heatmaps/{conversion_timing}_{y}_fct_{x}", [], heatmap_values[y_index,:], f"y_line_{y_index}", bio_para, num_para)   
+        save_fig_or_data(save_loc, [], heatmap_values[y_index,:], f"y_line_{y_index}", bio_para, num_para)   
         
     # Save final data
-    save_fig_or_data(f"heatmaps/{conversion_timing}_{y}_fct_{x}", [], heatmap_values, f"{conversion_timing}_{y}_fct_{x}", bio_para, num_para)
+    save_fig_or_data(save_loc, [], heatmap_values, f"y_line_all", bio_para, num_para)
     return(heatmap_values) 
  
     
 
 
        
-#### Load an already existing heatmap ####
+#### Load an already existing heatmap #
     
-def load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas) : 
-    heatmap_values = np.zeros((precision,precision))
-    coex_values = np.ones((precision,precision))*(-2)
+def load_heatmap(bio_para, rlog, precision, migale, x, y) :
+    r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
+    speed_values = np.zeros((precision,precision))
+    coex_values = np.ones((precision,precision))*(-2)   
+    x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta = heatmap_axes(y, rlog, precision)   
+    # where to save or search for the aggregated data
+    save_loc, x_bio, y_bio = where_to_save(r,s,h,c,conversion_timing,x,y,cas)
+    bio_para[x_bio] = x_axis; bio_para[y_bio] = y_axis
+
     # migale = True means we download each line of the heatmap (from the migale file)
     if migale :
-        for r_index in range(0,precision):
-            if os.path.exists(f'../migale/heatmaps/speed_{r_index+1}.txt') :
-                heatmap_values[r_index,:] = np.loadtxt(f'../migale/heatmaps/speed_{r_index+1}.txt')
-            else : print(f'Manque heatmap_{r_index+1}.txt')
-            if os.path.exists(f'../migale/heatmaps/coex_{r_index+1}.txt') :
-                coex_values[r_index,:] = np.loadtxt(f'../migale/heatmaps/coex_{r_index+1}.txt')
-            else : print(f'Manque coex_{r_index+1}.txt')
-        if not os.path.exists(f'../outputs/heatmaps/{conversion_timing}_c_{c}_r_{r}'): 
-            os.mkdir(f'../outputs/heatmaps/{conversion_timing}_c_{c}_r_{r}')
-        np.savetxt(f'../outputs/heatmaps/{conversion_timing}_c_{c}_r_{r}/{conversion_timing}_c_{c}_r_{r}.txt', heatmap_values) 
-        np.savetxt(f'../outputs/heatmaps/{conversion_timing}_c_{c}_r_{r}/{conversion_timing}_c_{c}_r_{r}_coex.txt', coex_values) 
+        for y_index in range(0,precision):
+            if os.path.exists(f'../migale/heatmaps/speed_{y_index+1}.txt') :
+                speed_values[y_index,:] = np.loadtxt(f'../migale/heatmaps/speed_{y_index+1}.txt')
+            else : print(f'Manque heatmap_{y_index+1}.txt')
+            if os.path.exists(f'../migale/heatmaps/coex_{y_index+1}.txt') :
+                coex_values[y_index,:] = np.loadtxt(f'../migale/heatmaps/coex_{y_index+1}.txt')
+            else : print(f'Manque coex_{y_index+1}.txt')   
+        # save aggregated data
+        save_fig_or_data(save_loc, [], speed_values, f"1_speed", bio_para, None)
+        save_fig_or_data(save_loc, [], coex_values, f"1_coex", bio_para, None)
+
+      
     # migale = False means we download the full data from a .txt, either in the file : where = 'figures' or in the file : where = 'outputs'
     else :  
-        if cas == None :
-            heatmap_values = np.loadtxt(f'../figures/heatmaps/{conversion_timing}_c_{c}_h_{h}/{conversion_timing}_c_{c}_h_{h}.txt')  
-            if os.path.exists(f'../figures/heatmaps/{conversion_timing}_c_{c}_h_{h}/{conversion_timing}_c_{c}_h_{h}_coex.txt') :
-                coex_values = np.loadtxt(f'../figures/heatmaps/{conversion_timing}_c_{c}_h_{h}/{conversion_timing}_c_{c}_h_{h}_coex.txt')     
-        else : 
-            heatmap_values = np.loadtxt(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}.txt')  
-            if os.path.exists(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt') :
-                coex_values = np.loadtxt(f'../outputs/heatmaps/cas_{cas}/{conversion_timing}_c_{c}_r_{r}_coex.txt')     
-    return(heatmap_values, coex_values)
+        speed_values = np.loadtxt(f'../outputs/{save_loc}/1_speed.txt')  
+        if os.path.exists(f'../outputs/{save_loc}/1_coex.txt') :
+                coex_values = np.loadtxt(f'../outputs/{save_loc}/1_coex.txt')     
+    return(speed_values, coex_values)
   
     
 #### How do we store the values in heatmap_values ? ####
@@ -134,6 +143,9 @@ def load_heatmap(conversion_timing, c, r, h, s, rlog, precision, migale, cas) :
 def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, file_name) :    
     r,s,h,difWW,difDW,difDD,c,conversion_timing,cas,a,growth_dynamic,death_dynamic = bio_para
     x_axis, x_min, x_max, x_delta, y_axis, y_min, y_max, y_delta = heatmap_axes(y, rlog, precision)
+    
+    # where to save heatmaps
+    save_loc, x_bio, y_bio = where_to_save(r,s,h,c,conversion_timing,x,y,cas)
     
     # Figure
     fig, ax = plt.subplots()     
@@ -188,8 +200,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
             ax.vlines((h_2-x_axis[0])*(1/x_delta),-0.5,precision-0.5, color="black", linewidth = 1, linestyle=(0, (3, 5, 1, 5)))
         axtop.set_xticks(ticks) 
         axtop.set_xticklabels(ticklabels)
-             
-    
+               
     
     if y == "r" and x == "s" :     
         # Vertical axis s_1 and s_2
@@ -217,7 +228,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         if cas in ['a','b_pos','b_neg','c'] :            
             index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) >= ((a-1)/2)**2*y_min)[0], np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) <= ((a-1)/2)**2*y_max)[0])
         elif cas in ['d'] :
-            index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(a-x_axis_precise[:-1]) >= y_min)[0], np.where(x_axis_precise[:-1]/(a-x_axis_precise[:-1]) <= y_max)[0])
+            index_eradication_drive =  np.intersect1d(np.where(x_axis_precise[:-1]/(((a-1)/2)**2-x_axis_precise[:-1]) >= y_min)[0], np.where(x_axis_precise[:-1]/(((a-1)/2)**2-x_axis_precise[:-1]) <= y_max)[0])
         # values of the pure drive persistance line
         eradication_drive = np.ones(len(index_eradication_drive))*(-1)
         if cas in ['a','b_pos','b_neg','c'] :   
@@ -229,10 +240,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
             for i in range(len(eradication_drive)):
                 # s_loc = local value of s (inside the for loop)
                 s_loc = x_axis_precise[index_eradication_drive[i]]
-                if a>s_loc : 
-                    eradication_drive[i] = np.where(s_loc < (a-s_loc)*y_axis_precise)[0][0]/nb_precise 
-                else :
-                    eradication_drive[i] = np.where(s_loc > (a-s_loc)*y_axis_precise)[0][0]/nb_precise 
+                eradication_drive[i] = np.where(s_loc/(((a-1)/2)**2*-s_loc) < y_axis_precise)[0][0]/nb_precise  
         ax.plot(abscisse_precise[index_eradication_drive]-0.5, eradication_drive*precision-0.5, color='#73c946ff', label="eradication drive", linewidth = 4)           
             
                     
@@ -291,17 +299,15 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         
         
 
-    # Axis and label sizes
+    # Axis, title and label sizes
     plt.gca().invert_yaxis()                 # inverse r axis (increasing values)
     ax.xaxis.set_tick_params(labelsize=9)
     ax.yaxis.set_tick_params(labelsize=11)
     ax.set(xlabel=x, ylabel=y)
+    ax.set_title(f"{file_name}", fontsize = 12, loc='left')
 
     # Always save figure
-    save_fig_or_data(f"heatmaps", fig, [], f"{conversion_timing}_c_{c}_r_{r}_{file_name}", bio_para, num_para)
+    save_fig_or_data(save_loc, fig, [], f"{file_name}", bio_para, num_para)
 
     plt.show()
-
-
-
 
