@@ -8,9 +8,8 @@ Created on Wed Dec  1 16:29:46 2021
 
 # Libraries
 import matplotlib.pyplot as plt
-import os
 import numpy as np
-
+import os
 
 # Graph parameters 
 title_size = 15

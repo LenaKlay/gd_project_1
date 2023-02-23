@@ -248,12 +248,12 @@ def heatmap(precision, x, y, rlog, r, s, h, c):
 
 ## Biological
 cas = "quel_cas"                            # None "a" "b_pos" "b_neg" "c" "d"
-x = "s"
-y = "r"
+x = "h"
+y = "s"
 rlog = True
 r = 10                               # intrinsic growth rate
 s = 0.9                              # fitness disadvantage for drive
-h = 0.1                              # dominance coefficient
+h = 0.9                              # dominance coefficient
 c = 0.85                             # conversion rate
 conversion_timing = "germline"       # "zygote" or "germline"
 
@@ -282,13 +282,11 @@ precision = quelle_precision       # heatmap precision
  
   
 
-
-
 ############################### Results #########################################
 
 speed_vect, coex_vect = heatmap(precision, x, y, rlog, r, s, h, c)
-np.savetxt(f'speed_{num}.txt', speed_vect) 
-np.savetxt(f'coex_{num}.txt', coex_vect)  
+np.savetxt(f'{cas}_speed_{num}.txt', speed_vect) 
+np.savetxt(f'{cas}_coex_{num}.txt', coex_vect)  
 
   
         

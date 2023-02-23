@@ -45,15 +45,15 @@ what_to_do = "evolution"
 ### General parameters
 
 ## Biological
-r = 4.94                        # intrinsic growth rate
-s = 0.51                            # fitness disadvantage for drive
-h = 0.9                             # dominance coefficient
-c = 0.85                             # conversion rate
-conversion_timing = "germline"       # "zygote" or "germline"
+r = 10                               # intrinsic growth rate
+s = 1                               # fitness disadvantage for drive
+h = 0.1                             # dominance coefficient
+c = 0.85                            # conversion rate
+conversion_timing = "germline"      # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
 
 # Particular growth/death terms
-cas = "b_pos"
+cas = "c"
 # detailled cases (a : allee effect coefficient)
 if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"; a = -1  # a not taken into acount in case a (but I use a=-1 it in the persistent line, heatmap.py)
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
@@ -66,10 +66,10 @@ difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 2000                            # final time
+T = 500                            # final time
 L = 2000                           # length of the spatial domain
-M = T*8                            # number of time steps
-N = L*4                              # number of spatial steps
+M = T*12                           # number of time steps
+N = L*2                            # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs
@@ -80,7 +80,7 @@ save_fig = True                    # Save the figures (.svg and .png)
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = "Allele frequencies"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele densities"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = True                                     # Show graph at time 0
 show_graph_end = True                                     # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
@@ -104,7 +104,7 @@ x = "s"; y = "r"         # Heatmap axes
 rlog = True          # r in log scale or not (when y = "r")
 precision = 50       # Number of value on s and r scale for the heatmap
 load = True          # do we load the datas (True) or create them (False)
-migale = False        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
+migale = True        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
 vmin = -8; vmax = 8      # Range min and max for the heatmap colour scale
 
 ### Small particularities

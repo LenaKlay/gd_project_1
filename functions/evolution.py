@@ -135,7 +135,23 @@ def evolution(bio_para, num_para, graph_para) :
         D = np.zeros(N+1); D[0:N//10] = 1   # Drive individuals at t=0
         
     # Print regimes 
-    if cas == "a" : s1, s2 = s1_s2_num(conversion_timing, c, h, s, graph_type)   
+    if cas == "a" : s1, s2 = s1_s2_num(conversion_timing, c, h, s, graph_type)  
+    if cas in ["b_neg","b_pos"] : 
+        if r*((a-1)/2)**2<s/(1-s) : print("Sous la ligne d'éradication : seul état stable 0.")
+        else : 
+            nd_star = np.round((1+a+np.sqrt((1+a)**2-4*(a+s/(r*(1-s)))))/2,3)  
+            if a > 0 : print("Bistabilité d'éradication : nd* =", nd_star)
+            else : 
+                if r > s/(abs(a)*(1-s)) : print("Seul état stable : nd* =", nd_star)
+                else : print("Bistabilité d'éradication : nd* =", nd_star)         
+    if cas == "d" :           
+        if r*(((a-1)/2)**2-s)<s : print("Sous la ligne d'éradication : seul état stable 0.")
+        else : 
+            nd_star = np.round((1+a+np.sqrt((1+a)**2-4*(a+s*(r+1)/r)))/2,3)  
+            if a + s > 0 : print("Bistabilité d'éradication : nd* =", nd_star)
+            else : 
+                if r > s/(abs(a+s)) : print("Seul état stable : nd* =", nd_star)
+                else : print("Bistabilité d'éradication : nd* =", nd_star)
           
     if graph_type != None and show_graph_ini :
         graph(X,W,H,D,0,graph_para,bio_para,num_para)
@@ -194,7 +210,17 @@ def evolution(bio_para, num_para, graph_para) :
             
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
+        if len(index_neg) > 4 : print("t =", t, "WT prop decreasing :", index_neg) 
+        
+        # if the threshold value of the wave is outside the window, stop the simulation  
+        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
+            print("Outside the window, t =",t)
+            break
+        
+        # if the WT is above 1 or below 0, stop the simulation
+        if np.isin(True, WT>1.1) or np.isin(True, WT<-0.1) or np.isin(True, np.isnan(WT)):
+            print("Numerical scheme explosion, t =",t)
+            break
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
         # palliate centered
@@ -225,22 +251,17 @@ def evolution(bio_para, num_para, graph_para) :
                 time = np.array([]) 
                 coex_density = -1
                 pw_star = -1 
-                threshold = 0.2
+                threshold = 0.5
             
         # we recorde the position only if the WT wave is still in the environment. We do not recorde the 0 position since the threshold value of the wave might be outside the window.
         if np.isin(True, WT>threshold) and np.isin(True, WT<0.99) and np.where(WT>threshold)[0][0] != 0:  
             # List containing the first position of WT where the proportion of wild alleles is higher than the threshold.  
             position = np.append(position, np.where(WT>threshold)[0][0])
             # Wait a minimum time and a minimum number of positions to compute the speed
-            if len(position) > 20  : 
+            if len(position) > 20 : 
                 # The speed is computed on the last fifth of the position vector.
                 time = np.append(time,t)
                 speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-               
-        # if the threshold value of the wave is outside the window, stop the simulation  
-        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
-            print("t =",t)
-            break
         
     # False coexistence detection
     if speed_fct_of_time[-1] < 0 : 
@@ -363,10 +384,20 @@ def evolution_2D(bio_para, num_para, graph_para, CI_lenght) :
             WT = (W+0.5*H)/(W+H+D) 
         if conversion_timing == "germline" : 
             WT = (W+0.5*(1-c)*H)/(W+H+D) 
-        
+            
         # Check if the WT wave is strictly increasing
         epsilon = -0.01 ; index_neg = np.where(WT[1:]-WT[:-1]<epsilon)[0]
-        if len(index_neg) > 4 : print("WT prop decreasing :", index_neg) 
+        if len(index_neg) > 4 : print("t =", t, "WT prop decreasing :", index_neg) 
+        
+        # if the threshold value of the wave is outside the window, stop the simulation  
+        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
+            print("Outside the window, t =",t)
+            break
+        
+        # if the WT is above 1 or below 0, stop the simulation
+        if np.isin(True, WT>1.1) or np.isin(True, WT<-0.1) :
+            print("Above 1 or under 0, t =",t)
+            break
                
         # Check if there is a coexistence state (if so adapt threshold and erase all speed values)
         center_index = np.arange(N//2-N//10,N//2+N//10)
@@ -386,12 +417,7 @@ def evolution_2D(bio_para, num_para, graph_para, CI_lenght) :
             if len(position) > 20  : 
                 # The speed is computed on the last fifth of the position vector.
                 time = np.append(time,t)
-                speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt)
-        # if the threshold value of the wave is outside the window, stop the simulation  
-        if not(np.isin(False, WT>threshold) and np.isin(False, WT<threshold) ) :
-            print("t =",t)
-            break
- 
+                speed_fct_of_time = np.append(speed_fct_of_time, np.mean(np.diff(position[int(4*len(position)/5):len(position)]))*dx/dt) 
     
     # plot the speed function of time    
     if len(speed_fct_of_time) != 0 : 

@@ -188,7 +188,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         if conversion_timing == "zygote" : 
             h_2 = c*(1-2*s)/(s*(1-c))
         if conversion_timing == "germline" :
-            if h != 0 : h_2 = c/(s*(1+c))  
+            if s != 0 : h_2 = c/(s*(1+c))  
         axtop = ax.twiny(); ticks = []; ticklabels = []
         if x_min < h_1 and h_1 < x_max : 
             ticks.append((h_1-x_min)/(x_max-x_min)); ticklabels.append("h1")
@@ -228,7 +228,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         if cas in ['a','b_pos','b_neg','c'] :            
             index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) >= ((a-1)/2)**2*y_min)[0], np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) <= ((a-1)/2)**2*y_max)[0])
         elif cas in ['d'] :
-            index_eradication_drive =  np.intersect1d(np.where(x_axis_precise[:-1]/(((a-1)/2)**2-x_axis_precise[:-1]) >= y_min)[0], np.where(x_axis_precise[:-1]/(((a-1)/2)**2-x_axis_precise[:-1]) <= y_max)[0])
+            index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1] >= (((a-1)/2)**2-x_axis_precise[:-1])*y_min)[0], np.where(x_axis_precise[:-1] <= (((a-1)/2)**2-x_axis_precise[:-1])*y_max)[0])
         # values of the pure drive persistance line
         eradication_drive = np.ones(len(index_eradication_drive))*(-1)
         if cas in ['a','b_pos','b_neg','c'] :   
@@ -240,28 +240,63 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
             for i in range(len(eradication_drive)):
                 # s_loc = local value of s (inside the for loop)
                 s_loc = x_axis_precise[index_eradication_drive[i]]
-                eradication_drive[i] = np.where(s_loc/(((a-1)/2)**2*-s_loc) < y_axis_precise)[0][0]/nb_precise  
+                eradication_drive[i] = np.where(s_loc < (((a-1)/2)**2-s_loc)*y_axis_precise)[0][0]/nb_precise  
+        # finish with a vertical line if needed
+        if index_eradication_drive[-1] < nb_precise-2 :
+            index_eradication_drive = np.append(index_eradication_drive, index_eradication_drive[-1]+1) 
+            eradication_drive = np.append(eradication_drive, 1) 
         ax.plot(abscisse_precise[index_eradication_drive]-0.5, eradication_drive*precision-0.5, color='#73c946ff', label="eradication drive", linewidth = 4)           
-            
-                    
+
+                
+        # Second pure drive persistance line if bistability case        
+        if (cas in ['b_pos','b_neg'] and a < 0) or cas =='d' :   
+            if cas in ['b_pos','b_neg'] and a < 0 : 
+                # index for which we have a second pure drive persistance line in between y_min and y_max
+                index_eradication_drive_2 = np.intersect1d(np.where(x_axis_precise[:-1]/(abs(a)*(1-x_axis_precise[:-1])) >= y_min)[0], np.where(x_axis_precise[:-1]/(abs(a)*(1-x_axis_precise[:-1])) <= y_max)[0])
+                # values of the pure drive persistance line
+                eradication_drive_2 = np.ones(len(index_eradication_drive_2))*(-1)
+                for i in range(len(eradication_drive_2)):
+                    # s_loc = local value of s (inside the for loop)
+                    s_loc = x_axis_precise[index_eradication_drive_2[i]]
+                    eradication_drive_2[i] = np.where(s_loc/(abs(a)*(1-s_loc)) < y_axis_precise)[0][0]/nb_precise                  
+            if cas =='d':
+                # index for which we have a second pure drive persistance line in between y_min and y_max
+                index_eradication_drive_2 = np.intersect1d(np.where(x_axis_precise[:-1] >= (a+x_axis_precise[:-1])*y_min)[0], np.where(x_axis_precise[:-1] <= (a+x_axis_precise[:-1])*y_max)[0])
+                # values of the pure drive persistance line
+                eradication_drive_2 = np.ones(len(index_eradication_drive_2))*(-1)
+                for i in range(len(eradication_drive_2)):
+                    # s_loc = local value of s (inside the for loop)
+                    s_loc = x_axis_precise[index_eradication_drive_2[i]]
+                    eradication_drive_2[i] = np.where(-s_loc/(a+s_loc) < y_axis_precise)[0][0]/nb_precise
+            # finish with a vertical line if needed 
+            if index_eradication_drive_2[-1] < nb_precise-2 :
+                index_eradication_drive_2 = np.append(index_eradication_drive_2, index_eradication_drive_2[-1]+1) 
+                eradication_drive_2 = np.append(eradication_drive_2, 1) 
+            ax.plot(abscisse_precise[index_eradication_drive_2]-0.5, eradication_drive_2*precision-0.5, color='#73c946ff', label="eradication drive 2", linewidth = 4, linestyle="--")           
+       
+
+                 
         # Composite persistance line
-        index_s1s2 = np.arange(np.where(x_axis_precise>=s_1)[0][0], np.where(x_axis_precise<=s_2)[0][-1]+1)
-        if (conversion_timing == "zygote" and (1-h)*(1-c) > 0.5) or (conversion_timing == "germline" and h < 0.5) :                               
-            if conversion_timing == "zygote" :    
-                p_star = (x_axis_precise[index_s1s2]*(1-(1-c)*(1-h)) - c*(1-x_axis_precise[index_s1s2]))/(x_axis_precise[index_s1s2]*(1-2*(1-c)*(1-h)))  
-                mean_fitness = (1-x_axis_precise[index_s1s2])*p_star**2+2*(c*(1-x_axis_precise[index_s1s2])+(1-c)*(1-x_axis_precise[index_s1s2]*h))*p_star*(1-p_star)+(1-p_star)**2 
-            if conversion_timing == "germline" :           
-                p_star = ((1-x_axis_precise[index_s1s2]*h)*(1+c)-1)/(x_axis_precise[index_s1s2]*(1-2*h))
-                mean_fitness = (1-x_axis_precise[index_s1s2])*p_star**2+2*(1-x_axis_precise[index_s1s2]*h)*p_star*(1-p_star)+(1-p_star)**2   
-            # index for which we have a composite persistance line in between y_min and y_max
-            index_eradication_pop = index_s1s2[np.intersect1d(np.where(mean_fitness/(1-mean_fitness) <= y_max)[0], np.where(y_min <= mean_fitness/(1-mean_fitness))[0])]    
-            # values of the composite persistance line
-            eradication_pop = np.ones(len(index_eradication_pop))*(-1)      
-            for i in range(len(eradication_pop)):
-                # m_loc = local value of the mean fitness (inside the for loop)
-                m_loc = x_axis_precise[index_eradication_pop[i]]  
-                eradication_pop[i] = np.where((1-m_loc)/m_loc < y_axis_precise)[0][0]/nb_precise 
-            ax.plot(abscisse_precise[index_eradication_pop]-0.5, eradication_pop*precision-0.5, color='#40720cff', linewidth = 4) 
+        if cas == "a":
+            index_s1s2 = np.arange(np.where(x_axis_precise>=s_1)[0][0], np.where(x_axis_precise<=s_2)[0][-1]+1)
+            if (conversion_timing == "zygote" and (1-h)*(1-c) > 0.5) or (conversion_timing == "germline" and h < 0.5) :                               
+                if conversion_timing == "zygote" :    
+                    p_star = (x_axis_precise[index_s1s2]*(1-(1-c)*(1-h)) - c*(1-x_axis_precise[index_s1s2]))/(x_axis_precise[index_s1s2]*(1-2*(1-c)*(1-h)))  
+                    mean_fitness = (1-x_axis_precise[index_s1s2])*p_star**2+2*(c*(1-x_axis_precise[index_s1s2])+(1-c)*(1-x_axis_precise[index_s1s2]*h))*p_star*(1-p_star)+(1-p_star)**2 
+                if conversion_timing == "germline" :           
+                    p_star = ((1-x_axis_precise[index_s1s2]*h)*(1+c)-1)/(x_axis_precise[index_s1s2]*(1-2*h))
+                    mean_fitness = (1-x_axis_precise[index_s1s2])*p_star**2+2*(1-x_axis_precise[index_s1s2]*h)*p_star*(1-p_star)+(1-p_star)**2   
+                # index for which we have a composite persistance line in between y_min and y_max
+                index_era_inside_s1s2 = np.intersect1d(np.where((1-mean_fitness)/mean_fitness <= y_max)[0], np.where(y_min <= (1-mean_fitness)/mean_fitness)[0])   
+                index_eradication_pop = index_s1s2[index_era_inside_s1s2]
+                # values of the composite persistance line
+                eradication_pop = np.ones(len(index_eradication_pop))*(-1)      
+                for i in range(len(eradication_pop)):
+                    # m_loc = local value of the mean fitness (inside the for loop)
+                    m_loc = mean_fitness[index_era_inside_s1s2[i]]  
+                    eradication_pop[i] = np.where((1-m_loc)/m_loc < y_axis_precise)[0][0]/nb_precise 
+                ax.plot(abscisse_precise[index_eradication_pop]-0.5, eradication_pop*precision-0.5, color='#40720cff', linewidth = 4) 
+
 
     if x == "h" and y == "s":
         

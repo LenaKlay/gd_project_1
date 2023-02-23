@@ -7,7 +7,7 @@
    viewBox="0 0 340 280"
    version="1.1"
    id="svg5"
-   inkscape:version="1.2.1 (0f2f062aeb, 2022-09-21, custom)"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
    sodipodi:docname="germline.svg"
    inkscape:export-filename="../b77840eb/germline.png"
    inkscape:export-xdpi="150"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.67720467"
-     inkscape:cx="378.02456"
-     inkscape:cy="180.89066"
+     inkscape:zoom="0.62069301"
+     inkscape:cx="307.72056"
+     inkscape:cy="529.24714"
      inkscape:window-width="1853"
      inkscape:window-height="1018"
      inkscape:window-x="67"
@@ -2988,11 +2988,11 @@
    style="font-size:65%;baseline-shift:sub"
    id="tspan1217">2,g</tspan> </tspan>&lt; <tspan
    style="font-style:italic;font-size:6.35px"
-   id="tspan3598-2">s<tspan
-   style="font-size:65%;baseline-shift:sub"
-   id="tspan1219">1</tspan></tspan> &lt; <tspan
+   id="tspan3598-2">s</tspan> &lt; <tspan
    style="font-style:italic;font-size:6.35px"
-   id="tspan3602-6">s</tspan></tspan></text>
+   id="tspan3602-6">s<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan2590">1</tspan></tspan></tspan></text>
     <circle
        style="fill:#676767;fill-opacity:0;stroke:#000000;stroke-width:0.3;stroke-dasharray:none;stroke-opacity:1"
        id="path115371"
