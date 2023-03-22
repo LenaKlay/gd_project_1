@@ -23,6 +23,8 @@ number_y_size = 20
 # Saving figures
 save_column = True
 
+# Font
+plt.rcParams.update({'font.family':'serif'})
 
 def graph(X,W,H,D,t,graph_para,bio_para,num_para):
        

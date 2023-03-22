@@ -36,7 +36,7 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "evolution"
+what_to_do = "heatmap"
 
 
 ######################### General parameters ##################################
@@ -45,21 +45,22 @@ what_to_do = "evolution"
 ### General parameters
 
 ## Biological
-r = 10                               # intrinsic growth rate
-s = 1                               # fitness disadvantage for drive
-h = 0.1                             # dominance coefficient
+r = 8                               # intrinsic growth rate
+s = 0.2                               # fitness disadvantage for drive
+h = 0.9                             # dominance coefficient
 c = 0.85                            # conversion rate
 conversion_timing = "germline"      # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
 
 # Particular growth/death terms
-cas = "c"
+cas = "d_neg"
 # detailled cases (a : allee effect coefficient)
 if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"; a = -1  # a not taken into acount in case a (but I use a=-1 it in the persistent line, heatmap.py)
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
 if cas == "b_neg": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = -0.2
 if cas == "c" : growth_dynamic = "constant"; death_dynamic = "logistical"; a = -1  # a not taken into acount in case c (but I use a=-1 it in the persistent line, heatmap.py)
-if cas == "d" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = 0.2
+if cas == "d_pos" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = 0.2
+if cas == "d_neg" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = -0.2
 
 # Diffusion
 difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or DD individuals
