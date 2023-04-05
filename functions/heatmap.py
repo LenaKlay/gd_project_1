@@ -123,7 +123,7 @@ def load_heatmap(bio_para, rlog, precision, migale, x, y) :
         save_fig_or_data(save_loc, [], coex_values, f"1_coex", bio_para, None)
 
       
-    # migale = False means we download the full data from a .txt, either in the file : where = 'figures' or in the file : where = 'outputs'
+    # migale = False means we download the full data from a .txt, in the file : where = 'outputs'
     else :  
         speed_values = np.loadtxt(f'../outputs/{save_loc}/1_speed.txt')  
         if os.path.exists(f'../outputs/{save_loc}/1_coex.txt') :
@@ -166,9 +166,13 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
     else : ax.set_yticklabels(np.around(np.arange(x_min,x_max+0.1,0.1),2))   
      
     # Colorbar creation
-    colors1 = plt.cm.Blues(np.flip(np.linspace(0.3, 1, 128))); colors2 = plt.cm.hot(np.flip(np.linspace(0, 0.75, 128)))  # Create the color scale   
-    colors = np.vstack((colors1, colors2)) # Merge the two
-    mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors)  
+    if num_para[-1][0] < 0 : # symetric colorbar around 0
+        colors1 = plt.cm.Blues(np.flip(np.linspace(0.3, 1, 128))); colors2 = plt.cm.hot(np.flip(np.linspace(0, 0.75, 128)))  # Create the color scale   
+        colors = np.vstack((colors1, colors2)) # Merge the two
+        mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors)  
+    if num_para[-1][0] >= 0 : # positive colorbar 
+        colors2 = plt.cm.hot(np.flip(np.linspace(0, 0.75, 128*2))) 
+        mymap = mcolors.LinearSegmentedColormap.from_list('my_colormap', colors2) 
     # Plot heatmap values
     im = ax.imshow(heatmap_values,cmap=mymap, vmin=num_para[-1][0], vmax=num_para[-1][1], aspect='auto')  
     # Add the colorbar
@@ -183,6 +187,9 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
     else : y_axis_precise = np.linspace(y_min, y_max, nb_precise)
        
     if y == "r" and x == "h" :
+        # Labels 
+        x_label = "h (Drive dominance)"; y_label = "r (Intrinsic growth rate)"
+        
         # Vertical axis h_1 and h_2
         h_1 = (s-c)/(s*(1-c))
         if conversion_timing == "zygote" : 
@@ -202,7 +209,10 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         axtop.set_xticklabels(ticklabels)
                
     
-    if y == "r" and x == "s" :     
+    if y == "r" and x == "s" :    
+        # Labels 
+        x_label = "s (Fitness disadvantage for drive)"; y_label = "r (Intrinsic growth rate)"
+        
         # Vertical axis s_1 and s_2
         s_1 = c/(1-h*(1-c))
         if conversion_timing == "zygote" : 
@@ -223,7 +233,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         axtop.set_xticklabels(ticklabels)
             
 
-        # Pure drive persistance line        
+        # Pure drive persistence line        
         # index for which we have a pure drive persistance line in between y_min and y_max
         if cas in ['a','b_pos','b_neg','c'] :            
             index_eradication_drive = np.intersect1d(np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) >= ((a-1)/2)**2*y_min)[0], np.where(x_axis_precise[:-1]/(1-x_axis_precise[:-1]) <= ((a-1)/2)**2*y_max)[0])
@@ -245,10 +255,12 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
         if index_eradication_drive[-1] < nb_precise-2 :
             index_eradication_drive = np.append(index_eradication_drive, index_eradication_drive[-1]+1) 
             eradication_drive = np.append(eradication_drive, 1) 
-        ax.plot(abscisse_precise[index_eradication_drive]-0.5, eradication_drive*precision-0.5, color='#73c946ff', label="eradication drive", linewidth = 4)           
-
+        if (cas in ['a','c']) or a==-1 :
+            ax.plot(abscisse_precise[index_eradication_drive]-0.5, eradication_drive*precision-0.5, color='#73c946ff', label="eradication drive", linewidth = 4)           
+        else :           
+            ax.plot(abscisse_precise[index_eradication_drive]-0.5, eradication_drive*precision-0.5, color='#73c946ff', label="eradication drive", linewidth = 4, linestyle="-.")
                 
-        # Second pure drive persistance line if bistability case        
+        # Unconditionnal pure drive persistance line (if bistability)        
         if cas in ['b_neg','d_neg'] :   
             if cas == 'b_neg' : 
                 # index for which we have a second pure drive persistance line in between y_min and y_max
@@ -260,8 +272,8 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
                     s_loc = x_axis_precise[index_eradication_drive_2[i]]
                     eradication_drive_2[i] = np.where(s_loc/(abs(a)*(1-s_loc)) < y_axis_precise)[0][0]/nb_precise                  
             if cas =='d_neg':
-                # index for which we have a second pure drive persistance line in between y_min and y_max
-                index_eradication_drive_2 = np.intersect1d(np.where(-x_axis_precise[:-1]/(a+x_axis_precise[:-1]) >= y_min)[0], np.where(-x_axis_precise[:-1]/(a+x_axis_precise[:-1]) <= y_max)[0])
+                # index for which we have a second pure drive persistance line in between y_min and y_max  (/!\ a+s<0 if s is in [0,a] which changes the sense of the inequalities)
+                index_eradication_drive_2 = np.intersect1d(np.where(-x_axis_precise[:-1] <= (a+x_axis_precise[:-1])*y_min)[0], np.where(-x_axis_precise[:-1] >= (a+x_axis_precise[:-1])*y_max)[0])               
                 # values of the pure drive persistance line
                 eradication_drive_2 = np.ones(len(index_eradication_drive_2))*(-1)
                 for i in range(len(eradication_drive_2)):
@@ -299,6 +311,8 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
 
 
     if x == "h" and y == "s":
+        # Labels 
+        x_label = "h (Drive dominance)";  y_label = "s (Fitness disadvantage for drive)" 
         
         # S1 line
         # index for which s1 is in between y_min and y_max          
@@ -338,7 +352,7 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
     plt.gca().invert_yaxis()                 # inverse r axis (increasing values)
     ax.xaxis.set_tick_params(labelsize=9)
     ax.yaxis.set_tick_params(labelsize=11)
-    ax.set(xlabel=x, ylabel=y)
+    ax.set(xlabel=x_label, ylabel=y_label)
     ax.set_title(f"{file_name}", fontsize = 12, loc='left')
 
     # Always save figure

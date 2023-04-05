@@ -9,7 +9,7 @@ Created on Wed Dec  1 16:03:42 2021
 # Libraries
 import numpy as np
 import scipy.sparse as sp
-import scipy.sparse.linalg  as la
+import scipy.sparse.linalg as la
 import matplotlib.pyplot as plt
 
 # External functions 

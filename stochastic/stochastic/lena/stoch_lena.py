@@ -13,15 +13,15 @@ import matplotlib.pyplot as plt
 
 ### Parameters
 K = 1000000000              # Carrying capacity for a spatial interval of size 1
-nb_sites = 2000             # Number of sites
-dx = 1                    # Spatial interval 
-T = 150                     # Time at which simulation stops (it can stop earlier if one of the type disappear from the environment)
+nb_sites = 20000            # Number of sites
+dx = 0.1                    # Spatial interval 
+T = 1000                    # Time at which simulation stops (it can stop earlier if one of the type disappear from the environment)
 dt = 0.001                  # Time interval
 m = np.round(2*dt/dx**2,3)  # Migration probability
 r = 0                       # Intrasic growth rate
 s = 0.4                     # Disadvantage for drive
 nb_graph = 5                # Number of graphs shown if T is reached 
-nb_save = 200               # Number of values (nD, nW) saved in between 0...T
+nb_save = 1000              # Number of values (nD, nW) saved in between 0...T
 
 
 ### Seed for reproductibility
@@ -127,3 +127,15 @@ np.savetxt(f"nW_matrix.txt", nW_matrix)
 file = open(f"parameters.txt", "w") 
 file.write(f"Parameters : \nK = {K} \nnb_sites = {nb_sites} \ndx = {dx} \nT = {T} \ndt = {dt} \nm = {m} \nr = {r} \ns = {s} \nnb_graph = {nb_graph} \nnb_save = {nb_save}")  
 file.close() 
+
+
+
+
+
+
+
+
+
+
+
+

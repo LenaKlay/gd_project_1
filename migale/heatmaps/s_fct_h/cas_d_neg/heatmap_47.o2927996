@@ -1,0 +1,465 @@
+
+h= 0.01
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08562103852481187
+coex_density  = 1.360187514353925e-78
+threshold = 0.542810519262406
+t = 409.17
+speed= 2.472
+coex= 1.360187514353925e-78
+
+h= 0.03
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08609131842611868
+coex_density  = 1.532775739507978e-78
+threshold = 0.5430456592130594
+t = 417.25
+speed= 2.429
+coex= 1.532775739507978e-78
+
+h= 0.05
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08659634337520346
+coex_density  = 2.14131167654839e-78
+threshold = 0.5432981716876017
+t = 425.92
+speed= 2.391
+coex= 2.14131167654839e-78
+
+h= 0.07
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08716433781572483
+coex_density  = 3.4031346167275323e-78
+threshold = 0.5435821689078624
+t = 435.17
+speed= 2.342
+coex= 3.4031346167275323e-78
+
+h= 0.09
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08778623908122102
+coex_density  = 6.883813366941301e-78
+threshold = 0.5438931195406105
+t = 445.08
+speed= 2.289
+coex= 6.883813366941301e-78
+
+h= 0.11
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.0884751644719192
+coex_density  = 1.8002935251293103e-77
+threshold = 0.5442375822359596
+t = 455.83
+speed= 2.234
+coex= 1.8002935251293103e-77
+
+h= 0.13
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.08924781769156014
+coex_density  = 6.198686210197409e-77
+threshold = 0.54462390884578
+t = 467.42
+speed= 2.177
+coex= 6.198686210197409e-77
+
+h= 0.15
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.09010643399414064
+coex_density  = 3.157563236085638e-76
+threshold = 0.5450532169970703
+t = 480.08
+speed= 2.123
+coex= 3.157563236085638e-76
+
+h= 0.17
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.09110029719437876
+coex_density  = 2.2139358754532435e-75
+threshold = 0.5455501485971894
+t = 493.83
+speed= 2.058
+coex= 2.2139358754532435e-75
+
+h= 0.19
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.09225143141593248
+coex_density  = 2.4165696858870604e-74
+threshold = 0.5461257157079662
+speed= 1.983
+coex= 2.4165696858870604e-74
+
+h= 0.21
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.09362085076431327
+coex_density  = 4.2407456588739784e-73
+threshold = 0.5468104253821566
+speed= 1.914
+coex= 4.2407456588739784e-73
+
+h= 0.23
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.09528344309452068
+coex_density  = 1.3634122201022477e-71
+threshold = 0.5476417215472603
+speed= 1.851
+coex= 1.3634122201022477e-71
+
+h= 0.25
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.0974081334162666
+coex_density  = 7.668642842582449e-70
+threshold = 0.5487040667081333
+speed= 1.782
+coex= 7.668642842582449e-70
+
+h= 0.27
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.1002070884130767
+coex_density  = 1.0450699889588744e-67
+threshold = 0.5501035442065384
+speed= 1.71
+coex= 1.0450699889588744e-67
+
+h= 0.29
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.1042071155042655
+coex_density  = 3.079466044065047e-65
+threshold = 0.5521035577521327
+speed= 1.636
+coex= 3.079466044065047e-65
+
+h= 0.31
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.11047841192234839
+coex_density  = 2.7684775512591235e-62
+threshold = 0.5552392059611742
+speed= 1.563
+coex= 2.7684775512591235e-62
+
+h= 0.33
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.1222832372763219
+coex_density  = 8.368111250887908e-59
+threshold = 0.5611416186381609
+speed= 1.473
+coex= 8.368111250887908e-59
+
+h= 0.35
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.15391000822089018
+coex_density  = 1.0497873973103395e-54
+threshold = 0.5769550041104451
+speed= 1.382
+coex= 1.0497873973103395e-54
+
+h= 0.37
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.17200485985597175
+coex_density  = 7.375479254868674e-55
+threshold = 0.5860024299279859
+speed= 1.279
+coex= 7.375479254868674e-55
+
+h= 0.39
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.18584053583756105
+coex_density  = 6.815675617388958e-56
+threshold = 0.5929202679187805
+speed= 1.183
+coex= 6.815675617388958e-56
+
+h= 0.41
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.20493813104509406
+coex_density  = 8.913914429888497e-57
+threshold = 0.6024690655225471
+speed= 1.062
+coex= 8.913914429888497e-57
+
+h= 0.43
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.2336065669354468
+coex_density  = 3.2023048357070763e-57
+threshold = 0.6168032834677234
+speed= 0.927
+coex= 3.2023048357070763e-57
+
+h= 0.45
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.2842111153864809
+coex_density  = 4.192449459064074e-56
+threshold = 0.6421055576932404
+speed= 0.771
+coex= 4.192449459064074e-56
+
+h= 0.47
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.5240548397287834
+coex_density  = 3.258732242952633e-26
+threshold = 0.7620274198643917
+speed= 0.562
+coex= 3.258732242952633e-26
+
+h= 0.49
+c= 0.85
+r= 1
+s= 0.93
+coex ! p_w* = 0.8670753385915856
+coex_density  = 0.6215836171401952
+threshold = 0.9335376692957928
+WT prop decreasing : [198 717 718 719 720]
+WT prop decreasing : [194 716 717 718 719]
+WT prop decreasing : [194 716 717 718 719]
+WT prop decreasing : [189 715 716 717 718]
+WT prop decreasing : [189 715 716 717 718]
+WT prop decreasing : [189 714 715 716 717]
+speed= 0.208
+coex= 0.6215836171401952
+
+h= 0.51
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.53
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.55
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.57
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.59
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.61
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.63
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.65
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.67
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.69
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.71
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.73
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.75
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.77
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.79
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.81
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.83
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.85
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.87
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.89
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.91
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.93
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.95
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.97
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.99
+c= 0.85
+r= 1
+s= 0.93
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0

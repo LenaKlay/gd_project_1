@@ -274,10 +274,10 @@ difW = 1; difH = 1; difD = 1       # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 1000                            # final time
-L = 4000                           # length of the spatial domain
-M = T*60                            # number of time steps
-N = L*10                              # number of spatial steps
+T = 500                            # final time
+L = 2000                           # length of the spatial domain
+M = T*12                            # number of time steps
+N = L*2                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
 precision = 50       # heatmap precision
  

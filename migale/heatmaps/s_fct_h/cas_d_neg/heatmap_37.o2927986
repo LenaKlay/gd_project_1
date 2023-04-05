@@ -1,0 +1,379 @@
+
+h= 0.01
+c= 0.85
+r= 1
+s= 0.73
+t = 408.33
+speed= 2.476
+coex= -1.0
+
+h= 0.03
+c= 0.85
+r= 1
+s= 0.73
+t = 414.58
+speed= 2.439
+coex= -1.0
+
+h= 0.05
+c= 0.85
+r= 1
+s= 0.73
+t = 421.17
+speed= 2.4
+coex= -1.0
+
+h= 0.07
+c= 0.85
+r= 1
+s= 0.73
+t = 428.08
+speed= 2.366
+coex= -1.0
+
+h= 0.09
+c= 0.85
+r= 1
+s= 0.73
+t = 435.42
+speed= 2.322
+coex= -1.0
+
+h= 0.11
+c= 0.85
+r= 1
+s= 0.73
+t = 443.17
+speed= 2.286
+coex= -1.0
+
+h= 0.13
+c= 0.85
+r= 1
+s= 0.73
+t = 451.42
+speed= 2.244
+coex= -1.0
+
+h= 0.15
+c= 0.85
+r= 1
+s= 0.73
+t = 460.17
+speed= 2.201
+coex= -1.0
+
+h= 0.17
+c= 0.85
+r= 1
+s= 0.73
+t = 469.5
+speed= 2.163
+coex= -1.0
+
+h= 0.19
+c= 0.85
+r= 1
+s= 0.73
+t = 479.42
+speed= 2.113
+coex= -1.0
+
+h= 0.21
+c= 0.85
+r= 1
+s= 0.73
+t = 490.17
+speed= 2.071
+coex= -1.0
+
+h= 0.23
+c= 0.85
+r= 1
+s= 0.73
+speed= 2.012
+coex= -1.0
+
+h= 0.25
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.962
+coex= -1.0
+
+h= 0.27
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.912
+coex= -1.0
+
+h= 0.29
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.862
+coex= -1.0
+
+h= 0.31
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.807
+coex= -1.0
+
+h= 0.33
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.756
+coex= -1.0
+
+h= 0.35
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.696
+coex= -1.0
+
+h= 0.37
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.636
+coex= -1.0
+
+h= 0.39
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.571
+coex= -1.0
+
+h= 0.41
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.511
+coex= -1.0
+
+h= 0.43
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.436
+coex= -1.0
+
+h= 0.45
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.371
+coex= -1.0
+
+h= 0.47
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.291
+coex= -1.0
+
+h= 0.49
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.211
+coex= -1.0
+
+h= 0.51
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.116
+coex= -1.0
+
+h= 0.53
+c= 0.85
+r= 1
+s= 0.73
+speed= 1.021
+coex= -1.0
+
+h= 0.55
+c= 0.85
+r= 1
+s= 0.73
+speed= 0.911
+coex= -1.0
+
+h= 0.57
+c= 0.85
+r= 1
+s= 0.73
+speed= 0.791
+coex= -1.0
+
+h= 0.59
+c= 0.85
+r= 1
+s= 0.73
+speed= 0.641
+coex= -1.0
+
+h= 0.61
+c= 0.85
+r= 1
+s= 0.73
+speed= 0.455
+coex= -1.0
+
+h= 0.63
+c= 0.85
+r= 1
+s= 0.73
+speed= 0.215
+coex= -1.0
+
+h= 0.65
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.67
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.69
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.71
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.73
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.75
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.77
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.79
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.81
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.83
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.85
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.87
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.89
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0
+
+h= 0.91
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.93
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.95
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.97
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.981
+coex= -1.0
+
+h= 0.99
+c= 0.85
+r= 1
+s= 0.73
+False coex detection (speed<0)
+speed= -0.976
+coex= -1.0

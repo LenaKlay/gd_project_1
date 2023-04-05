@@ -45,15 +45,15 @@ what_to_do = "heatmap"
 ### General parameters
 
 ## Biological
-r = 8                               # intrinsic growth rate
-s = 0.2                               # fitness disadvantage for drive
-h = 0.9                             # dominance coefficient
+r = 1                               # intrinsic growth rate
+s = 0.1                               # fitness disadvantage for drive
+h = 0.1                            # dominance coefficient
 c = 0.85                            # conversion rate
 conversion_timing = "germline"      # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
 
 # Particular growth/death terms
-cas = "d_neg"
+cas = "a"
 # detailled cases (a : allee effect coefficient)
 if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"; a = -1  # a not taken into acount in case a (but I use a=-1 it in the persistent line, heatmap.py)
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
@@ -81,14 +81,14 @@ save_fig = True                    # Save the figures (.svg and .png)
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = "Allele densities"                           # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
-show_graph_ini = True                                     # Show graph at time 0
-show_graph_end = True                                     # Show graph at time T
+graph_type = None # "Allele densities"                    # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
+show_graph_ini = False                                    # Show graph at time 0
+show_graph_end = False                                    # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//5                                               # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//5                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 ## Evolution 2D
 CI_lenght = N//4
  
@@ -105,8 +105,8 @@ x = "s"; y = "r"         # Heatmap axes
 rlog = True          # r in log scale or not (when y = "r")
 precision = 50       # Number of value on s and r scale for the heatmap
 load = True          # do we load the datas (True) or create them (False)
-migale = True        # if load == True, do the datas come from migale cluster, or from the folder "figures/heatmaps"
-vmin = -8; vmax = 8      # Range min and max for the heatmap colour scale
+migale = False   # if True, the datas come from migale cluster (stored in "migale/heatmaps"), if false they come frome "outputs/heatmaps"
+vmin = 1; vmax = 2      # Range min and max for the heatmap colour scale
 
 ### Small particularities
 # Do not show graph for these tasks
@@ -128,14 +128,16 @@ graph_para = [wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, 
 
 ## Evolution
 if what_to_do == "evolution" :
-    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
-    W, H, D, time, speed = evolution(bio_para, num_para, graph_para)
-    print("\nspeed :", speed[-1])
+    for s in np.linspace(0,1,50) :
+        bio_para[1] = s 
+        print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nh =", h); print("c =", c); print("r =", r); print("s =", s)
+        W, H, D, time, speed = evolution(bio_para, num_para, graph_para)
+        print("\nspeed :", speed[-1])
     
     
 ## Evolution 2D
 if what_to_do == "evolution 2D" :
-    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nr =", r); print("s =", s); print("h =", h); print("c =", c)
+    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nh =", h); print("c =", c); print("r =", r); print("s =", s)
     W, H, D, time, speed = evolution_2D(bio_para, num_para, graph_para, CI_lenght)
     print("\nspeed :", speed[-1])
     
@@ -281,14 +283,14 @@ if what_to_do == "heatmap" :
         else :
             heatmap_values = heatmap(bio_para, num_para, graph_para, rlog, precision, x, y)            
         # Print heatmap
-        print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, "fig_speed") 
+        print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, f"{cas}") 
         # Print coex       
-        num_para[-1][0] = -1; num_para[-1][1] = 1
-        print_heatmap(coex_values, bio_para, num_para, rlog, precision, x, y, "fig_coex") 
+        #num_para[-1][0] = -1; num_para[-1][1] = 1
+        #print_heatmap(coex_values, bio_para, num_para, rlog, precision, x, y, "coex") 
         # Superposition
-        coex_values[np.where(coex_values == -1)] = -0.1
-        num_para[-1][0] = -8; num_para[-1][1] = 8
-        print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, rlog, precision, x, y, "fig_superposition") 
+        #coex_values[np.where(coex_values == -1)] = -0.1
+        #num_para[-1][0] = -8; num_para[-1][1] = 8
+        #print_heatmap(heatmap_values+8*(coex_values+0.1), bio_para, num_para, rlog, precision, x, y, "superposition") 
 
                 
 

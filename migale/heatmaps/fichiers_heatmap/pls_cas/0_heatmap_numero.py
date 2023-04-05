@@ -251,7 +251,7 @@ cas = "quel_cas"                            # None "a" "b_pos" "b_neg" "c" "d"
 x = "h"
 y = "s"
 rlog = True
-r = 10                               # intrinsic growth rate
+r = 1                               # intrinsic growth rate
 s = 0.9                              # fitness disadvantage for drive
 h = 0.9                              # dominance coefficient
 c = 0.85                             # conversion rate
@@ -273,10 +273,10 @@ difW = 1; difH = 1; difD = 1       # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 1000                            # final time
-L = 4000                           # length of the spatial domain
-M = T*6                            # number of time steps
-N = L                              # number of spatial steps
+T = 500                            # final time
+L = 2000                           # length of the spatial domain
+M = T*12                            # number of time steps
+N = L*2                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
 precision = quelle_precision       # heatmap precision
  

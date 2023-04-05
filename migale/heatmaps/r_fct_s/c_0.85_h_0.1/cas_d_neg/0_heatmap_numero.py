@@ -266,7 +266,7 @@ if cas == "a" : growth_dynamic = "logistical"; death_dynamic = "constant"
 if cas == "b_pos": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = 0.2
 if cas == "b_neg": growth_dynamic = "allee_effect"; death_dynamic = "constant"; a = -0.2
 if cas == "c" : growth_dynamic = "constant"; death_dynamic = "logistical"
-if cas == "d" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = 0.2
+if cas == "d_pos" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = 0.2
 if cas == "d_neg" : growth_dynamic = "constant"; death_dynamic = "allee_effect"; a = -0.2
 
 # Diffusion
@@ -274,10 +274,10 @@ difW = 1; difH = 1; difD = 1       # diffusion coefficient for resp. WW, WD or D
 
 ## Numerical
 CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 1000                            # final time
-L = 4000                           # length of the spatial domain
-M = T*6                            # number of time steps
-N = L                              # number of spatial steps
+T = 500                            # final time
+L = 2000                           # length of the spatial domain
+M = T*40                            # number of time steps
+N = L*4                              # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
 precision = quelle_precision       # heatmap precision
  

@@ -1,3 +1,0 @@
-Speed : 0.846
-wt : q = 1.056 and log(q) = 0.054
-drive : q = 1.034 and log(q) = 0.033
