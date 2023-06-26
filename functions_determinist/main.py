@@ -36,7 +36,7 @@ plt.rcParams.update({'font.family':'serif'})
 # "evolution" "evolution 2D" "tanaka cubic" "tanaka fraction" "KPP" "pulled pushed" 
 # "speed function of time" "speed function of s" "speed function of r" "heatmap"
 
-what_to_do = "heatmap"
+what_to_do = "evolution"
 
 
 ######################### General parameters ##################################
@@ -45,9 +45,9 @@ what_to_do = "heatmap"
 ### General parameters
 
 ## Biological
-r = 1                               # intrinsic growth rate
-s = 0.1                               # fitness disadvantage for drive
-h = 0.1                            # dominance coefficient
+r = 3                               # intrinsic growth rate
+s = 0.8                               # fitness disadvantage for drive
+h = 0.2                            # dominance coefficient
 c = 0.85                            # conversion rate
 conversion_timing = "germline"      # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
@@ -66,11 +66,11 @@ if cas == "d_neg" : growth_dynamic = "constant"; death_dynamic = "allee_effect";
 difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or DD individuals
 
 ## Numerical
-CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 500                            # final time
-L = 2000                           # length of the spatial domain
-M = T*12                           # number of time steps
-N = L*2                            # number of spatial steps
+CI = "left"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
+T = 70                            # final time
+L = 150                           # length of the spatial domain
+M = T*6                           # number of time steps
+N = L                            # number of spatial steps
 theta = 0.5                        # discretization in space : theta = 0.5 for Crank Nicholson, theta = 0 for Euler Explicit, theta = 1 for Euler Implicit  
     
 ## Save outputs
@@ -81,7 +81,7 @@ save_fig = True                    # Save the figures (.svg and .png)
 ### Parameters specific for each what_to_do
 
 ## Evolution
-graph_type = None # "Allele densities"                    # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
+graph_type = "Allele densities"                    # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = False                                    # Show graph at time 0
 show_graph_end = False                                    # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
@@ -128,11 +128,9 @@ graph_para = [wild, heterozygous, drive, mod, grid, semilogy, xlim, graph_type, 
 
 ## Evolution
 if what_to_do == "evolution" :
-    for s in np.linspace(0,1,50) :
-        bio_para[1] = s 
-        print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nh =", h); print("c =", c); print("r =", r); print("s =", s)
-        W, H, D, time, speed = evolution(bio_para, num_para, graph_para)
-        print("\nspeed :", speed[-1])
+    print("\nwhat_to_do =", what_to_do); print("conversion_timing =", conversion_timing); print("\nh =", h); print("c =", c); print("r =", r); print("s =", s)
+    W, H, D, time, speed = evolution(bio_para, num_para, graph_para)
+    print("\nspeed :", speed[-1])
     
     
 ## Evolution 2D

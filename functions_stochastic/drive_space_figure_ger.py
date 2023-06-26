@@ -267,7 +267,15 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, dir_sav
     plt.show()
     
 
-    
+def heatmap_distance(v):
+    pic_values = 
+    difference = 
+    L(pic_values, lambda_pos)
+    fig, ax = plt.subplots()
+    im = ax.imshow(harvest)
+    fig.tight_layout()
+    plt.show()
+            
     
 
 ### Parameters and datas ###
@@ -312,7 +320,7 @@ index_time = np.intersect1d(np.where(time>start)[0], np.where(time<end)[0])
     
     
 # Parameters for figures
-pic_values = [0.02*K*dx, 0.02*K*dx]   # Reference position
+pic_values = [0.02*K*dx]*2   # Reference position
 nb_ind = [10, 10]
 nb_graph = 2       # Number of graphs shown
 nb_sinus = 30      # Number of time values used in the sinus graph

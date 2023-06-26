@@ -15,7 +15,7 @@ import os
 title_size = 15
 label_size = 17
 legend_size = 12
-line_size = 10
+line_size = 2
 number_on_x_axe = False
 number_x_size = 10
 number_y_size = 20
