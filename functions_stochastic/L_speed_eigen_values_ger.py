@@ -69,7 +69,7 @@ def continu(conv_timing,s,h,c,r):
     lDfc = -v/2
     lDbc = -v/2 + np.sqrt(term - (r+1)*(1-s))
     lWbc = -v/2 + np.sqrt(term - (r+1)*(1-s*h)*(1-c))
-    return(v, lDfc, lDbc, lWbc)
+    return(v, lDfc, [lWbc, lDbc])
 
     
 # Speed and lambdas (discrete)
@@ -84,15 +84,15 @@ def discrete(conv_timing,s,h,c,r,m,dx,dt):
     # Speed 
     v = np.min(np.log((1+(term-1)*dt)*(1-m+m*np.cosh(lambda_vect*dx)))/(lambda_vect*dt))
     # Drive lambda at the front
-    eqDfd = np.exp(lambda_vect*v*dt) - (1-(term-1)*dt)*(1-m+m*np.cosh(lambda_vect*dx))
-    lDfd = lambda_vect[np.where(abs(eqDfd)==np.min(abs(eqDfd)))[0][0]]
+    eqDfd = np.exp(-lambda_vect*v*dt) - (1-(term-1)*dt)*(1-m+m*np.cosh(lambda_vect*dx))
+    lDfd = (-1*lambda_vect)[np.where(abs(eqDfd)==np.min(abs(eqDfd)))[0][0]]
     # Drive and Wild-type lamdba at the back
     eqDbd = np.exp(-lambda_vect*v*dt) - (1+((r+1)*(1-s)-1)*dt)*(1-m+m*np.cosh(lambda_vect*dx))
     eqWbd = np.exp(-lambda_vect*v*dt) - (1+((r+1)*(1-s*h)*(1-c)-1)*dt)*(1-m+m*np.cosh(lambda_vect*dx))
     lDbd = lambda_vect[np.where(abs(eqDbd)==np.min(abs(eqDbd)))[0][0]]
     lWbd = lambda_vect[np.where(abs(eqWbd)==np.min(abs(eqWbd)))[0][0]]
-    return(v, lDfd, lDbd, lWbd) 
-
+    return(v, lDfd, [lWbd, lDbd]) 
+    
     
 # Distance of the last individual (density striclty positive)
 def L(pic_values, lambda_pos):    

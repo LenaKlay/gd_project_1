@@ -13,6 +13,27 @@ import matplotlib.pyplot as plt
 import os
 
 
+def erad_s(conv_timing, r, c, h) : 
+    print(f"\nEradication pour {np.round(r/(1+r),3)} < s < 1") 
+    s_1 = c/(1-h*(1-c))   
+    if conv_timing == "zyg" :
+        s_2 = c/(2*c + h*(1-c))
+        if s_1 < s_2 : 
+            print("Coexistence", ":", np.round(s_1,3), "< s <", np.round(s_2,3))
+        else :  
+            print("Bistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
+        lin = c*(1-2*s)-(1-c)*s*h
+        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))               
+    if conv_timing == "ger" : 
+        s_2 = c/(2*c*h + h*(1-c))
+        if s_1 < s_2 :
+            print("Coexistence", ":", np.round(s_1,3) , "< s <", np.round(s_2,3))
+        else :  
+            print("Bistability", ":", np.round(s_2,3), "< s <", np.round(s_1,3))
+        lin = c*(1-2*s*h)-(1-c)*s*h 
+        if lin > 0 : print("Linear speed :", 2*np.sqrt(lin))
+    return(2*np.sqrt(lin))
+
 
 ### Seed for reproductibility
 np.random.seed(21)
@@ -23,34 +44,27 @@ np.random.seed(21)
 
 ### Parameters
 
-K = 100000 # 1000000000              # Carrying capacity for a spatial interval of size 1
-dx = 1                # Spatial interval 
+K = 10**8 # 1000000000       # Carrying capacity for a spatial interval of size 1
+dx = 1                      # Spatial interval 
 T = 1000                    # Time at which simulation stops (it can stop earlier if one of the type disappear from the environment)
 m = 0.2                     # Migration probability
 dt = np.round(m*dx**2/2,10) # Time interval
 nb_graph = 5                # Number of graphs shown if T is reached 
-nb_save = 1000              # Number of values (nD, nW) saved in between 0...T (In zoom all values are saved)
-
+nb_save = int(T/dt) #1000              # Number of values (nD, nW) saved in between 0...T (In zoom all values are saved)
 
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 r = 0.1                     # Intrasic growth rate
-s = 0.5                     # Disadvantage for drive
-c = 0.85                    # Conversion rate
-h = 0.6                     # Dominance
+c = 0.9                     # Conversion rate
+h = 0.4                     # Dominance
+s = 0.3                     # Disadvantage for drive
 
-# Speed of the problem linearised at the front
-if conv_timing == "zyg" :
-    v_cont = 2*np.sqrt(c*(1-2*s)-(1-c)*s*h)
-if conv_timing == "ger" :
-    v_cont = 2*np.sqrt(c*(1-2*s*h)-(1-c)*s*h)
-    
+v_cont = erad_s(conv_timing, r, c, h) 
 nb_sites = int(((v_cont*T*2/dx)//1000)*1000+1000)
 
 
-#if s == 0.1 and dx == 0.1 : nb_sites = 40000             # Number of sites
-#if s == 0.4 and dx == 0.1 : nb_sites = 20000             # Number of sites
-
-
+# Where to save datas
+dir_save = f"{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
+if not os.path.exists(dir_save ): os.mkdir(dir_save)
 
 
 ### Initialization
@@ -80,6 +94,7 @@ for t in np.arange(0, T, dt):
         ax.set(xlabel='Space', ylabel='Number of individuals', ylim = [0,1.1*K*dx])
         ax.set_title(f"Time {t}")
         plt.legend(loc="upper left")
+        fig.savefig(f"{dir_save}/t_{t}.png", format='png')
         plt.show()
         print(graph_counter)
         graph_counter += 1
@@ -154,18 +169,15 @@ for t in np.arange(0, T, dt):
 
 # Save datas 
 time[0]=-1; time = time[np.where(time!=0)[0]]; time[0]=0  #remove all the zeros at the end, when T is not reached.
-    
-directory = f"{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
-if not os.path.exists(directory): os.mkdir(directory)
-np.savetxt(f"{directory}/time.txt", time)
-np.savetxt(f"{directory}/nD_matrix.txt", nD_matrix)
-np.savetxt(f"{directory}/nW_matrix.txt", nW_matrix)
-file = open(f"{directory}/parameters.txt", "w") 
+nD_matrix = nD_matrix[:len(time),:]
+nW_matrix = nW_matrix[:len(time),:]
+np.savetxt(f"{dir_save}/time.txt", time)
+np.savetxt(f"{dir_save}/nD_matrix.txt", nD_matrix)
+np.savetxt(f"{dir_save}/nW_matrix.txt", nW_matrix)
+file = open(f"{dir_save}/parameters.txt", "w") 
 file.write(f"Parameters : \nK = {K} \nnb_sites = {nb_sites} \ndx = {dx} \nT = {T} \ndt = {dt} \nm = {m} \nconv_timing = {conv_timing} \nr = {r} \ns = {s}  \nc = {c} \nh = {h} \nnb_graph = {nb_graph} \nnb_save = {nb_save}")  
 file.close() 
     
-
-
 
 
 
