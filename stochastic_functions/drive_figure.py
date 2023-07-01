@@ -65,31 +65,63 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
     # Number of drive wave superposed in the graphic
     nb_values = 400
     # Vector to calculate the intercept mean, for drive and wt
-    density = np.ones((2,len(index_time[-nb_values:]))).astype('int')*(-1)  
+    ref_inside_window_drive = False; absc_drive_for_mean = np.ones(len(index_time[-nb_values:])).astype('int')*(-1)  
+    density_for_mean = np.ones((2,len(index_time[-nb_values:]))).astype('int')*(-1)  
     # Figure    
     abscisse = np.arange(-x_graph_values,1)*dx         
     fig, ax = plt.subplots(figsize=[-int(abscisse[0])/10, 5.25])
     # Superposition of the numerical waves
     for i in index_time[-nb_values:] :
         after_chasing = np.where(wt[i,:]==0)[0][-1]
-        last_index = after_chasing + np.where(wt[i,after_chasing:]>1000)[0][0]  
-        first_index = last_index - int(x_graph_values)     
-        # Drive
-        ax.semilogy(abscisse, drive[i, first_index:last_index+1], color="crimson", alpha=0.3) 
+        last_index = after_chasing + np.where(wt[i,after_chasing:]>ref_values[0])[0][0]  
+        first_index = last_index - int(x_graph_values) 
         # Wild-type
-        ax.semilogy(abscisse, wt[i, first_index:last_index+1], color="cornflowerblue", alpha=0.3)  
-        density[:, i-index_time[-nb_values]] = [wt[i, last_index], drive[i, last_index]]
+        ax.semilogy(abscisse, wt[i, first_index:last_index+1], color="cornflowerblue", alpha=0.3) 
+        # Drive
+        ax.semilogy(abscisse, drive[i, first_index:last_index+1], color="crimson", alpha=0.3)        
+        # Save values for mean
+        
+        # Wild-type
+        value_wt = wt[i, last_index]
+        
+        # Drive
+        if ref_values[1] < drive[i, last_index] :            
+            index_drive = after_chasing + np.where(drive[i, after_chasing:] > ref_values[1])[0][0] - first_index
+            value_drive = drive[i, index_drive+first_index]; ref_inside_window_drive = True
+            
+        else: value_drive = drive[i, last_index]
+        
+        # Save
+        
+        density_for_mean[:, i-index_time[-nb_values]] = [value_wt, value_drive]  
+        if ref_inside_window_drive : absc_drive_for_mean[i-index_time[-nb_values]] = abscisse[index_drive]
+        
     # Legend
     ax.semilogy(0,0, color="crimson", label="drive") 
     ax.semilogy(0,0, color="cornflowerblue", label="wild-type")
     ax.set_ylim([None,10**5]); ax.set_xlim([int(abscisse[0]),0])
     # Theoritical exponential function
-    beta = np.mean(density[1,:]); exp_drive = beta*np.exp(lambda_back[1]*abscisse)
-    gamma = np.mean(density[0,:]); exp_wt = gamma*np.exp(lambda_back[0]*abscisse)
-    exp_D1 = np.where(exp_drive>1)[0][0]; exp_WT1 = np.where(exp_wt>1)[0][0]
-    ax.semilogy(abscisse[exp_D1:], exp_drive[exp_D1:], color="black")
-    ax.semilogy(abscisse[exp_WT1:], exp_wt[exp_WT1:], color="black")           
-    #ax.set_title(f"Wild-type and drive densities at the back of the wave.")
+    
+    # Wild-type
+    gamma = np.mean(density_for_mean[0,:])
+    exp_wt = gamma*np.exp(lambda_back[0]*abscisse)
+    exp_WT1 = np.where(exp_wt>1)[0][0]
+    ax.semilogy(abscisse[exp_WT1:], exp_wt[exp_WT1:], color="black")   
+    
+    # Drive
+    
+    if not ref_inside_window_drive: beta = np.mean(density_for_mean[1,:])
+    else : beta = np.mean(density_for_mean[1,:])/np.exp(np.mean(absc_drive_for_mean)*lambda_back[1])
+    
+    exp_drive = beta*np.exp(lambda_back[1]*abscisse)
+    exp_D1 = np.where(exp_drive>1)[0][0]
+    
+    if ref_inside_window_drive: expDref = np.where(exp_drive>ref_values[1])[0][0]
+    else : expDref = -1   
+    
+    ax.semilogy(abscisse[exp_D1:expDref+1], exp_drive[exp_D1:expDref+1], color="black")
+   
+    # Graph labels, legend, save
     ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
     plt.legend()
     plt.tight_layout() 
@@ -292,7 +324,7 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
 nb_drive = 100              # Threshold for drive ("enough" drive for the chasing not to happen)
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 dx = 1                      # spatial step
-K = 10**8                    # Carrying capacity on one space unit
+K = 10**5                    # Carrying capacity on one space unit
 s = 0.7                     # Disadvantage for drive
 r = 0.1                     # Intrasic growth rate
 
@@ -315,7 +347,7 @@ file.close()
 
 # Load datas
 
-load = True
+load = False
 if load: 
     time = np.loadtxt(f"{dir_load}/time.txt")              # Vector time
     wt = np.loadtxt(f"{dir_load}/nW_matrix.txt")           # Matrix wt : columns = times, row = space
