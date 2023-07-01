@@ -15,8 +15,8 @@ import os
 
 ### Load functions
 
-from L_speed_eigen_values_ger import num, continu, discrete, L
-from gw_space import gw    
+from L_speed_eigen_values import num, continu, discrete, L
+from gw_space import gw, ini_exp
 
 ### Numerical positions and distances  
 def dist(time, index_time, wt, drive, K, ref_values, dir_save):
@@ -36,16 +36,7 @@ def dist(time, index_time, wt, drive, K, ref_values, dir_save):
         # Distance from the pic to last individual (first line : wt, second line : drive)
         posi_nb[0,i] = np.where(wt[j,:]>nb_drive)[0][0]*dx
         posi_nb[1,i] = np.where(drive[j,:]>nb_drive)[0][0]*dx 
-
-    #fig, ax = plt.subplots()
-    #ax.plot(time[index_time], (posi_pic[0,:]-posi_1[0,:])-np.mean(posi_pic[0,:]-posi_1[0,:]), label = "wild-type")
-    #ax.plot(time[index_time], (posi_pic[0,:]-posi_nb[1,:])-np.mean(posi_pic[0,:]-posi_nb[1,:]), label = f"drive")
-    #ax.set(xlabel='Time', ylabel='Distance')
-    #ax.set_title(f"Space variations of the last wild-type individual \n and the last site with a drive density above {nb_drive}.")
-    #plt.legend()
-    #fig.savefig(f"{dir_save}/distance_s_{s}_nb_{nb_drive}.png", format='png')
-    #plt.show()
-                
+    # Difference of the positions
     dist_1 = posi_pic - posi_1
     dist_nb = posi_pic - posi_nb
     return(posi_pic, posi_1, posi_nb, dist_1, dist_nb)
@@ -65,40 +56,33 @@ def plot_wave(time, index_time, dx, nb_graph, wt, drive, ref_values, dir_save):
         plt.legend()
         fig.savefig(f"{dir_save}/t_{time[i]}.png", format='png')
         plt.show()
-        
-               
-    
+
+
+
 # to test the function : lambda_back =[lWbd, lDbd]  
     
-def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, s, dir_save):  
-    # Left margin after the last drive individual (blanc space)
-    left_margin = int(np.round(5/dx,0))
+def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, s, x_graph_values, dir_save):  
     # Number of drive wave superposed in the graphic
     nb_values = 400
     # Vector to calculate the intercept mean, for drive and wt
     density = np.ones((2,len(index_time[-nb_values:]))).astype('int')*(-1)  
-    # Loop to shape the figure on the datas
-    min_abscisse = np.zeros(nb_values)
-    for i in index_time[-nb_values:] :
-        last_index = np.where(wt[i,:]>1000)[0][0]  #max(np.where(drive[i,:]> ref_values[1])[0][0], 
-        first_individual = min([max([np.where(drive[i,:]>0)[0][0], nb_sites//2]), np.where(wt[i,:]>0)[0][0]])
-        min_abscisse[i-index_time[-nb_values]] = (first_individual-left_margin-last_index+1)*dx  
-    # Figure             
-    fig, ax = plt.subplots(figsize=[-min(min_abscisse)/10, 5.25])
+    # Figure    
+    abscisse = np.arange(-x_graph_values,1)*dx         
+    fig, ax = plt.subplots(figsize=[-int(abscisse[0])/10, 5.25])
     # Superposition of the numerical waves
     for i in index_time[-nb_values:] :
-         #index_wt_ref_value = np.where(wt[i,:]> ref_values[0])[0][0]
-         index_drive_ref_value = np.where(drive[i,:]> ref_values[1])[0][0]         
-         last_index = max(index_drive_ref_value, np.where(wt[i,:]>1000)[0][0])  # max : to see some wt if there are far away
-         first_individual = min([max([np.where(drive[i,:]>0)[0][0], nb_sites//2]), np.where(wt[i,:]>0)[0][0]])
-         abscisse = np.arange(first_individual-left_margin-last_index+1,1)*dx
-         ax.semilogy(abscisse, drive[i, first_individual-left_margin:last_index], color="crimson", alpha=0.3) 
-         ax.semilogy(abscisse, wt[i, first_individual-left_margin:last_index], color="cornflowerblue", alpha=0.3)  
-         density[:, i-index_time[-nb_values]] = [wt[i, last_index-1], drive[i, last_index-1]]
+        after_chasing = np.where(wt[i,:]==0)[0][-1]
+        last_index = after_chasing + np.where(wt[i,after_chasing:]>1000)[0][0]  
+        first_index = last_index - int(x_graph_values)     
+        # Drive
+        ax.semilogy(abscisse, drive[i, first_index:last_index+1], color="crimson", alpha=0.3) 
+        # Wild-type
+        ax.semilogy(abscisse, wt[i, first_index:last_index+1], color="cornflowerblue", alpha=0.3)  
+        density[:, i-index_time[-nb_values]] = [wt[i, last_index], drive[i, last_index]]
     # Legend
     ax.semilogy(0,0, color="crimson", label="drive") 
     ax.semilogy(0,0, color="cornflowerblue", label="wild-type")
-    ax.set_ylim([None,ref_values[1]]); ax.set_xlim([min(min_abscisse),0])
+    ax.set_ylim([None,10**5]); ax.set_xlim([int(abscisse[0]),0])
     # Theoritical exponential function
     beta = np.mean(density[1,:]); exp_drive = beta*np.exp(lambda_back[1]*abscisse)
     gamma = np.mean(density[0,:]); exp_wt = gamma*np.exp(lambda_back[0]*abscisse)
@@ -109,10 +93,12 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
     ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
     plt.legend()
     plt.tight_layout() 
-    fig.savefig(f"{dir_save}/end_wave_s_{s}.png", format='png')    
+    fig.savefig(f"{dir_save}/end_wave_s_{s}_{int(np.log10(K))}.png", format='png')    
     plt.show()
     
- 
+    
+    
+
 # Plot the distance from the last individual (density=1) to the first density = nb_drive
 def eradication_time_mvt(time, index_time, matrix, nb_drive):
     
@@ -168,97 +154,123 @@ def plot_distances(index_time, dist_1, dist_nb, ref_values, nb_drive, dir_save):
         plt.show()
         
         
-def comparaison_distance_time(v, s, dist_1, dist_nb, erad, gw, allele, dir_save):
+        
+# Galton-Watson : Histogram for different values of max densities  
     
+def data_histogram_gw(nb_sites, lWbd, nb_drive, allele, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save):
+    exposants = np.arange(3, int(np.log10(K)))
+    extinction_list = np.zeros((len(exposants), nb_i))
+    for j in exposants:
+        max_density = 10**j
+        exp, exp_nb = ini_exp(nb_sites, lWbd, nb_drive, max_density, dx, x_graph_values)         
+        extinction_list[j-3], exp = gw(exp, exp_nb, allele, nb_i, T, dt, dx, r, s, c, h, m, dir_load, dir_save)
+    return(exposants, extinction_list, exp)
+    
+    
+def histogram_gw(exposants, extinction_list, exp, x_graph_values):
+    col = ["darkturquoise", "deepskyblue", "dodgerblue", "royalblue", "blue"][len(exposants)-5:]
+    al = [0.3,0.5,0.5,0.5,0.8]
+    abscisse = np.arange(-x_graph_values,1)
+    # Initial conditions
+    fig, ax = plt.subplots()
+    for j in exposants:
+        part_exp = np.zeros(len(exp))
+        # Densities
+        if j == exposants[0]:
+            part_exp[:np.where(exp>=10**(j))[0][0]] = exp[:np.where(exp>=10**(j))[0][0]] 
+        else : 
+            part_exp[np.where(exp>=10**(j-1))[0][0]:np.where(exp>=10**(j))[0][0]] = exp[np.where(exp>=10**(j-1))[0][0]:np.where(exp>=10**(j))[0][0]]      
+        bins = [x for x in range(len(exp))]
+        kwargs = dict(histtype='stepfilled', alpha=al[j-3], bins=bins, weights = part_exp, color=col[j-3], log=True)
+        plt.hist(np.arange(len(part_exp)), **kwargs)  
+        # Limit on the right   
+        ax.vlines(np.where(exp>=10**j)[0][0], 0, 10**j, color=col[j-3], linewidth=2, label = np.arange(3, int(np.log10(K)))[j-3])
+        ax.hlines(10**j, 0, np.where(exp>=10**j)[0][0], color=col[j-3], linewidth=2, label = np.arange(3, int(np.log10(K)))[j-3])
+    # Site initially of density close to nb_drive
+    ax.scatter(np.where(exp>=nb_drive)[0][0], exp[np.where(exp>=nb_drive)[0][0]], alpha=0.5, color="black", s=100, zorder=10)
+    ax.vlines(np.where(exp>=nb_drive)[0][0], 0, nb_drive, alpha=0.5, color="black", linewidth=4)        
+    ax.set(xlabel='Space', ylabel='Number of individuals')
+    ax.set_xticks(np.linspace((len(exp)-1)%10, len(exp)-1, len(np.arange(abscisse[0], abscisse[-1]+1, 10))))    
+    ax.set_xticklabels(np.arange(abscisse[(len(exp)-1)%10], abscisse[-1]+1, 10))    
+    fig.savefig(f"{dir_save}/gw_ini_s_{s}.png", format='png')
+    plt.show()
+    
+    #  Histogram of extinction time values
+    al = [0.3,0.5,0.5,0.5,0.8]
+    fig, ax = plt.subplots()
+    for j in exposants:
+        bins = [x - 0.5 for x in range(int(max(extinction_list[j-3,:]))+11)]
+        kwargs = dict(histtype='stepfilled', alpha=al[j-3], bins=bins, color=col[j-3], label = f"max. $10^{j}$", density=True)
+        ax.hist(extinction_list[j-3,:]*v_num, **kwargs)
+        ax.vlines(np.mean(extinction_list[j-3,:]*v_num), 0, 0.4, color=col[j-3], linewidth=2, linestyle="-.")
+    ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
+    #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
+    plt.legend()
+    ax.set(xlabel='Time', xlim = [0,30], ylim = [0,0.35])
+    fig.savefig(f"{dir_save}/gw_histogram_s_{s}.png", format='png')
+    plt.show()
+    
+       
+     
+        
+def comparaison_distance_time_gw(v, s, dist_1, dist_nb, erad, gw, allele, dir_save):
+ 
+    # Histogram
     dis = (dist_1 - dist_nb)[allele]
-    title = ["Wt","Drive"][allele]
-    col = [["yellowgreen","green","blue"],["red", "orange", "gold"]][allele]
-    # histogram of these value
-    fig, ax = plt.subplots()
-    bins = [x - 0.5 for x in range(int(np.max(dis))+10)]
-    ax.hist([dis, erad*v, gw*v], bins = bins, histtype = 'bar', label = ['distance last indi.','(time wave)*speed', '(time gw)*speed'], density=True, color = col)
-    for i in range(3) :
-        vect = [dis, erad*v, gw*v]
-        ax.vlines(np.mean(vect[i]), 0, 0.3, color=col[i], linewidth=2, linestyle="-.")
-    ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
-    #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
-    plt.legend()
-    fig.savefig(f"{dir_save}/distance_time_s_{s}.png", format='png')
-    plt.show()
+    title = ["time_gw","","distance_time"]
+    col = [["blue","green","yellowgreen"],["red", "orange", "gold"]][allele]
+    leg = ['(time gw)*speed', '(time wave)*speed','distance last indi.']
+    vect = [gw*v, erad*v, dis]
+    for ir in [[1,0], [1,2]] : 
+        # histogram of these value
+        fig, ax = plt.subplots()
+        bins = [x - 0.5 for x in range(int(np.max(dis))+10)]
+        for i in ir :      
+            ax.hist(vect[i], bins = bins, histtype = 'stepfilled', density=True, color = col[i], alpha = (i==ir[0])*0.8+(i==ir[-1])*0.5, linewidth = 2, label = leg[i])        
+        for i in ir :     
+            ax.hist(vect[i], bins = bins, histtype = 'step', density=True, color = col[i], alpha = 1, linewidth = 2)
+            ax.vlines(np.mean(vect[i]), 0, 0.3, color=col[i], linewidth=2, linestyle="-.")
+        ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
+        #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
+        plt.legend()
+        fig.savefig(f"{dir_save}/{title[i]}_s_{s}.png", format='png')
+        plt.show()
     
-    col = [["yellowgreen","green"],["red", "orange"]][allele]
-    # histogram of these value
-    fig, ax = plt.subplots()
-    bins = [x - 0.5 for x in range(int(np.max(dis))+10)]
-    ax.hist([dis, erad*v], bins = bins, histtype = 'bar', label = ['distance last indi.','(time wave)*speed'], density=True, color = col)
-    for i in range(2) :
-        vect = [dis, erad*v]
-        ax.vlines(np.mean(vect[i]), 0, 0.3, color=col[i], linewidth=2, linestyle="-.")
-    ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
-    #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
-    plt.legend()
-    fig.savefig(f"{dir_save}/distance_time_s_{s}_bis.png", format='png')
-    plt.show()
-    
-    
+    # Scatter plot for the position of the last individual
     fig, ax = plt.subplots()
     plt.scatter(np.arange(len(dis)), dis, s=5)
     ax.set(xlabel='Time', ylabel=f'Distance (from {nb_drive} -> 0)')
     ax.set_title(f"{title} : Distance (from {nb_drive} -> 0) in the wave, at each time.") 
     fig.savefig(f"{dir_save}/{title}_dist.png", format='png')
-    plt.show()
-    
-    fig, ax = plt.subplots()
-    plt.scatter(np.arange(len(erad)), erad, s=5)
-    ax.set(xlabel='Sites', ylabel='Eradication time')
-    ax.set_title(f"{title} : Eradication time, at each spatial site.") 
-    fig.savefig(f"{dir_save}/{title}_erad.png", format='png')
-    plt.show()
-    
-    fig, ax = plt.subplots()
-    plt.scatter(np.arange(len(gw)), gw, s=5)
-    ax.set(xlabel='Sites', ylabel='Eradication time')
-    ax.set_title(f"{title} : Galton-Watson eradication time.") 
-    fig.savefig(f"{dir_save}/{title}_gw.png", format='png')
-    plt.show()
-    
-            
+    plt.show()   
             
         
-def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, dir_save):   
-    # Left margin on the left of the graphic (blanc space)
-    left_margin = int(np.round(20/dx,0))
+def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_graph_values, dir_save):   
     # Number of drive wave superposed in the graphic
     nb_values = 400
     # Distance between sites of density 1 and nb_drive
-    dist = dist_1 - dist_nb + 1    
-    # Loop to shape the figure on the datas
-    min_abscisse = np.zeros(nb_values)
-    for i in index_time[-nb_values:] :
-        last_index = np.where(wt[i,:]>nb_drive)[0][0]
-        first_individual = min([max([np.where(drive[i,:]>0)[0][0], nb_sites//2]), np.where(wt[i,:]>0)[0][0]])
-        min_abscisse[i-index_time[-nb_values]] = (first_individual-left_margin-last_index+1)*dx  
+    dist = dist_1 - dist_nb + 1   
     # Figure             
-    fig, ax1 = plt.subplots(figsize=[-min(min_abscisse)/10, 5.25])
+    abscisse = np.arange(-x_graph_values,1)*dx       
+    fig, ax1 = plt.subplots(figsize=[-int(abscisse[0])/10, 5.25])
     ax2 = ax1.twinx()
     # Drive   
     for i in index_time[-nb_values:]:
         last_index = np.where(wt[i,:]>nb_drive)[0][0]
-        first_individual = min([max([np.where(drive[i,:]>0)[0][0], nb_sites//2]), np.where(wt[i,:]>0)[0][0]]) # min([np.where(drive[i,:]>10)[0][0], np.where(wt[i,:]>0)[0][0]])
-        abscisse = np.arange(first_individual-left_margin-last_index+1,1)*dx       
-        ax2.semilogy(abscisse, drive[i, first_individual-left_margin:last_index], color="crimson", alpha = 0.3)   
+        first_index = last_index - int(x_graph_values) 
+        ax2.semilogy(abscisse, drive[i, first_index:last_index+1], color="crimson", alpha = 0.3)   
     ax2.semilogy(0, 0, label="Drive", color="crimson", linewidth=2) 
     # Histogramme
     bins = [x - 0.5 for x in range(int(abscisse[0]),0)]
     ax1.hist(-dist[0,:], bins = bins, histtype = 'bar', label = ['dist erad'], density = True, color="yellowgreen", alpha = 0.4)
     # Wild-type
-    ax2.semilogy(abscisse, wt[index_time[-1], first_individual-left_margin:last_index], label="Wild-type", color="cornflowerblue", linewidth=2)
+    ax2.semilogy(abscisse, wt[index_time[-1], first_index:last_index+1], label="Wild-type", color="cornflowerblue", linewidth=2)
     # Wild-type last individual
-    index_first_ind = np.where(wt[index_time[-10], first_individual-left_margin:last_index]>0)[0][0]
-    ax2.semilogy(abscisse[index_first_ind-1:index_first_ind+1], wt[index_time[-10], first_individual-left_margin+index_first_ind-1:first_individual-left_margin+index_first_ind+1], color="limegreen", linewidth=2, alpha = 0.8, label = "Last wild-type indi.")
+    index_first_ind = np.where(wt[index_time[-1], first_index:last_index+1]>0)[0][0]
+    ax2.semilogy(abscisse[index_first_ind-1:index_first_ind+1], wt[index_time[-1], first_index+index_first_ind-1:first_index+index_first_ind+1], color="limegreen", linewidth=2, alpha = 0.8, label = "Last wild-type indi.")
     #ax2.hlines(nb_drive, (first_individual-30-last_index)*dx, 0, color="black", linestyle="-.") 
     #ax1.set_title(f"Extinction histogramme wt")
-    ax2.set_ylim([None,ref_values[1]]); ax2.set_xlim([min(min_abscisse),0])
+    ax2.set_ylim([None,ref_values[1]]); ax2.set_xlim([abscisse[0],0])
     plt.legend()
     ax1.set_xlabel('Distances')
     ax2.set_ylabel('Densities')
@@ -269,15 +281,9 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, dir_
     plt.show()
     
 
-#def heatmap_distance(v):
-#    ref_values = 
-#    difference = 
-#    L(ref_values, lambda_pos)
-#    fig, ax = plt.subplots()
-#    im = ax.imshow(harvest)
-#    fig.tight_layout()
-#    plt.show()
-            
+
+    
+     
     
 
 ### Parameters and datas ###
@@ -287,12 +293,12 @@ nb_drive = 100              # Threshold for drive ("enough" drive for the chasin
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 dx = 1                      # spatial step
 K = 10**8                    # Carrying capacity on one space unit
-s = 0.3                      # Disadvantage for drive
+s = 0.7                     # Disadvantage for drive
 r = 0.1                     # Intrasic growth rate
 
 
 # Load the other parameters
-dir_load = f"{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
+dir_load = f"../../stoch_not_save/datas/{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
 file = open(f"{dir_load}/parameters.txt", "r")
 para = file.read()
 para_list = para.replace(' ', '').split("\n")[:-1]
@@ -308,9 +314,12 @@ file.close()
 
 
 # Load datas
-time = np.loadtxt(f"{dir_load}/time.txt")              # Vector time
-wt = np.loadtxt(f"{dir_load}/nW_matrix.txt")           # Matrix wt : columns = times, row = space
-drive = np.loadtxt(f"{dir_load}/nD_matrix.txt")        # Matrix drive : columns = times, row = space
+
+load = True
+if load: 
+    time = np.loadtxt(f"{dir_load}/time.txt")              # Vector time
+    wt = np.loadtxt(f"{dir_load}/nW_matrix.txt")           # Matrix wt : columns = times, row = space
+    drive = np.loadtxt(f"{dir_load}/nD_matrix.txt")        # Matrix drive : columns = times, row = space
 
 
 # Determine parameters from data
@@ -320,22 +329,22 @@ index_time = np.intersect1d(np.where(time>start)[0], np.where(time<end)[0])
     
     
 # Parameters for figures
-ref_values = [0.001*K*dx]*2   # Reference position
+if K > 10**5: ref_values = [0.001*K*dx]*2   #  Reference position for large K
+if K <= 10**5: ref_values = [0.01*K*dx]*2   #  Reference position for small K
 nb_ind = [10, 10]
 nb_graph = 2       # Number of graphs shown
-nb_sinus = 30      # Number of time values used in the sinus graph
-show_graph = False
 
 
 
-# Save
-
-### Results and save
-dir_save = f"{dir_load}/outputs"
+# Where to save results
+dir_save = f"../stochastic_outputs/K_{int(np.log10(K))}_s_{s}"
 if not os.path.exists(dir_save): os.mkdir(dir_save)
+
 
 # Preliminar
 posi_pic, posi_1, posi_nb, dist_1, dist_nb = dist(time, index_time, wt, drive, K, ref_values, dir_save)
+
+
 #plot_wave(time, index_time, dx, nb_graph, wt, drive, ref_values, dir_save)
 v_num, [lWbn, lDbn], L_num = num(index_time, time, dx, wt, drive, nb_ind, nb_drive, posi_pic, ref_values, dist_1)
 v_cont, lDfc, [lWbc, lDbc] = continu(conv_timing,s,h,c,r); L_cont = L(ref_values, [lWbc, lDbc]) 
@@ -345,20 +354,25 @@ print(lDfc, lDfd)
 
 
 # Plot the end of the wave (exp section )
-plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, dir_save)
+x_graph_values = 160/dx
+plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
 
 # Eradication time in the wave
 erad_wt = eradication_time_mvt(time, index_time, wt, nb_drive)
 
 # Eradication time galton-watson
-nb_i = 1000; max_density = 10**5; snapshot = False; left_margin=30
-gw_wt = gw(time, start, end, wt, 0, max_density, left_margin, nb_drive, m, nb_i, dx, T, dt, r, s, c, h, lWbd, snapshot, dir_load, dir_save)
-  
+nb_i = 500
+x_graph_values = 40/dx
+exposants, extinction_list, exp = data_histogram_gw(nb_sites, lWbd, nb_drive, 0, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save)
+histogram_gw(exposants, extinction_list, exp, x_graph_values)
+
 #Comparaison
-comparaison_distance_time(v_num, s, dist_1, dist_nb, erad_wt, gw_wt, 0, dir_save)
+gw_wt = extinction_list[-1,:]
+comparaison_distance_time_gw(v_num, s, dist_1, dist_nb, erad_wt, gw_wt, 0, dir_save)
 
 #plot_distances(index_time, dist_1, dist_nb, directory, ref_values, nb_drive)
-plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, dir_save)
+x_graph_values = 160/dx
+plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_graph_values, dir_save)
 
 
 # Save the results in the file "figures_values.txt"
