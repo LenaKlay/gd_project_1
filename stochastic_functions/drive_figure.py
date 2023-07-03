@@ -201,7 +201,7 @@ def data_histogram_gw(nb_sites, lWbd, nb_drive, allele, nb_i, T, dt, dx, r, s, c
     
 def histogram_gw(exposants, extinction_list, exp, x_graph_values):
     col = ["darkturquoise", "deepskyblue", "dodgerblue", "royalblue", "blue"][len(exposants)-5:]
-    al = [0.3,0.5,0.5,0.5,0.8]
+    al = [0.3,0.4,0.5,0.5,0.8]
     abscisse = np.arange(-x_graph_values,1)
     # Initial conditions
     fig, ax = plt.subplots()
@@ -228,7 +228,7 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
     plt.show()
     
     #  Histogram of extinction time values
-    al = [0.3,0.5,0.5,0.5,0.8]
+    al = [0.3,0.4,0.5,0.5,0.8]
     fig, ax = plt.subplots()
     for j in exposants:
         bins = [x - 0.5 for x in range(int(max(extinction_list[j-3,:]))+11)]
