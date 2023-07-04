@@ -12,6 +12,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+### Graphs parameters 
+
+plt.rcParams.update({'font.family':'serif'})
+label_size = 12
+legend_size = 10
 
 ### Load functions
 
@@ -42,28 +47,13 @@ def dist(time, index_time, wt, drive, K, ref_values, dir_save):
     return(posi_pic, posi_1, posi_nb, dist_1, dist_nb)
     
     
-  
-
-# Plot the wave of drive and wild-type individuals
-def plot_wave(time, index_time, dx, nb_graph, wt, drive, ref_values, dir_save):  
-    for i in index_time[np.linspace(0,len(index_time)-1,nb_graph).astype(int)]:   
-        fig, ax = plt.subplots()
-        ax.semilogy(np.arange(nb_sites)*dx, wt[i,:], label = "wt", color = "cornflowerblue")
-        ax.semilogy(np.arange(nb_sites)*dx, drive[i,:], label = "drive", color = "crimson")
-        ax.hlines(ref_values[0], xmin = 0, xmax = nb_sites*dx, color = "black", linewidth = 1, linestyle ="--")
-        ax.set(xlabel='Space', ylabel='Number of individuals') #, ylim = [0,1.1*K*dx])
-        ax.set_title(f"t = {time[i]}")
-        plt.legend()
-        fig.savefig(f"{dir_save}/t_{time[i]}.png", format='png')
-        plt.show()
-
 
 
 # to test the function : lambda_back =[lWbd, lDbd]  
     
 def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, s, x_graph_values, dir_save):  
     # Number of drive wave superposed in the graphic
-    nb_values = 400
+    nb_values = 2000
     # Vector to calculate the intercept mean, for drive and wt
     ref_inside_window_drive = False; absc_drive_for_mean = np.ones(len(index_time[-nb_values:])).astype('int')*(-1)  
     density_for_mean = np.ones((2,len(index_time[-nb_values:]))).astype('int')*(-1)  
@@ -123,10 +113,16 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
    
     # Graph labels, legend, save
     ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
+    ax.xaxis.label.set_size(label_size)
+    ax.yaxis.label.set_size(label_size)   
+    plt.rc('legend', fontsize=legend_size)      
     plt.legend()
     plt.tight_layout() 
     fig.savefig(f"{dir_save}/end_wave_s_{s}_{int(np.log10(K))}.png", format='png')    
     plt.show()
+    
+    return(np.where(wt[-10,:]>0)[0][0]<np.where(drive[-10,:]>0)[0][0])
+
     
     
     
@@ -154,37 +150,7 @@ def eradication_time_mvt(time, index_time, matrix, nb_drive):
 
     return(erad_time) 
             
-            
-    
-# Distance function of time, and histogram
-def plot_distances(index_time, dist_1, dist_nb, ref_values, nb_drive, dir_save): 
-    for density in ["1_to_2000000",f"{nb_drive}_to_2000000",f"1_to_{nb_drive}"] :
-        # In between two densities
-        if density == "1_to_2000000": 
-            dist = dist_1; first_dens = 1; last_dens = ref_values[0]
-        if density == f"{nb_drive}_to_2000000": 
-            dist = dist_nb; first_dens = nb_drive; last_dens = ref_values[0]
-        if density == f"1_to_{nb_drive}": 
-            dist = dist_1 - dist_nb; first_dens = 1; last_dens = nb_drive
-        # distances function of time
-        fig, ax = plt.subplots()
-        ax.plot(time[index_time], dist[0,:], label = "wt")
-        ax.plot(time[index_time], dist[1,:], label = "drive")
-        ax.set(xlabel='Time', ylabel='Distance')
-        ax.set_title(f"Distance from density {first_dens} to density {last_dens}.")
-        plt.legend()
-        fig.savefig(f"{dir_save}/distance_time_{density}.png", format='png')
-        plt.show()   
-        # histogram of these values
-        fig, ax = plt.subplots()
-        bins = [x - 0.5 for x in range(int(max(dist[1,:]))+1)]
-        ax.hist([dist[0,:], dist[1,:]], bins = bins, histtype = 'bar', label = ['wt','drive'], density=True)
-        ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
-        ax.set_title(f"Distance from density {first_dens} to density {last_dens}.")
-        #plt.legend()
-        fig.savefig(f"{dir_save}/distance_histogram_{density}.png", format='png')
-        plt.show()
-        
+ 
         
         
 # Galton-Watson : Histogram for different values of max densities  
@@ -237,6 +203,9 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
         ax.vlines(np.mean(extinction_list[j-3,:]*v_num), 0, 0.4, color=col[j-3], linewidth=2, linestyle="-.")
     ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
     #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
+    ax.xaxis.label.set_size(label_size)
+    ax.yaxis.label.set_size(label_size)   
+    plt.rc('legend', fontsize=legend_size)  
     plt.legend()
     ax.set(xlabel='Time', xlim = [0,30], ylim = [0,0.35])
     fig.savefig(f"{dir_save}/gw_histogram_s_{s}.png", format='png')
@@ -264,6 +233,9 @@ def comparaison_distance_time_gw(v, s, dist_1, dist_nb, erad, gw, allele, dir_sa
             ax.vlines(np.mean(vect[i]), 0, 0.3, color=col[i], linewidth=2, linestyle="-.")
         ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
         #ax.set_title(f"{title} : distance VS time of eradication * speed (from {nb_drive} -> 0).")
+        ax.xaxis.label.set_size(label_size)
+        ax.yaxis.label.set_size(label_size)   
+        plt.rc('legend', fontsize=legend_size)  
         plt.legend()
         fig.savefig(f"{dir_save}/{title[i]}_s_{s}.png", format='png')
         plt.show()
@@ -303,6 +275,10 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
     #ax2.hlines(nb_drive, (first_individual-30-last_index)*dx, 0, color="black", linestyle="-.") 
     #ax1.set_title(f"Extinction histogramme wt")
     ax2.set_ylim([None,ref_values[1]]); ax2.set_xlim([abscisse[0],0])
+    ax1.xaxis.label.set_size(label_size)
+    ax1.yaxis.label.set_size(label_size)   
+    ax2.yaxis.label.set_size(label_size)   
+    plt.rc('legend', fontsize=legend_size)  
     plt.legend()
     ax1.set_xlabel('Distances')
     ax2.set_ylabel('Densities')
@@ -330,7 +306,7 @@ r = 0.1                     # Intrasic growth rate
 
 
 # Load the other parameters
-dir_load = f"../../stoch_not_save/datas/{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
+dir_load = f"../../../stoch_not_save/datas/{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
 file = open(f"{dir_load}/parameters.txt", "r")
 para = file.read()
 para_list = para.replace(' ', '').split("\n")[:-1]
@@ -369,7 +345,7 @@ nb_graph = 2       # Number of graphs shown
 
 
 # Where to save results
-dir_save = f"../stochastic_outputs/K_{int(np.log10(K))}_s_{s}"
+dir_save = f"../outputs/K_{int(np.log10(K))}_s_{s}"
 if not os.path.exists(dir_save): os.mkdir(dir_save)
 
 
@@ -387,26 +363,27 @@ print(lDfc, lDfd)
 
 # Plot the end of the wave (exp section )
 x_graph_values = 160/dx
-plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
+chasing = plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
 
-# Eradication time in the wave
-erad_wt = eradication_time_mvt(time, index_time, wt, nb_drive)
-
-# Eradication time galton-watson
-nb_i = 500
-x_graph_values = 40/dx
-exposants, extinction_list, exp = data_histogram_gw(nb_sites, lWbd, nb_drive, 0, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save)
-histogram_gw(exposants, extinction_list, exp, x_graph_values)
-
-#Comparaison
-gw_wt = extinction_list[-1,:]
-comparaison_distance_time_gw(v_num, s, dist_1, dist_nb, erad_wt, gw_wt, 0, dir_save)
-
-#plot_distances(index_time, dist_1, dist_nb, directory, ref_values, nb_drive)
-x_graph_values = 160/dx
-plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_graph_values, dir_save)
-
-
+if not chasing: 
+    # Eradication time in the wave
+    erad_wt = eradication_time_mvt(time, index_time, wt, nb_drive)
+    
+    # Eradication time galton-watson
+    nb_i = 500
+    x_graph_values = 40/dx
+    exposants, extinction_list, exp = data_histogram_gw(nb_sites, lWbd, nb_drive, 0, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save)
+    histogram_gw(exposants, extinction_list, exp, x_graph_values)
+    
+    #Comparaison
+    gw_wt = extinction_list[-1,:]
+    comparaison_distance_time_gw(v_num, s, dist_1, dist_nb, erad_wt, gw_wt, 0, dir_save)
+    
+    #plot_distances(index_time, dist_1, dist_nb, directory, ref_values, nb_drive)
+    x_graph_values = 160/dx
+    plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_graph_values, dir_save)
+    
+    
 # Save the results in the file "figures_values.txt"
 file = open(f"{dir_load}/speed_lambdas_L.txt", "w") 
 file.write(f"Speed num : {v_num}")
