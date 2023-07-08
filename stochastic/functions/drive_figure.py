@@ -124,6 +124,55 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
     return(np.where(wt[-10,:]>0)[0][0]<np.where(drive[-10,:]>0)[0][0])
 
     
+# to test the function : lambda_back =[lWbd, lDbd]  
+    
+def plot_end_wave_wt(wt, index_time, lambda_back, dx, s, x_graph_values, limit_exp, dir_save):  
+    # Number of wt wave superposed in the graphic
+    nb_values = 2000
+    # Vector to calculate the intercept mean, for drive and wt
+    absc_wt_for_mean = np.ones(len(index_time[-nb_values:])).astype('int')*(-1)  
+    density_wt_for_mean = np.ones(len(index_time[-nb_values:])).astype('int')*(-1)  
+    # Figure    
+    abscisse = np.arange(-x_graph_values,1)*dx         
+    fig, ax = plt.subplots()
+    # Superposition of the numerical waves
+    for i in index_time[-nb_values:] :
+        last_index = np.where(wt[i,:]>=10**7)[0][0]  
+        first_index = last_index - int(x_graph_values) 
+        # Plot
+        ax.semilogy(abscisse, wt[i, first_index:last_index+1], color="cornflowerblue", alpha=0.3)         
+        # Wild-type
+        index_wt = np.where(wt[i,:] > limit_exp)[0][0] - first_index
+        value_wt = wt[i, index_wt+first_index]
+        # Save        
+        density_wt_for_mean[i-index_time[-nb_values]] = value_wt
+        absc_wt_for_mean[i-index_time[-nb_values]] = abscisse[index_wt]
+        
+    # Legend
+    ax.semilogy(0,0, color="cornflowerblue", label="wild-type")
+    ax.set_ylim([None,10**7]); ax.set_xlim([int(abscisse[0]),0])
+    # Theoritical exponential function
+    
+    # Exponential function
+    gamma = np.mean(density_wt_for_mean)/np.exp(np.mean(absc_wt_for_mean)*lambda_back[0])    
+    exp_wt = gamma*np.exp(lambda_back[0]*abscisse)
+    exp_W1 = np.where(exp_wt>1)[0][0]
+    expWref = np.where(exp_wt>limit_exp)[0][0]    
+    ax.semilogy(abscisse[exp_W1:expWref+1], exp_wt[exp_W1:expWref+1], color="black")
+   
+    # Graph labels, legend, save
+    ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
+    ax.xaxis.label.set_size(label_size)
+    ax.yaxis.label.set_size(label_size)   
+    plt.rc('legend', fontsize=legend_size)      
+    plt.legend()
+    plt.tight_layout() 
+    fig.savefig(f"{dir_save}/end_wave_wt_s_{s}.png", format='png')    
+    plt.show() 
+    
+    return(np.mean(absc_wt_for_mean))
+    
+    
     
     
 
@@ -155,18 +204,20 @@ def eradication_time_mvt(time, index_time, matrix, nb_drive):
         
 # Galton-Watson : Histogram for different values of max densities  
     
-def data_histogram_gw(nb_sites, lWbd, nb_drive, allele, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save):
-    exposants = np.arange(3, int(np.log10(K)))
+def data_histogram_gw(nb_sites, lWbd, nb_drive, allele, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, decal, dir_load, dir_save):
+    exposants = np.arange(3, int(np.log10(K))-1)
     extinction_list = np.zeros((len(exposants), nb_i))
     for j in exposants:
         max_density = 10**j
         exp, exp_nb = ini_exp(nb_sites, lWbd, nb_drive, max_density, dx, x_graph_values)         
         extinction_list[j-3], exp = gw(exp, exp_nb, allele, nb_i, T, dt, dx, r, s, c, h, m, dir_load, dir_save)
-    return(exposants, extinction_list, exp)
-    
+    # adjust x position
+    exp_decal = np.zeros(len(exp))    
+    exp_decal[np.where(exp!=0)[0]+int(np.round(decal/dx,0))] = exp[np.where(exp!=0)[0]]
+    return(exposants, extinction_list, exp_decal)
     
 def histogram_gw(exposants, extinction_list, exp, x_graph_values):
-    col = ["darkturquoise", "deepskyblue", "dodgerblue", "royalblue", "blue"][len(exposants)-5:]
+    col = ["darkturquoise", "deepskyblue", "dodgerblue", "royalblue", "blue"][5-len(exposants):]
     al = [0.3,0.4,0.5,0.5,0.8]
     abscisse = np.arange(-x_graph_values,1)
     # Initial conditions
@@ -189,7 +240,8 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
     ax.vlines(np.where(exp>=nb_drive)[0][0], 0, nb_drive, alpha=0.5, color="black", linewidth=4)        
     ax.set(xlabel='Space', ylabel='Number of individuals')
     ax.set_xticks(np.linspace((len(exp)-1)%10, len(exp)-1, len(np.arange(abscisse[0], abscisse[-1]+1, 10))))    
-    ax.set_xticklabels(np.arange(abscisse[(len(exp)-1)%10], abscisse[-1]+1, 10))    
+    ax.set_xticklabels(np.arange(abscisse[(len(exp)-1)%10], abscisse[-1]+1, 10)) 
+    ax.set_ylim([None,10**7]); ax.set_xlim([0,-int(abscisse[0])])
     fig.savefig(f"{dir_save}/gw_ini_s_{s}.png", format='png')
     plt.show()
     
@@ -198,7 +250,7 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
     fig, ax = plt.subplots()
     for j in exposants:
         bins = [x - 0.5 for x in range(int(max(extinction_list[j-3,:]))+11)]
-        kwargs = dict(histtype='stepfilled', alpha=al[j-3], bins=bins, color=col[j-3], label = f"max. $10^{j}$", density=True)
+        kwargs = dict(histtype='stepfilled', alpha=al[j-3], bins=bins, color=col[j-3], label = f"max density = $10^{j}$", density=True)
         ax.hist(extinction_list[j-3,:]*v_num, **kwargs)
         ax.vlines(np.mean(extinction_list[j-3,:]*v_num), 0, 0.4, color=col[j-3], linewidth=2, linestyle="-.")
     ax.set(xlabel='Distances', ylabel='Frequencies of each distances')
@@ -300,7 +352,7 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
 nb_drive = 100              # Threshold for drive ("enough" drive for the chasing not to happen)
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 dx = 1                      # spatial step
-K = 10**5                    # Carrying capacity on one space unit
+K = 10**8                    # Carrying capacity on one space unit
 s = 0.7                     # Disadvantage for drive
 r = 0.1                     # Intrasic growth rate
 
@@ -323,7 +375,7 @@ file.close()
 
 # Load datas
 
-load = False
+load = True
 if load: 
     time = np.loadtxt(f"{dir_load}/time.txt")              # Vector time
     wt = np.loadtxt(f"{dir_load}/nW_matrix.txt")           # Matrix wt : columns = times, row = space
@@ -343,7 +395,6 @@ nb_ind = [10, 10]
 nb_graph = 2       # Number of graphs shown
 
 
-
 # Where to save results
 dir_save = f"../outputs/K_{int(np.log10(K))}_s_{s}"
 if not os.path.exists(dir_save): os.mkdir(dir_save)
@@ -357,11 +408,9 @@ posi_pic, posi_1, posi_nb, dist_1, dist_nb = dist(time, index_time, wt, drive, K
 v_num, [lWbn, lDbn], L_num = num(index_time, time, dx, wt, drive, nb_ind, nb_drive, posi_pic, ref_values, dist_1)
 v_cont, lDfc, [lWbc, lDbc] = continu(conv_timing,s,h,c,r); L_cont = L(ref_values, [lWbc, lDbc]) 
 v_dis, lDfd, [lWbd, lDbd] = discrete(conv_timing,s,h,c,r,m,dx,dt); L_dis = L(ref_values, [lWbd, lDbd]) 
-   
-print(lDfc, lDfd)
 
 
-# Plot the end of the wave (exp section )
+# Plot the end of the wave (exp section)
 x_graph_values = 160/dx
 chasing = plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
 
@@ -370,11 +419,12 @@ if not chasing:
     erad_wt = eradication_time_mvt(time, index_time, wt, nb_drive)
     
     # Eradication time galton-watson
-    nb_i = 500
-    x_graph_values = 40/dx
-    exposants, extinction_list, exp = data_histogram_gw(nb_sites, lWbd, nb_drive, 0, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, dir_load, dir_save)
+    nb_i = 1000
+    x_graph_values = 50/dx
+    if K == 10**8: decal = plot_end_wave_wt(wt, index_time, [lWbd, lDbd], dx, s, x_graph_values, 10**6, dir_save)
+    exposants, extinction_list, exp = data_histogram_gw(nb_sites, lWbd, nb_drive, 0, nb_i, T, dt, dx, r, s, c, h, m, x_graph_values, decal, dir_load, dir_save)
     histogram_gw(exposants, extinction_list, exp, x_graph_values)
-    
+        
     #Comparaison
     gw_wt = extinction_list[-1,:]
     comparaison_distance_time_gw(v_num, s, dist_1, dist_nb, erad_wt, gw_wt, 0, dir_save)
@@ -401,4 +451,15 @@ file.close()
 
 
 
+#fig, ax = plt.subplots()
+#ax.plot(np.exp(np.linspace(-4,0,100)), color = "black")
+#ax.set_ylim([0,1]); ax.set_xlim([0,100])
+#plt.tight_layout()     
+#fig.savefig(f"exp.svg", format='svg')
+#plt.show()
 
+
+
+#p_star = ((1-h)*(1+c)-1)/((1-2*h))
+#mean_fitness = 2*(1-h)*p_star*(1-p_star)+(1-p_star)**2   
+#(1-mean_fitness)/mean_fitness      

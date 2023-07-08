@@ -57,14 +57,14 @@ conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 r = 0.1                     # Intrasic growth rate
 c = 0.9                     # Conversion rate
 h = 0.4                     # Dominance
-s = 0.7                     # Disadvantage for drive
+s = 1 #0.7                     # Disadvantage for drive
 
 v_cont = erad_s(conv_timing, r, c, h) 
 nb_sites = int(((v_cont*T*2/dx)//1000)*1000+1000)
 
 
 # Where to save datas
-dir_save = f"../../stoch_not_save/datas/{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
+dir_save = f"../../../stoch_not_save/datas/{conv_timing}_K_{int(np.log10(K))}_dx_{dx}_s_{s}_r_{r}"
 if not os.path.exists(dir_save ): os.mkdir(dir_save)
 
 
