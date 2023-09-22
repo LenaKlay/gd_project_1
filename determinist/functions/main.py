@@ -45,10 +45,10 @@ what_to_do = "evolution"
 ### General parameters
 
 ## Biological
-r = 3                               # intrinsic growth rate
-s = 0.8                               # fitness disadvantage for drive
-h = 0.2                            # dominance coefficient
-c = 0.85                            # conversion rate
+r = 0.1                               # intrinsic growth rate
+s = 0.7                               # fitness disadvantage for drive
+h = 0.4                            # dominance coefficient
+c = 0.9                            # conversion rate
 conversion_timing = "germline"      # "zygote" or "germline"
 # Eradication : r = 1, s = 0.52, h = 0.6, c = 0.85  (condition extinction drive only : s > r/(r+1))
 
@@ -83,7 +83,7 @@ save_fig = True                    # Save the figures (.svg and .png)
 ## Evolution
 graph_type = "Allele densities"                    # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
 show_graph_ini = False                                    # Show graph at time 0
-show_graph_end = False                                    # Show graph at time T
+show_graph_end = True                                    # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y

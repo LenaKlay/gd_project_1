@@ -1,0 +1,18 @@
+Parameters : 
+T = 70 
+L = 150 
+M = 420 
+N = 150 
+theta = 0.5
+r = 0.1 
+s = 0.3 
+h = 0.4 
+c = 0.9 
+conversion_timing = germline
+difWW = 1 
+difDW = 1 
+difDD = 1 
+cas = a 
+a = -1 
+growth_dynamic = logistical 
+death_dynamic = constant

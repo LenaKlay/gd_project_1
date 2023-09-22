@@ -26,7 +26,7 @@ what_to_do = "density_nd" # "A_fct_of_a"  "ext_bist_line" "density_nd"
 if what_to_do == "ext_bist_line" : 
     cas = "d"; bist = False
     fig, ax = plt.subplots() 
-    s = np.linspace(0, 1, 2000)
+    s = np.linspace(0.0001, 0.9999, 2000)
     acolor=['navy','darkblue','royalblue','cornflowerblue','lightskyblue','greenyellow','gold', 'orange','red','crimson','purple']
     if cas in ["a", "c"] :      
         ax.semilogy(s, s/(1-s), color='black', linewidth=line_size)
@@ -69,7 +69,7 @@ if what_to_do == "ext_bist_line" :
 # Heatmap density n_D^*
 if what_to_do == "density_nd" :
     a=-0.2
-    for cas in ["a","b","c","d"] : 
+    for cas in ["a"] : 
         precision = 1000
         res = np.zeros((precision,precision))
         s_values = np.linspace(0.01,0.99,precision)
@@ -81,11 +81,13 @@ if what_to_do == "density_nd" :
                 if cas == "a" :
                     res[r_index, s_index] = 1 - s/(r*(1-s))
                 if cas == "b" :
-                    res[r_index, s_index] = 0.5*(1+a+np.sqrt((1+a)**2-4*(a+(s/(r*(1-s))))))
+                    if (1+a)**2-4*(a+(s/(r*(1-s)))) < 0 : res[r_index, s_index] = -1
+                    else : res[r_index, s_index] = 0.5*(1+a+np.sqrt((1+a)**2-4*(a+(s/(r*(1-s))))))
                 if cas == "c" : 
                     res[r_index, s_index] = 1 - s*(r+1)/r
                 if cas == "d" : 
-                    res[r_index, s_index] = 0.5*(1+a+np.sqrt((1+a)**2-4*(a+(s*(r+1)/r))))    
+                    if (1+a)**2-4*(a+(s*(r+1)/r)) < 0 : res[r_index, s_index] = -1
+                    else: res[r_index, s_index] = 0.5*(1+a+np.sqrt((1+a)**2-4*(a+(s*(r+1)/r))))    
                 if res[r_index, s_index] < 0 :
                     res[r_index, s_index] = np.nan
         fig, ax = plt.subplots()
@@ -93,11 +95,12 @@ if what_to_do == "density_nd" :
         ax.figure.colorbar(im, ax=ax)  # Add the colorbar
         ax.set_xticks(np.linspace(0,precision,5)); ax.set_yticks(np.linspace(0,1,4)*(precision-1))    
         ax.set_xticklabels(np.linspace(0,1,5)); ax.set_yticklabels(np.around(np.logspace(-2, 1, num=4),2))  
-        #ax.set_title(f"cas = {cas}, a = {a}, A = {A}")
+        #ax.set_title(f"cas = {cas}, a = {a}, A = {A}")                 
         ax.set_xlabel("s (fitness disadvantage for drive)", fontsize=12) 
         ax.set_ylabel("r (intrinsic growth rate)", fontsize=12)
         plt.gca().invert_yaxis()  
         fig.tight_layout()
-        #fig.savefig(f"../outputs/density_a_{a}_cas_{cas}.png", format='png')
+        fig.savefig(f"../outputs/density_{cas}_{a}.svg", format='svg')
         plt.show()
     
+

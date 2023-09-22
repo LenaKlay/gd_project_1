@@ -112,7 +112,7 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
     ax.semilogy(abscisse[exp_D1:expDref+1], exp_drive[exp_D1:expDref+1], color="black")
    
     # Graph labels, legend, save
-    ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
+    ax.set_ylabel('Number of individuals'); ax.set_xlabel('Space') 
     ax.xaxis.label.set_size(label_size)
     ax.yaxis.label.set_size(label_size)   
     plt.rc('legend', fontsize=legend_size)      
@@ -161,7 +161,7 @@ def plot_end_wave_wt(wt, index_time, lambda_back, dx, s, x_graph_values, limit_e
     ax.semilogy(abscisse[exp_W1:expWref+1], exp_wt[exp_W1:expWref+1], color="black")
    
     # Graph labels, legend, save
-    ax.set_ylabel('Densities'); ax.set_xlabel('Space') 
+    ax.set_ylabel('Number of individuals'); ax.set_xlabel('Space') 
     ax.xaxis.label.set_size(label_size)
     ax.yaxis.label.set_size(label_size)   
     plt.rc('legend', fontsize=legend_size)      
@@ -179,7 +179,6 @@ def plot_end_wave_wt(wt, index_time, lambda_back, dx, s, x_graph_values, limit_e
 # Plot the distance from the last individual (density=1) to the first density = nb_drive
 def eradication_time_mvt(time, index_time, matrix, nb_drive):
     
-    # Find the max to work only on the increasing section (important in the drive case)
     # FIRST TIME : on the right of this point, the density is always > nb_drive (before the pic for drive) 
     space_index_1 = np.where(matrix[index_time[0],:]<nb_drive)[0][-1]+1
     # LAST TIME : on the left of this point, the density = 0 everywhere 
@@ -237,11 +236,12 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
         ax.hlines(10**j, 0, np.where(exp>=10**j)[0][0], color=col[j-3], linewidth=2, label = np.arange(3, int(np.log10(K)))[j-3])
     # Site initially of density close to nb_drive
     ax.scatter(np.where(exp>=nb_drive)[0][0], exp[np.where(exp>=nb_drive)[0][0]], alpha=0.5, color="black", s=100, zorder=10)
-    ax.vlines(np.where(exp>=nb_drive)[0][0], 0, nb_drive, alpha=0.5, color="black", linewidth=4)        
+    ax.vlines(np.where(exp>=nb_drive)[0][0], 0, exp[np.where(exp>=nb_drive)[0][0]], alpha=0.5, color="black", linewidth=4)        
     ax.set(xlabel='Space', ylabel='Number of individuals')
     ax.set_xticks(np.linspace((len(exp)-1)%10, len(exp)-1, len(np.arange(abscisse[0], abscisse[-1]+1, 10))))    
     ax.set_xticklabels(np.arange(abscisse[(len(exp)-1)%10], abscisse[-1]+1, 10)) 
     ax.set_ylim([None,10**7]); ax.set_xlim([0,-int(abscisse[0])])
+    plt.tight_layout() 
     fig.savefig(f"{dir_save}/gw_ini_s_{s}.png", format='png')
     plt.show()
     
@@ -260,6 +260,7 @@ def histogram_gw(exposants, extinction_list, exp, x_graph_values):
     plt.rc('legend', fontsize=legend_size)  
     plt.legend()
     ax.set(xlabel='Time', xlim = [0,30], ylim = [0,0.35])
+    plt.tight_layout() 
     fig.savefig(f"{dir_save}/gw_histogram_s_{s}.png", format='png')
     plt.show()
     
@@ -289,6 +290,7 @@ def comparaison_distance_time_gw(v, s, dist_1, dist_nb, erad, gw, allele, dir_sa
         ax.yaxis.label.set_size(label_size)   
         plt.rc('legend', fontsize=legend_size)  
         plt.legend()
+        plt.tight_layout() 
         fig.savefig(f"{dir_save}/{title[i]}_s_{s}.png", format='png')
         plt.show()
     
@@ -297,6 +299,7 @@ def comparaison_distance_time_gw(v, s, dist_1, dist_nb, erad, gw, allele, dir_sa
     plt.scatter(np.arange(len(dis)), dis, s=5)
     ax.set(xlabel='Time', ylabel=f'Distance (from {nb_drive} -> 0)')
     ax.set_title(f"{title} : Distance (from {nb_drive} -> 0) in the wave, at each time.") 
+    plt.tight_layout() 
     fig.savefig(f"{dir_save}/{title}_dist.png", format='png')
     plt.show()   
             
@@ -318,12 +321,12 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
     ax2.semilogy(0, 0, label="Drive", color="crimson", linewidth=2) 
     # Histogramme
     bins = [x - 0.5 for x in range(int(abscisse[0]),0)]
-    ax1.hist(-dist[0,:], bins = bins, histtype = 'bar', label = ['dist erad'], density = True, color="yellowgreen", alpha = 0.4)
+    ax1.hist(-dist[0,:], bins = bins, histtype = 'bar', label = ['dist erad'], density = True, color="yellowgreen", alpha = 0.6)
     # Wild-type
-    ax2.semilogy(abscisse, wt[index_time[-1], first_index:last_index+1], label="Wild-type", color="cornflowerblue", linewidth=2)
+    ax2.semilogy(abscisse, wt[index_time[-1], first_index:last_index+1], label="Wild-type", color="cornflowerblue", linewidth=3)
     # Wild-type last individual
-    index_first_ind = np.where(wt[index_time[-1], first_index:last_index+1]>0)[0][0]
-    ax2.semilogy(abscisse[index_first_ind-1:index_first_ind+1], wt[index_time[-1], first_index+index_first_ind-1:first_index+index_first_ind+1], color="limegreen", linewidth=2, alpha = 0.8, label = "Last wild-type indi.")
+    index_first_ind = np.where(wt[index_time[-10], first_index:last_index+1]>0)[0][0]
+    ax2.semilogy(abscisse[index_first_ind-1:index_first_ind+1], wt[index_time[-10], first_index+index_first_ind-1:first_index+index_first_ind+1], color="cornflowerblue", linewidth=3)#, label = "Last wild-type indi.")
     #ax2.hlines(nb_drive, (first_individual-30-last_index)*dx, 0, color="black", linestyle="-.") 
     #ax1.set_title(f"Extinction histogramme wt")
     ax2.set_ylim([None,ref_values[1]]); ax2.set_xlim([abscisse[0],0])
@@ -333,11 +336,12 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
     plt.rc('legend', fontsize=legend_size)  
     plt.legend()
     ax1.set_xlabel('Distances')
-    ax2.set_ylabel('Densities')
+    ax2.set_ylabel('Number of individuals')
     ax1.set_ylabel('Histogramme proportions')
     ax1.set_ylim([0,0.3])
     plt.tight_layout() 
     fig.savefig(f"{dir_save}/histogram_s_{s}.png", format='png')
+    fig.savefig(f"{dir_save}/histogram_s_{s}.svg", format='svg')
     plt.show()
     
 
@@ -353,7 +357,7 @@ nb_drive = 100              # Threshold for drive ("enough" drive for the chasin
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 dx = 1                      # spatial step
 K = 10**8                    # Carrying capacity on one space unit
-s = 0.7                     # Disadvantage for drive
+s = 0.3                     # Disadvantage for drive
 r = 0.1                     # Intrasic growth rate
 
 

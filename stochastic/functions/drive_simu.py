@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import os
 
 
-
 def erad_s(conv_timing, r, c, h) : 
     print(f"\nEradication pour {np.round(r/(1+r),3)} < s < 1") 
     s_1 = c/(1-h*(1-c))   
@@ -57,7 +56,7 @@ conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 r = 0.1                     # Intrasic growth rate
 c = 0.9                     # Conversion rate
 h = 0.4                     # Dominance
-s = 1 #0.7                     # Disadvantage for drive
+s = 0.3                     # Disadvantage for drive
 
 v_cont = erad_s(conv_timing, r, c, h) 
 nb_sites = int(((v_cont*T*2/dx)//1000)*1000+1000)

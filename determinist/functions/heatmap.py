@@ -359,4 +359,14 @@ def print_heatmap(heatmap_values, bio_para, num_para, rlog, precision, x, y, fil
     save_fig_or_data(save_loc, fig, [], f"{file_name}", bio_para, num_para)
 
     plt.show()
+    
+    
+    
+    
+    
+    
+    
+    
+#(1/0.1321344 - 1/0.45387345)*np.log(10)
+#(1/0.42398840000000004 - 1/0.54802635)*np.log(10)
 
