@@ -32,13 +32,13 @@ def dist(time, index_time, wt, drive, K, ref_values, dir_save):
     posi_nb = np.zeros((2,len(index_time)))  
     for i in range(len(index_time)) :   
         j = index_time[i]
-        # Percent pic (first line : wt, second line : drive)
+        # Position of the pic (first line : wt, second line : drive)
         posi_pic[0,i] = np.where(wt[j,:]>ref_values[0])[0][0]*dx 
         posi_pic[1,i] = np.where(drive[j,:]>ref_values[1])[0][0]*dx 
-        # Distance from the last individual to the pic (first line : wt, second line : drive)
+        # Position of the last individual (first line : wt, second line : drive)
         posi_1[0,i] = np.where(wt[j,:]!=0)[0][0]*dx
         posi_1[1,i] = np.where(drive[j,:]!=0)[0][0]*dx 
-        # Distance from the pic to last individual (first line : wt, second line : drive)
+        # Position of the density N determinist (first line : wt, second line : drive)
         posi_nb[0,i] = np.where(wt[j,:]>nb_drive)[0][0]*dx
         posi_nb[1,i] = np.where(drive[j,:]>nb_drive)[0][0]*dx 
     # Difference of the positions
@@ -46,6 +46,44 @@ def dist(time, index_time, wt, drive, K, ref_values, dir_save):
     dist_nb = posi_pic - posi_nb
     return(posi_pic, posi_1, posi_nb, dist_1, dist_nb)
     
+    
+### Plot the distance between the last ind (resp. N) to the pic (the first is highly stochastic, the second is determinist)
+def deterministic_to_be_or_not_to_be(dist_1, dist_nb, posi_pic, posi_nb):
+        
+    dist_vect = [- (posi_pic[0,:] - posi_nb[1,:]) , -dist_nb[0,:], -dist_1[0,:] ]
+    col_vect = ["crimson", "steelblue", "cornflowerblue"]
+    lab_vect = [ "Drive : last site with >100 ind.", "WT : last site with >100 ind.", "WT : last individual"]
+    alpha_vect = [1,1,0.7]
+    
+    fig, ax = plt.subplots(figsize=[7, 4])
+    for i in range(3) :
+        dist = dist_vect[i]
+        bins =  [x - 0.5 for x in range(int(min(dist)),int(max(dist))+2)] 
+        kwargs = dict(bins=bins, histtype = 'stepfilled', color = col_vect[i], label = lab_vect[i], alpha = alpha_vect[i], density=True)
+        ax.hist(dist, **kwargs)    
+    # print the red at the front
+    dist = dist_vect[0]
+    bins =  [x - 0.5 for x in range(int(min(dist)),int(max(dist))+2)] 
+    kwargs = dict(bins=bins, histtype = 'stepfilled', color = "crimson", density=True)
+    ax.hist(dist, **kwargs)  
+        
+    ax.set_xlim([-100,0])
+    ax.set_ylabel('Histogram proportions'); ax.set_xlabel('Space') 
+    ax.xaxis.label.set_size(label_size); ax.yaxis.label.set_size(label_size)   
+    plt.rc('legend', fontsize=legend_size)      
+    plt.legend()
+    plt.tight_layout() 
+    fig.savefig(f"{dir_save}/hist_determinist_or_not_s_{s}.png", format='png')    
+    plt.show()
+     
+    #ax.plot(dist_1[0,:]-np.mean(dist_1[0,:]), color="cornflowerblue")
+    #ax.plot(dist_nb[0,:]-np.mean(dist_nb[0,:]), color="blue") 
+    
+    # abscisse = np.arange(len(index_time))
+    #ax.scatter(abscisse, dist_1[0,:]-np.mean(dist_1[0,:]), color="cornflowerblue", s=100)
+    #ax.scatter(abscisse, dist_nb[0,:]-np.mean(dist_nb[0,:]), color="blue", s=100)
+       
+
     
 
 
@@ -121,7 +159,27 @@ def plot_end_wave(wt, drive, nb_drive, ref_values, index_time, lambda_back, dx, 
     fig.savefig(f"{dir_save}/end_wave_s_{s}_{int(np.log10(K))}.png", format='png')    
     plt.show()
     
-    return(np.where(wt[-10,:]>0)[0][0]<np.where(drive[-10,:]>0)[0][0])
+    
+    
+    # Chasing and if yes, when ? (Chasing here: more than 10 wt individuals alone at the end of the wave)
+    chasing = np.where(wt[-10,:]>10)[0][0]<np.where(drive[-10,:]>0)[0][0]    
+    if chasing: 
+        for index_chasing_10 in range(50, int(time[-1]/dt)+1):           
+            if np.where(wt[index_chasing_10,:]>10)[0][0]<np.where(drive[index_chasing_10,:]>0)[0][0]: 
+                break        
+        time_chasing_10 = index_chasing_10*dt
+    else:  
+        index_chasing_10 = None; time_chasing_10 = None    
+    
+               
+    return(chasing, index_chasing_10, time_chasing_10)
+
+# To test 
+#fig, ax = plt.subplots()
+#ax.plot(wt[index_chasing,:])
+#ax.plot(drive[index_chasing,:])
+#ax.set_ylim([0,100])
+#plt.show()    
 
     
 # to test the function : lambda_back =[lWbd, lDbd]  
@@ -356,8 +414,8 @@ def plot_histo_on_wave(wt, drive, index_time, nb_drive, dist_1, dist_nb, s, x_gr
 nb_drive = 100              # Threshold for drive ("enough" drive for the chasing not to happen)
 conv_timing = "ger"         # Conversion timing : "ger" or "zyg"
 dx = 1                      # spatial step
-K = 10**8                    # Carrying capacity on one space unit
-s = 0.3                     # Disadvantage for drive
+K = 10**8                   # Carrying capacity on one space unit
+s = 0.7                     # Disadvantage for drive
 r = 0.1                     # Intrasic growth rate
 
 
@@ -406,7 +464,7 @@ if not os.path.exists(dir_save): os.mkdir(dir_save)
 
 # Preliminar
 posi_pic, posi_1, posi_nb, dist_1, dist_nb = dist(time, index_time, wt, drive, K, ref_values, dir_save)
-
+deterministic_to_be_or_not_to_be(dist_1, dist_nb, posi_pic, posi_nb)
 
 #plot_wave(time, index_time, dx, nb_graph, wt, drive, ref_values, dir_save)
 v_num, [lWbn, lDbn], L_num = num(index_time, time, dx, wt, drive, nb_ind, nb_drive, posi_pic, ref_values, dist_1)
@@ -416,7 +474,7 @@ v_dis, lDfd, [lWbd, lDbd] = discrete(conv_timing,s,h,c,r,m,dx,dt); L_dis = L(ref
 
 # Plot the end of the wave (exp section)
 x_graph_values = 160/dx
-chasing = plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
+chasing, index_chasing_10, time_chasing_10 = plot_end_wave(wt, drive, nb_drive, ref_values, index_time, [lWbd, lDbd], dx, s, x_graph_values, dir_save)
 
 if not chasing: 
     # Eradication time in the wave
@@ -439,7 +497,7 @@ if not chasing:
     
     
 # Save the results in the file "figures_values.txt"
-file = open(f"{dir_load}/speed_lambdas_L.txt", "w") 
+file = open(f"{dir_save}/speed_lambdas_L.txt", "w") 
 file.write(f"Speed num : {v_num}")
 file.write(f"\nSpeed cont : {v_cont}")
 file.write(f"\nSpeed dis : {v_dis}")
@@ -461,7 +519,6 @@ file.close()
 #plt.tight_layout()     
 #fig.savefig(f"exp.svg", format='svg')
 #plt.show()
-
 
 
 #p_star = ((1-h)*(1+c)-1)/((1-2*h))

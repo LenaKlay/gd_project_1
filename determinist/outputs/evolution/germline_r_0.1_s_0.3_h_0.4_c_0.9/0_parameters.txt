@@ -1,7 +1,7 @@
 Parameters : 
-T = 70 
+T = 100 
 L = 150 
-M = 420 
+M = 600 
 N = 150 
 theta = 0.5
 r = 0.1 

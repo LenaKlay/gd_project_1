@@ -46,7 +46,7 @@ what_to_do = "evolution"
 
 ## Biological
 r = 0.1                               # intrinsic growth rate
-s = 0.7                               # fitness disadvantage for drive
+s = 0.3                               # fitness disadvantage for drive
 h = 0.4                            # dominance coefficient
 c = 0.9                            # conversion rate
 conversion_timing = "germline"      # "zygote" or "germline"
@@ -66,8 +66,8 @@ if cas == "d_neg" : growth_dynamic = "constant"; death_dynamic = "allee_effect";
 difWW = 1; difDW = 1; difDD = 1    # diffusion coefficient for resp. WW, WD or DD individuals
 
 ## Numerical
-CI = "left"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
-T = 70                            # final time
+CI = "center"                      # Initial conditions : "center" for having the border in the center, "left" for having the border on the left
+T = 100                            # final time
 L = 150                           # length of the spatial domain
 M = T*6                           # number of time steps
 N = L                            # number of spatial steps
@@ -82,13 +82,13 @@ save_fig = True                    # Save the figures (.svg and .png)
 
 ## Evolution
 graph_type = "Allele densities"                    # "Genotype densities", "Genotype frequencies", "Allele densities" or "Allele frequencies" (or None if we don't want any evolution graph fct of time)
-show_graph_ini = False                                    # Show graph at time 0
-show_graph_end = True                                    # Show graph at time T
+show_graph_ini = True                                   # Show graph at time 0
+show_graph_end = False                                 # Show graph at time T
 wild = True; heterozygous = True; drive = True            # What to draw on the graph
 grid = True                                               # A grid or not
 semilogy = False                                          # semilogy = False : classical scale, semilogy = True : log scale for y
 xlim = None                                               # x scale on the graph (xlim = None, means it's not specify)
-mod = T//5                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
+mod = T//10                                                # Draw graph every ..mod.. time. Also used to know when tracking points in time graphics.
 ## Evolution 2D
 CI_lenght = N//4
  
