@@ -1,0 +1,14 @@
+heatmap_48.py:125: RuntimeWarning: invalid value encountered in divide
+  p = WT/(W+H+D)
+heatmap_48.py:44: RuntimeWarning: invalid value encountered in divide
+  WW = (W**2)/(W+H+D)
+heatmap_48.py:45: RuntimeWarning: invalid value encountered in divide
+  HH = (H**2)/(W+H+D)
+heatmap_48.py:46: RuntimeWarning: invalid value encountered in divide
+  DD = (D**2)/(W+H+D)
+heatmap_48.py:47: RuntimeWarning: invalid value encountered in divide
+  WH = (W*H)/(W+H+D)   # *2
+heatmap_48.py:48: RuntimeWarning: invalid value encountered in divide
+  WD = (W*D)/(W+H+D)   # *2
+heatmap_48.py:49: RuntimeWarning: invalid value encountered in divide
+  HD = (D*H)/(W+H+D)   # *2
