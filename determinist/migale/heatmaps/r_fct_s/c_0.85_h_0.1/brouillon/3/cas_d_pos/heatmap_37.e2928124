@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "heatmap_37.py", line 290, in <module>
-    speed_vect, coex_vect = heatmap(precision, x, y, rlog, r, s, h, c)
-  File "heatmap_37.py", line 237, in heatmap
-    speed_vect[x_index], coex_vect[x_index] = evolution(r,s,h,difW,difH,difD,c,T,L,M,N,theta,conversion_timing)
-  File "heatmap_37.py", line 184, in evolution
-    if speed_fct_of_time[-1] < 0 : 
-IndexError: index -1 is out of bounds for axis 0 with size 0
