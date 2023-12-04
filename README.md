@@ -6,7 +6,7 @@ Artificial gene drive is a genetic engineering technology that could be used for
 
 ## Authors
 
-I (Léna Kläy) wrote the code but this project was carried out in collaboration with Florence Débarre, Vincent Calvez and Léo Girardin.
+This code was written by Léna Kläy. The project was carried out in collaboration with Vincent Calvez, Florence Débarre and Léo Girardin.
 
 ## Contents
 

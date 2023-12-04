@@ -9,3 +9,5 @@ This folder contains all the code needed to run the stochastic simulations used 
 `L_speed_eigen_values.py` contains functions that provide some analytically values based on the exponential profile of the pulled wave.
 
 `figure.py` plot the figures of the article. It uses the datas from `galton_watson_simu.py` and the functions in `galton_watson_simu.py` and `L_speed_eigen_values.py` to do so.
+
+The two codes used to compare the results with the two-dimensional case and plot the figures from section 3.5, are available in the folder `comparison_1D_2D`. These codes are variations of the code `global_simu.py`.
