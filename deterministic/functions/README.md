@@ -1,6 +1,6 @@
 # Functions
 
-This folder contains all the code needed to run the deterministic simulations. 
+This folder contains all the code needed to run the deterministic simulations. To simulate the drive propagation in space and time, we use a Crank-Nicolson finite difference method. 
 
 ## The `main.py` file
 

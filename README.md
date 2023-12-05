@@ -18,7 +18,7 @@ This repository contains the pdf of my first article, my PhD final presentation 
 
 They always follow the same organisation inside:
 
-1) `Functions` contains the code to run the simulations (.py), as well as a README.rmd file for the explanations,
+1) `Functions` contains the code to run the simulations (.py), as well as a `README.rmd` file detailing each function,
 
 2) `Outputs` stores the results of the simulations,
 
